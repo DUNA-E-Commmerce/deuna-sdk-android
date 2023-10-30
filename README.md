@@ -45,11 +45,7 @@ Before using the SDK, you need to configure it with your API key, order token, u
 This method initializes the checkout process. It sets up the WebView, checks for internet connectivity, and loads the payment link.
 
 **Parameters:**
-
--   **callbacks**: An instance of the `DeunaSDK.Callbacks` class, which contains closures that will be called on success, error, or when the WebView is closed.
-
--   **viewToEmbedWebView** (Optional): A `UIView` where the WebView should be embedded. If this parameter is not provided, the SDK will automatically select a view from the parent view controller to embed the WebView.
-
+-   **view**: The view that will contain the WebView.
           val initPayment = DeUnaSdk.initCheckout(view)
           initPayment.onSuccess = { order ->
             val orderSuccessResponse: OrderSuccessResponse = order
@@ -82,8 +78,6 @@ This method initializes the checkout process. It sets up the WebView, checks for
 
 
 ## Classes & Enums
-
-
 
 ### CloseButtonConfig
 
