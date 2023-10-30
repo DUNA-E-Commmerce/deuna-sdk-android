@@ -21,7 +21,7 @@ You can install DeunaSDK using Swift Package Manager by adding the following dep
 
 ### Examples
 
-- [Prebuilt UI](Example/basic-integration) (Recommended)
+- [Prebuilt UI](examples) (Recommended)
     - This example demonstrates how to build a payment flow using [`PaymentWidget`](https://docs.deuna.com/docs/widget-payments-and-fraud)
 
 ## Usage
