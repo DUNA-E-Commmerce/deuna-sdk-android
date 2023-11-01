@@ -1,5 +1,6 @@
 package com.deuna.maven.domain
 
+import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import org.json.JSONException
@@ -29,14 +30,17 @@ class DeUnaBridge(
                         null
                     )
                 }
+
                 CheckoutEvents.PURCHASE_SUCCESS -> {
                     callbacks.onSuccess?.invoke(
                         OrderSuccessResponse.fromJson(json.getJSONObject("data"))
                     )
                 }
+
                 CheckoutEvents.CHANGE_ADDRESS -> {
                     callbacks.onChangeAddress?.invoke(webView)
                 }
+
                 else -> {
                     if (eventType in (closeOnEvents ?: emptyArray())) {
                         callbacks.onClose?.invoke(webView)
@@ -45,6 +49,31 @@ class DeUnaBridge(
             }
         } catch (e: JSONException) {
             callbacks.onError?.invoke(null, message)
+        }
+    }
+
+    private fun handleEvent(eventTypeString: String) {
+        val json = JSONObject(eventTypeString)
+        when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
+            CheckoutEvents.LINKCLOSE -> handleCloseEvent()
+            CheckoutEvents.CHANGE_ADDRESS -> handleChangeAddressEvent()
+            else -> handleOtherEvent(eventType)
+        }
+    }
+
+    private fun handleCloseEvent() {
+        webView.post {
+            webView.visibility = View.GONE
+        }
+    }
+
+    private fun handleChangeAddressEvent() {
+        callbacks.onChangeAddress?.invoke(webView)
+    }
+
+    private fun handleOtherEvent(eventType: CheckoutEvents) {
+        if (eventType in (closeOnEvents ?: emptyArray())) {
+            callbacks.onClose?.invoke(webView)
         }
     }
 }
