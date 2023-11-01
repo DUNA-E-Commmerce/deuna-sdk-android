@@ -11,13 +11,6 @@ ext {
     passwordMaven = System.getProperty("passwordMaven", "");
 }
 
-
-if (project.hasProperty("passwordMaven")) {
-    ext.passwordMaven = project.getProperty("passwordMaven")
-} else {
-    ext.passwordMaven = ""
-}
-
 android {
     namespace 'com.deuna.maven'
     compileSdk 33
@@ -52,7 +45,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version ' '
+            version '1.0.0-SNAPSHOT'
             artifact("$buildDir/outputs/aar/android-debug.aar")
             pom {
                 name = 'Android SDK DEUNA'

@@ -1,10 +1,10 @@
 package com.deuna.maven.domain
 
-import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import org.json.JSONException
 import org.json.JSONObject
+
 /**
  * The DeUnaBridge class is used to receive messages from JavaScript code in a WebView.
  * The messages are parsed and the corresponding callbacks are called based on the event type.
@@ -22,7 +22,6 @@ class DeUnaBridge(
     fun postMessage(message: String) {
         try {
             val json = JSONObject(message)
-            Log.d("DeUnaBridge Type ", json.getString("type"))
             when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
                 CheckoutEvents.PURCHASE_REJECTED -> {
                     callbacks.onError?.invoke(
@@ -34,9 +33,6 @@ class DeUnaBridge(
                     callbacks.onSuccess?.invoke(
                         OrderSuccessResponse.fromJson(json.getJSONObject("data"))
                     )
-                }
-                CheckoutEvents.LINK_CLOSED -> {
-                    callbacks.onClose?.invoke(webView)
                 }
                 CheckoutEvents.CHANGE_ADDRESS -> {
                     callbacks.onChangeAddress?.invoke(webView)

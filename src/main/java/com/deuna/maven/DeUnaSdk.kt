@@ -15,6 +15,7 @@ import android.webkit.WebViewClient
 import com.deuna.maven.domain.Callbacks
 import com.deuna.maven.domain.CheckoutEvents
 import com.deuna.maven.domain.DeUnaBridge
+import com.deuna.maven.domain.DeUnaElementBridge
 import com.deuna.maven.domain.ElementType
 import com.deuna.maven.domain.Environment
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -25,7 +26,8 @@ class DeUnaSdk {
     private lateinit var environment: Environment
     private lateinit var elementType: ElementType
     private lateinit var userToken: String
-    private var baseUrl: String = "https://elements.euna"
+    private var baseUrl: String = ""
+    private var elementUrl: String = "https://elements.deuna.io"
     private var actionMillisecods = 5000L
     private var closeOnEvents: Array<CheckoutEvents>? = null
     private var loggingEnabled: Boolean? = false
@@ -60,8 +62,10 @@ class DeUnaSdk {
                 this.environment = environment
                 if (this.environment == Environment.DEVELOPMENT) {
                     this.baseUrl = "https://pay.stg.deuna.com"
+                    this.elementUrl = "https://elements.stg.deuna.io"
                 } else {
                     this.baseUrl = "https://pay.deuna.com"
+                    this.elementUrl = "https://elements.deuna.io"
                 }
                 if (elementType != null) {
                     this.elementType = elementType
@@ -101,14 +105,17 @@ class DeUnaSdk {
                 cookieManager.setAcceptCookie(true)
                 val webView: WebView = view.findViewById(R.id.deuna_webview)
                 configureWebViewClient(webView, callbacks, closeOnEvents)
-                val builder = Uri.parse("$baseUrl/elements/${elementType.value}").buildUpon()
+                val builder = Uri.parse("$elementUrl/${elementType.value}").buildUpon()
                 if (userToken.isNotEmpty()) {
                     builder.appendQueryParameter("userToken", userToken)
+                }
+                if (apiKey.isNotEmpty()) {
+                    builder.appendQueryParameter("publicApiKey", apiKey)
                 }
                 val url = builder.build().toString()
                 configureWebViewClient(webView, callbacks, closeOnEvents)
                 configureWebView(webView)
-                addJavascriptInterface(webView, callbacks, closeOnEvents)
+                addJavascriptElementInterface(webView, callbacks, closeOnEvents)
                 loadUrlWithNetworkCheck(webView, webView.context, url, callbacks)
 
                 return callbacks
@@ -120,6 +127,16 @@ class DeUnaSdk {
                 domStorageEnabled = true
                 javaScriptEnabled = true
                 cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+            }
+        }
+
+        private fun validateElementsConfig() {
+            if(instance.apiKey.isEmpty()) {
+                log("You must provide an apiKey")
+            }
+
+            if(instance.userToken.isEmpty()) {
+                log("You must provide an userToken")
             }
         }
 
@@ -152,6 +169,17 @@ class DeUnaSdk {
         ) {
             webView.addJavascriptInterface(
                 DeUnaBridge(callbacks, webView, closeOnEvents),
+                "android"
+            )
+        }
+
+        private fun addJavascriptElementInterface(
+            webView: WebView,
+            callbacks: Callbacks,
+            closeOnEvents: Array<CheckoutEvents>?
+        )  {
+            webView.addJavascriptInterface(
+                DeUnaElementBridge(callbacks, webView, closeOnEvents),
                 "android"
             )
         }
