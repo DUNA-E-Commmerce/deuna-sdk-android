@@ -42,7 +42,9 @@ class DeunaActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Habilita el soporte de múltiples ventanas
         }
-        webView?.addJavascriptInterface(DeUnaBridge(), "android")
+        webView.apply {
+            this.addJavascriptInterface(DeUnaBridge(), "android")
+        }
         webView.webChromeClient = object : WebChromeClient() {
             override fun onCreateWindow(
                 view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
@@ -61,7 +63,10 @@ class DeunaActivity : AppCompatActivity() {
                         }
                     }
                 }
-
+                val bridge = (webView?.parent as ConstraintLayout).getChildAt(0) as WebView
+                val originalBridge = bridge.tag as DeUnaBridge
+                webView.addJavascriptInterface(originalBridge, "android")
+                newWebView.addJavascriptInterface(originalBridge, "android")
                 val transport = resultMsg.obj as WebView.WebViewTransport
                 transport.webView = newWebView
                 resultMsg.sendToTarget()
@@ -71,6 +76,7 @@ class DeunaActivity : AppCompatActivity() {
 
                 return true
             }
+
         }
 
         if (url != null) {
@@ -93,7 +99,6 @@ class DeunaActivity : AppCompatActivity() {
             )
         ) {
             Log.d("Cargando", url.toString())
-            view.addJavascriptInterface(DeUnaBridge(), "android")
             view.loadUrl(url)
         } else {
             this.log("No internet connection")

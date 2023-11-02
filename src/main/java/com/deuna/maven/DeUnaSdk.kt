@@ -56,9 +56,7 @@ open class DeUnaSdk {
                     this.orderToken = orderToken
                 }
 
-                if (context != null) {
-                    this.context = context
-                }
+                this.context = context
 
                 if (closeOnEvents != null) {
                     this.closeOnEvents = closeOnEvents
@@ -68,12 +66,13 @@ open class DeUnaSdk {
                     this.userToken = userToken
                 }
                 this.environment = environment
-                if (this.environment == Environment.DEVELOPMENT) {
-                    this.baseUrl = "https://pay.stg.deuna.com"
-                    this.elementUrl = "https://elements.stg.deuna.io"
-                } else {
-                    this.baseUrl = "https://pay.deuna.com"
-                    this.elementUrl = "https://elements.deuna.io"
+                this.baseUrl = when (environment) {
+                    Environment.DEVELOPMENT -> "https://pay.stg.deuna.com"
+                    Environment.PRODUCTION -> "https://pay.deuna.com"
+                }
+                this.elementUrl = when (environment) {
+                    Environment.DEVELOPMENT -> "https://elements.stg.deuna.io"
+                    Environment.PRODUCTION -> "https://elements.deuna.io"
                 }
                 if (elementType != null) {
                     this.elementType = elementType
