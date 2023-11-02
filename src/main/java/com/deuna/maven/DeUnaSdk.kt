@@ -38,6 +38,17 @@ open class DeUnaSdk {
     companion object {
         private lateinit var instance: DeUnaSdk
 
+        /**
+         * Configure the DeUna SDK with the given parameters.
+         * @param apiKey The API key to use for the DeUna SDK.
+         * @param orderToken The order token to use for the DeUna SDK.
+         * @param environment The environment to use for the DeUna SDK.
+         * @param elementType The element type to use for the DeUna SDK.
+         * @param closeOnEvents The events to close the DeUna SDK on.
+         * @param loggingEnabled Whether to enable logging for the DeUna SDK.
+         * @param context The context to use for the DeUna SDK.
+         * @throws IllegalStateException if the SDK has already been configured.
+         */
         fun config(
             apiKey: String? = null,
             orderToken: String? = null,
@@ -52,6 +63,7 @@ open class DeUnaSdk {
                 if (apiKey != null) {
                     this.apiKey = apiKey
                 }
+
                 if (orderToken != null) {
                     this.orderToken = orderToken
                 }
@@ -62,9 +74,6 @@ open class DeUnaSdk {
                     this.closeOnEvents = closeOnEvents
                 }
 
-                if (userToken != null) {
-                    this.userToken = userToken
-                }
                 this.environment = environment
                 this.baseUrl = when (environment) {
                     Environment.DEVELOPMENT -> "https://pay.stg.deuna.com"
@@ -74,18 +83,31 @@ open class DeUnaSdk {
                     Environment.DEVELOPMENT -> "https://elements.stg.deuna.io"
                     Environment.PRODUCTION -> "https://elements.deuna.io"
                 }
-                if (elementType != null) {
-                    this.elementType = elementType
-                }
 
                 if(loggingEnabled != null) {
                     this.loggingEnabled = loggingEnabled
                 }
+
+                if (userToken != null || apiKey != null || elementType != null) {
+                    var url = this.elementUrl
+                    if (elementType != null) {
+                        url += "/${elementType}"
+                    }
+                    val builder = Uri.parse(url).buildUpon()
+                    if (userToken != null) {
+                        builder.appendQueryParameter("userToken", userToken)
+                    }
+                    if (apiKey != null) {
+                        builder.appendQueryParameter("apiKey", apiKey)
+                    }
+                    this.elementUrl = builder.build().toString()
+                }
             }
         }
 
-
-        @OptIn(DelicateCoroutinesApi::class)
+        /**
+         * Initialize the DeUna SDK Checkout with the configured parameters.
+         */
         fun initCheckout(
         ) {
             Intent(instance.context!!, DeunaActivity::class.java).apply {
@@ -93,45 +115,23 @@ open class DeUnaSdk {
                 putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
                 startActivity(instance.context!!, this, null)
             }
-//            instance.apply {
-//                val callbacks = Callbacks()
-//                val cookieManager = CookieManager.getInstance()
-//                cookieManager.setAcceptCookie(true)
-//                val webView: WebView = view.findViewById(R.id.deuna_webview)
-//                configureWebViewClient(webView, callbacks, closeOnEvents)
-//                configureWebView(webView)
-//                addJavascriptInterface(webView, callbacks, closeOnEvents)
-//                loadUrlWithNetworkCheck(webView, webView.context, "$baseUrl/$orderToken", callbacks)
-//                return callbacks
-//            }
         }
 
-//        @OptIn(DelicateCoroutinesApi::class)
-//        fun initElements(
-//            view: View
-//        ): Callbacks {
-//            instance.apply {
-//                val callbacks = Callbacks()
-//                val cookieManager = CookieManager.getInstance()
-//                cookieManager.setAcceptCookie(true)
-//                val webView: WebView = view.findViewById(R.id.deuna_webview)
-//                configureWebViewClient(webView, callbacks, closeOnEvents)
-//                val builder = Uri.parse("$elementUrl/${elementType.value}").buildUpon()
-//                if (userToken.isNotEmpty()) {
-//                    builder.appendQueryParameter("userToken", userToken)
-//                }
-//                if (apiKey.isNotEmpty()) {
-//                    builder.appendQueryParameter("publicApiKey", apiKey)
-//                }
-//                val url = builder.build().toString()
-//                configureWebViewClient(webView, callbacks, closeOnEvents)
-//                configureWebView(webView)
-//                addJavascriptElementInterface(webView, callbacks, closeOnEvents)
-//                loadUrlWithNetworkCheck(webView, webView.context, url, callbacks)
-//
-//                return callbacks
-//            }
-//        }
+        /**
+         * Initialize the DeUna SDK Elements with the configured parameters.
+         * @throws IllegalStateException if the SDK has not been configured.
+         */
+        fun initElements(
+        ) {
+            if (instance::elementType.isInitialized.not() || instance::userToken.isInitialized.not() || instance::apiKey.isInitialized.not()) {
+                throw IllegalStateException("elementType, userToken and apiKey must be configured before calling initElements")
+            }
+            Intent(instance.context!!, DeunaElementActivity::class.java).apply {
+                putExtra(DeunaElementActivity.EXTRA_URL, "${instance.elementUrl}")
+                putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
+                startActivity(instance.context!!, this, null)
+            }
+        }
 
 
     }
