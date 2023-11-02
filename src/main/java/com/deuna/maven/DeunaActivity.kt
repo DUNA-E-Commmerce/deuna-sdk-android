@@ -1,29 +1,23 @@
 package com.deuna.maven
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
-import android.view.View
-import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import com.deuna.maven.domain.Callbacks
 import com.deuna.maven.domain.DeUnaBridge
 
+/**
+ * Activity for Deuna.
+ */
 class DeunaActivity : AppCompatActivity() {
 
     companion object {
@@ -31,42 +25,43 @@ class DeunaActivity : AppCompatActivity() {
         const val LOGGING_ENABLED = "logging_enabled"
     }
 
+    /**
+     * Called when the activity is starting.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna)
 
         val url = intent.getStringExtra(EXTRA_URL)
         val webView: WebView = findViewById(R.id.deuna_webview)
+        setupWebView(webView)
+        if (url != null) {
+            loadUrlWithNetworkCheck(webView, this, url, Callbacks())
+        }
+    }
+
+    /**
+     * Setup the WebView with necessary settings and JavascriptInterface.
+     */
+    private fun setupWebView(webView: WebView) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
-            setSupportMultipleWindows(true) // Habilita el soporte de múltiples ventanas
+            setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.apply {
-            this.addJavascriptInterface(DeUnaBridge(), "android")
-        }
+        webView.addJavascriptInterface(DeUnaBridge(), "android") // Add JavascriptInterface
+        setupWebChromeClient(webView)
+    }
+
+    /**
+     * Setup the WebChromeClient to handle creation of new windows.
+     */
+    private fun setupWebChromeClient(webView: WebView) {
         webView.webChromeClient = object : WebChromeClient() {
             override fun onCreateWindow(
                 view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
             ): Boolean {
-                val newWebView = WebView(this@DeunaActivity).apply {
-                    webViewClient = object : WebViewClient() {
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView?,
-                            request: WebResourceRequest?
-                        ): Boolean {
-                            val newUrl = request?.url.toString()
-                            Log.d("URL", newUrl)
-                            view?.loadUrl(newUrl)
-                            // Carga la URL en el mismo WebView
-                            return true // Indica que hemos manejado la carga de la URL
-                        }
-                    }
-                }
-                val bridge = (webView?.parent as ConstraintLayout).getChildAt(0) as WebView
-                val originalBridge = bridge.tag as DeUnaBridge
-                webView.addJavascriptInterface(originalBridge, "android")
-                newWebView.addJavascriptInterface(originalBridge, "android")
+                val newWebView = createNewWebView()
                 val transport = resultMsg.obj as WebView.WebViewTransport
                 transport.webView = newWebView
                 resultMsg.sendToTarget()
@@ -76,14 +71,32 @@ class DeunaActivity : AppCompatActivity() {
 
                 return true
             }
-
-        }
-
-        if (url != null) {
-            loadUrlWithNetworkCheck(webView, this, url, Callbacks())
         }
     }
 
+    /**
+     * Create a new WebView with a WebViewClient that handles URL loading.
+     */
+    private fun createNewWebView(): WebView {
+        return WebView(this@DeunaActivity).apply {
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val newUrl = request?.url.toString()
+                    Log.d("URL", newUrl)
+                    view?.loadUrl(newUrl) // Load the URL in the same WebView
+                    return true // Indicate that we have handled the URL loading
+                }
+            }
+            addJavascriptInterface(DeUnaBridge(), "android") // Add JavascriptInterface
+        }
+    }
+
+    /**
+     * Load a URL if there is an active internet connection.
+     */
     private fun loadUrlWithNetworkCheck(
         view: WebView,
         context: Context,
@@ -98,19 +111,20 @@ class DeunaActivity : AppCompatActivity() {
                 NetworkCapabilities.NET_CAPABILITY_INTERNET
             )
         ) {
-            Log.d("Cargando", url.toString())
+            Log.d("Loading", url)
             view.loadUrl(url)
         } else {
-            this.log("No internet connection")
+            log("No internet connection")
         }
     }
 
+    /**
+     * Log a message if logging is enabled.
+     */
     private fun log(message: String) {
         val loggingEnabled = intent.getBooleanExtra(LOGGING_ENABLED, false)
         if (loggingEnabled) {
             Log.d("[DeunaSDK]: ", message)
         }
     }
-
-
 }
