@@ -1,11 +1,7 @@
 package com.deuna.maven.domain
 
 import android.util.Log
-import android.view.View
 import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * The DeUnaBridge class is used to receive messages from JavaScript code in a WebView.

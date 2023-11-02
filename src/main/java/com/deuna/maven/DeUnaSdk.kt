@@ -2,25 +2,11 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
-import android.util.Log
-import android.view.View
-import android.webkit.CookieManager
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.core.content.ContextCompat.startActivity
-import com.deuna.maven.domain.Callbacks
 import com.deuna.maven.domain.CheckoutEvents
-import com.deuna.maven.domain.DeUnaBridge
-import com.deuna.maven.domain.DeUnaElementBridge
 import com.deuna.maven.domain.ElementType
 import com.deuna.maven.domain.Environment
-import kotlinx.coroutines.DelicateCoroutinesApi
 
 open class DeUnaSdk {
     private lateinit var apiKey: String
@@ -30,7 +16,6 @@ open class DeUnaSdk {
     private lateinit var userToken: String
     private var baseUrl: String = ""
     private var elementUrl: String = "https://elements.deuna.io"
-    private var actionMillisecods = 5000L
     private var closeOnEvents: Array<CheckoutEvents>? = null
     private var loggingEnabled: Boolean? = false
     private var context: Context? = null
@@ -84,7 +69,7 @@ open class DeUnaSdk {
                     Environment.PRODUCTION -> "https://elements.deuna.io"
                 }
 
-                if(loggingEnabled != null) {
+                if (loggingEnabled != null) {
                     this.loggingEnabled = loggingEnabled
                 }
 

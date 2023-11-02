@@ -1,7 +1,5 @@
 package com.deuna.maven.domain
 
-import android.app.Activity
-import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
