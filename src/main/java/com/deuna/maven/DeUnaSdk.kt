@@ -1,6 +1,7 @@
 package com.deuna.maven
 
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.domain.Callbacks
 import com.deuna.maven.domain.CheckoutEvents
 import com.deuna.maven.domain.DeUnaBridge
@@ -20,7 +22,7 @@ import com.deuna.maven.domain.ElementType
 import com.deuna.maven.domain.Environment
 import kotlinx.coroutines.DelicateCoroutinesApi
 
-class DeUnaSdk {
+open class DeUnaSdk {
     private lateinit var apiKey: String
     private lateinit var orderToken: String
     private lateinit var environment: Environment
@@ -31,6 +33,7 @@ class DeUnaSdk {
     private var actionMillisecods = 5000L
     private var closeOnEvents: Array<CheckoutEvents>? = null
     private var loggingEnabled: Boolean? = false
+    private var context: Context? = null
 
     companion object {
         private lateinit var instance: DeUnaSdk
@@ -42,7 +45,8 @@ class DeUnaSdk {
             environment: Environment,
             elementType: ElementType? = null,
             closeOnEvents: Array<CheckoutEvents>? = null,
-            loggingEnabled: Boolean? = false
+            loggingEnabled: Boolean? = false,
+            context: Context
         ) {
             instance = DeUnaSdk().apply {
                 if (apiKey != null) {
@@ -50,6 +54,10 @@ class DeUnaSdk {
                 }
                 if (orderToken != null) {
                     this.orderToken = orderToken
+                }
+
+                if (context != null) {
+                    this.context = context
                 }
 
                 if (closeOnEvents != null) {
@@ -80,134 +88,52 @@ class DeUnaSdk {
 
         @OptIn(DelicateCoroutinesApi::class)
         fun initCheckout(
-            view: View
-        ): Callbacks {
-            instance.apply {
-                val callbacks = Callbacks()
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                val webView: WebView = view.findViewById(R.id.deuna_webview)
-                configureWebViewClient(webView, callbacks, closeOnEvents)
-                configureWebView(webView)
-                addJavascriptInterface(webView, callbacks, closeOnEvents)
-                loadUrlWithNetworkCheck(webView, webView.context, "$baseUrl/$orderToken", callbacks)
-                return callbacks
-            }
-        }
-
-        @OptIn(DelicateCoroutinesApi::class)
-        fun initElements(
-            view: View
-        ): Callbacks {
-            instance.apply {
-                val callbacks = Callbacks()
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                val webView: WebView = view.findViewById(R.id.deuna_webview)
-                configureWebViewClient(webView, callbacks, closeOnEvents)
-                val builder = Uri.parse("$elementUrl/${elementType.value}").buildUpon()
-                if (userToken.isNotEmpty()) {
-                    builder.appendQueryParameter("userToken", userToken)
-                }
-                if (apiKey.isNotEmpty()) {
-                    builder.appendQueryParameter("publicApiKey", apiKey)
-                }
-                val url = builder.build().toString()
-                configureWebViewClient(webView, callbacks, closeOnEvents)
-                configureWebView(webView)
-                addJavascriptElementInterface(webView, callbacks, closeOnEvents)
-                loadUrlWithNetworkCheck(webView, webView.context, url, callbacks)
-
-                return callbacks
-            }
-        }
-
-        private fun configureWebView(webView: WebView) {
-            webView.settings.apply {
-                domStorageEnabled = true
-                javaScriptEnabled = true
-                cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-            }
-        }
-
-        private fun validateElementsConfig() {
-            if(instance.apiKey.isEmpty()) {
-                log("You must provide an apiKey")
-            }
-
-            if(instance.userToken.isEmpty()) {
-                log("You must provide an userToken")
-            }
-        }
-
-
-        private fun configureWebViewClient(
-            webView: WebView,
-            callbacks: Callbacks,
-            closeOnEvents: Array<CheckoutEvents>?
         ) {
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                }
-
-                override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
-                ) {
-                    super.onReceivedError(view, request, error)
-                    log("Error: ${error?.description}")
-                }
+            Intent(instance.context!!, DeunaActivity::class.java).apply {
+                putExtra(DeunaActivity.EXTRA_URL, "${instance.baseUrl}/${instance.orderToken}")
+                putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
+                startActivity(instance.context!!, this, null)
             }
+//            instance.apply {
+//                val callbacks = Callbacks()
+//                val cookieManager = CookieManager.getInstance()
+//                cookieManager.setAcceptCookie(true)
+//                val webView: WebView = view.findViewById(R.id.deuna_webview)
+//                configureWebViewClient(webView, callbacks, closeOnEvents)
+//                configureWebView(webView)
+//                addJavascriptInterface(webView, callbacks, closeOnEvents)
+//                loadUrlWithNetworkCheck(webView, webView.context, "$baseUrl/$orderToken", callbacks)
+//                return callbacks
+//            }
         }
 
-        private fun addJavascriptInterface(
-            webView: WebView,
-            callbacks: Callbacks,
-            closeOnEvents: Array<CheckoutEvents>?
-        ) {
-            webView.addJavascriptInterface(
-                DeUnaBridge(callbacks, webView, closeOnEvents),
-                "android"
-            )
-        }
+//        @OptIn(DelicateCoroutinesApi::class)
+//        fun initElements(
+//            view: View
+//        ): Callbacks {
+//            instance.apply {
+//                val callbacks = Callbacks()
+//                val cookieManager = CookieManager.getInstance()
+//                cookieManager.setAcceptCookie(true)
+//                val webView: WebView = view.findViewById(R.id.deuna_webview)
+//                configureWebViewClient(webView, callbacks, closeOnEvents)
+//                val builder = Uri.parse("$elementUrl/${elementType.value}").buildUpon()
+//                if (userToken.isNotEmpty()) {
+//                    builder.appendQueryParameter("userToken", userToken)
+//                }
+//                if (apiKey.isNotEmpty()) {
+//                    builder.appendQueryParameter("publicApiKey", apiKey)
+//                }
+//                val url = builder.build().toString()
+//                configureWebViewClient(webView, callbacks, closeOnEvents)
+//                configureWebView(webView)
+//                addJavascriptElementInterface(webView, callbacks, closeOnEvents)
+//                loadUrlWithNetworkCheck(webView, webView.context, url, callbacks)
+//
+//                return callbacks
+//            }
+//        }
 
-        private fun addJavascriptElementInterface(
-            webView: WebView,
-            callbacks: Callbacks,
-            closeOnEvents: Array<CheckoutEvents>?
-        )  {
-            webView.addJavascriptInterface(
-                DeUnaElementBridge(callbacks, webView, closeOnEvents),
-                "android"
-            )
-        }
 
-        private fun loadUrlWithNetworkCheck(
-            view: WebView,
-            context: Context,
-            url: String,
-            callbacks: Callbacks
-        ) {
-            val connectivityManager =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val networkCapabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if ((networkCapabilities != null) && networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_INTERNET
-                )
-            ) {
-                view.loadUrl(url)
-            } else {
-                this.log("No internet connection")
-            }
-        }
-
-        private fun log(message: String) {
-            if(instance.loggingEnabled!! && instance.loggingEnabled == true) {
-                Log.d("[DeunaSDK]: ", message)
-            }
-        }
     }
 }

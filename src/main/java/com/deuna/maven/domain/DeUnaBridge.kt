@@ -1,5 +1,6 @@
 package com.deuna.maven.domain
 
+import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -11,9 +12,6 @@ import org.json.JSONObject
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
 class DeUnaBridge(
-    private val callbacks: Callbacks,
-    private val webView: WebView,
-    private val closeOnEvents: Array<CheckoutEvents>? = null
 ) {
     /**
      * The postMessage function is called when a message is received from JavaScript code in a WebView.
@@ -21,59 +19,62 @@ class DeUnaBridge(
      */
     @JavascriptInterface
     fun postMessage(message: String) {
-        try {
-            val json = JSONObject(message)
-            when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
-                CheckoutEvents.PURCHASE_REJECTED -> {
-                    callbacks.onError?.invoke(
-                        OrderErrorResponse.fromJson(json.getJSONObject("data")),
-                        null
-                    )
-                }
-
-                CheckoutEvents.PURCHASE_SUCCESS -> {
-                    callbacks.onSuccess?.invoke(
-                        OrderSuccessResponse.fromJson(json.getJSONObject("data"))
-                    )
-                }
-
-                CheckoutEvents.CHANGE_ADDRESS -> {
-                    callbacks.onChangeAddress?.invoke(webView)
-                }
-
-                else -> {
-                    if (eventType in (closeOnEvents ?: emptyArray())) {
-                        callbacks.onClose?.invoke(webView)
-                    }
-                }
-            }
-        } catch (e: JSONException) {
-            callbacks.onError?.invoke(null, message)
-        }
+        Log.d("DeUnaBridge", message)
+//        try {
+//            Log.d("DeUnaBridge", message)
+//            val json = JSONObject(message)
+//            when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
+//                CheckoutEvents.PURCHASE_REJECTED -> {
+//                    callbacks.onError?.invoke(
+//                        OrderErrorResponse.fromJson(json.getJSONObject("data")),
+//                        null
+//                    )
+//                }
+//
+//                CheckoutEvents.PURCHASE_SUCCESS -> {
+//                    callbacks.onSuccess?.invoke(
+//                        OrderSuccessResponse.fromJson(json.getJSONObject("data"))
+//                    )
+//                }
+//
+//                CheckoutEvents.CHANGE_ADDRESS -> {
+//                    callbacks.onChangeAddress?.invoke(webView)
+//                }
+//
+//                else -> {
+//                    if (eventType in (closeOnEvents ?: emptyArray())) {
+//                        callbacks.onClose?.invoke(webView)
+//                    }
+//                }
+//            }
+//        } catch (e: JSONException) {
+//            Log.d("DeUnaBridge", e.message ?: "")
+//            callbacks.onError?.invoke(null, message)
+//        }
     }
 
-    private fun handleEvent(eventTypeString: String) {
-        val json = JSONObject(eventTypeString)
-        when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
-            CheckoutEvents.LINKCLOSE -> handleCloseEvent()
-            CheckoutEvents.CHANGE_ADDRESS -> handleChangeAddressEvent()
-            else -> handleOtherEvent(eventType)
-        }
-    }
+//    private fun handleEvent(eventTypeString: String) {
+//        val json = JSONObject(eventTypeString)
+//        when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
+//            CheckoutEvents.LINKCLOSE -> handleCloseEvent()
+//            CheckoutEvents.CHANGE_ADDRESS -> handleChangeAddressEvent()
+//            else -> handleOtherEvent(eventType)
+//        }
+//    }
 
-    private fun handleCloseEvent() {
-        webView.post {
-            webView.visibility = View.GONE
-        }
-    }
-
-    private fun handleChangeAddressEvent() {
-        callbacks.onChangeAddress?.invoke(webView)
-    }
-
-    private fun handleOtherEvent(eventType: CheckoutEvents) {
-        if (eventType in (closeOnEvents ?: emptyArray())) {
-            callbacks.onClose?.invoke(webView)
-        }
-    }
+//    private fun handleCloseEvent() {
+//        webView.post {
+//            webView.visibility = View.GONE
+//        }
+//    }
+//
+//    private fun handleChangeAddressEvent() {
+//        callbacks.onChangeAddress?.invoke(webView)
+//    }
+//
+//    private fun handleOtherEvent(eventType: CheckoutEvents) {
+//        if (eventType in (closeOnEvents ?: emptyArray())) {
+//            callbacks.onClose?.invoke(webView)
+//        }
+//    }
 }
