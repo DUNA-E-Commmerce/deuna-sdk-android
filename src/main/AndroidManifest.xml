@@ -5,10 +5,10 @@
 
     <application>
         <activity
-            android:name=".DeunaElementActivity"
+            android:name=".element.DeunaElementActivity"
             android:exported="false" />
         <activity
-            android:name=".DeunaActivity"
+            android:name=".checkout.DeunaActivity"
             android:exported="false" />
     </application>
 

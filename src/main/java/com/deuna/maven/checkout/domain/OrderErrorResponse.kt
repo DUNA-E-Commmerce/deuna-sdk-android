@@ -1,8 +1,8 @@
-package com.deuna.maven.domain
+package com.deuna.maven.checkout.domain
 
 import org.json.JSONObject
 
-data class OrderSuccessResponse(
+data class OrderErrorResponse(
     val order: Order,
     val metadata: Metadata
 ) {
@@ -17,8 +17,8 @@ data class OrderSuccessResponse(
     )
 
     companion object {
-        fun fromJson(json: JSONObject): OrderSuccessResponse {
-            val metadata = json.getJSONObject("metadata")
+        fun fromJson(json: JSONObject): OrderErrorResponse {
+            val metadata = json.optJSONObject("metadata")
             val orderData = json.getJSONObject("order")
             val meta= Metadata(
                 metadata.getString("errorCode"),
@@ -28,7 +28,7 @@ data class OrderSuccessResponse(
                 orderData.getString("order_id"),
                 orderData.getString("currency"),
             )
-            return OrderSuccessResponse(order, meta)
+            return OrderErrorResponse(order, meta)
         }
     }
 }

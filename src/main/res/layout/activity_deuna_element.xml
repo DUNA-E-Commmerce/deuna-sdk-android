@@ -3,11 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DeunaElementActivity">
+    tools:context=".element.DeunaElementActivity">
 
     <WebView
         android:id="@+id/deuna_webview_element"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
