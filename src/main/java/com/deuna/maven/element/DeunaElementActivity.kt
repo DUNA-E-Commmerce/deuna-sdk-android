@@ -7,10 +7,12 @@ import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
+import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.deuna.maven.R
@@ -36,12 +38,12 @@ class DeunaElementActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna_element)
-
         val url = intent.getStringExtra(EXTRA_URL)
         val webView: WebView = findViewById(R.id.deuna_webview_element)
         setupWebView(webView)
+        Log.d("DeunaElementActivity", url.toString())
         if (url != null) {
-            loadUrlWithNetworkCheck(webView, this, url, Callbacks())
+            loadUrlWithNetworkCheck(webView, this, url)
         }
     }
 
@@ -65,10 +67,13 @@ class DeunaElementActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                setVisibilityProgressBar(false)
+                webView.visibility = View.VISIBLE
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                setVisibilityProgressBar(true)
             }
         }
     }
@@ -99,8 +104,7 @@ class DeunaElementActivity : AppCompatActivity() {
     private fun loadUrlWithNetworkCheck(
         view: WebView,
         context: Context,
-        url: String,
-        callbacks: Callbacks
+        url: String
     ) {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -114,6 +118,12 @@ class DeunaElementActivity : AppCompatActivity() {
         } else {
             log("No internet connection")
         }
+    }
+
+    private fun setVisibilityProgressBar(isVisible: Boolean) {
+        val progressBar: ProgressBar = findViewById(R.id.progress_circular_element)
+        progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
+//        webView.visibility = View.VISIBLE
     }
 
     /**

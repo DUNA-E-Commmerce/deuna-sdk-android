@@ -53,7 +53,7 @@ class DeunaActivity : AppCompatActivity() {
         val webView: WebView = findViewById(R.id.deuna_webview)
         webView.visibility = View.VISIBLE
         setupWebView(webView)
-        loadUrlWithNetworkCheck(webView, this, url, Callbacks())
+        loadUrlWithNetworkCheck(webView, this, url)
     }
 
     /**
@@ -149,8 +149,7 @@ class DeunaActivity : AppCompatActivity() {
     private fun loadUrlWithNetworkCheck(
         view: WebView,
         context: Context,
-        url: String,
-        callbacks: Callbacks
+        url: String
     ) {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

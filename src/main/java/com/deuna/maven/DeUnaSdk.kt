@@ -55,7 +55,6 @@ open class DeUnaSdk {
             environment: Environment,
             elementType: ElementType? = null,
             closeOnEvents: Array<CheckoutEvents>? = null,
-            loggingEnabled: Boolean? = false,
             context: Context,
             callbacks: Callbacks? = null,
             elementCallbacks: ElementCallbacks? = null
@@ -92,27 +91,21 @@ open class DeUnaSdk {
                     Environment.PRODUCTION -> "https://elements.deuna.io"
                 }
 
-                if (loggingEnabled != null) {
-                    this.loggingEnabled = loggingEnabled
+                if (environment == Environment.DEVELOPMENT) {
+                    this.loggingEnabled = true
                 }
 
-                if (userToken != null || apiKey != null || elementType != null) {
+                if (userToken != null && apiKey != null && elementType != null) {
                     var url = this.elementUrl
-                    if (elementType != null) {
-                        url += "/${elementType.toString().lowercase(Locale.getDefault())}"
-                    }
+                    url += "/${elementType.toString().lowercase(Locale.getDefault())}"
                     val builder = Uri.parse(url).buildUpon()
-                    if (userToken != null) {
-                        builder.appendQueryParameter("userToken", userToken)
-                    }
-                    if (apiKey != null) {
-                        builder.appendQueryParameter("publicApiKey", apiKey)
-                    }
+                    builder.appendQueryParameter("userToken", userToken)
+                    builder.appendQueryParameter("publicApiKey", apiKey)
                     this.elementUrl = builder.build().toString()
                 }
 
                 if (userToken != null || apiKey != null || elementType != null) {
-                    var url = this.baseUrl
+                    val url = this.baseUrl
                     val builder = Uri.parse(url).buildUpon()
                     if (userToken != null) {
                         builder.appendQueryParameter("userToken", userToken)
@@ -143,6 +136,7 @@ open class DeUnaSdk {
         fun initElements(
         ) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
+            Log.d("DeUnaSdkUrl", instance.elementUrl)
             Intent(instance.context!!, DeunaElementActivity::class.java).apply {
                 putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
                 putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
