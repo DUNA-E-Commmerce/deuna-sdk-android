@@ -41,7 +41,6 @@ class DeunaElementActivity : AppCompatActivity() {
         val url = intent.getStringExtra(EXTRA_URL)
         val webView: WebView = findViewById(R.id.deuna_webview_element)
         setupWebView(webView)
-        Log.d("DeunaElementActivity", url.toString())
         if (url != null) {
             loadUrlWithNetworkCheck(webView, this, url)
         }
@@ -58,6 +57,11 @@ class DeunaElementActivity : AppCompatActivity() {
         }
         webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, this), "android") // Add JavascriptInterface
         setupWebChromeClient(webView)
+        val closeButton: View = findViewById(R.id.close_button_element)
+
+        closeButton.setOnClickListener {
+            finish()
+        }
     }
 
     /**
@@ -77,26 +81,6 @@ class DeunaElementActivity : AppCompatActivity() {
             }
         }
     }
-
-    /**
-     * Create a new WebView with a WebViewClient that handles URL loading.
-     */
-//    private fun createNewWebView(): WebView {
-//        return WebView(this@DeunaElementActivity).apply {
-//            webViewClient = object : WebViewClient() {
-//                override fun shouldOverrideUrlLoading(
-//                    view: WebView?,
-//                    request: WebResourceRequest?
-//                ): Boolean {
-//                    val newUrl = request?.url.toString()
-//                    Log.d("URL", newUrl)
-//                    view?.loadUrl(newUrl) // Load the URL in the same WebView
-//                    return true // Indicate that we have handled the URL loading
-//                }
-//            }
-//            addJavascriptInterface(DeUnaElementBridge(callbacks!!, this), "android") // Add JavascriptInterface
-//        }
-//    }
 
     /**
      * Load a URL if there is an active internet connection.

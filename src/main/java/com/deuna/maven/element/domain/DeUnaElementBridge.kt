@@ -49,7 +49,7 @@ class DeUnaElementBridge(
 
     private fun handleCloseEvent(activity: Activity) {
         Log.d("DeUnaElementBridge", "handleCloseEvent")
-        callbacks.onClose?.invoke(activity)
+        activity.finish()
     }
 
     private fun handleSuccess(jsonObject: JSONObject) {

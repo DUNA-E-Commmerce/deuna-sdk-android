@@ -85,18 +85,16 @@ open class DeUnaSdk {
 
                 this.environment = environment
 
-                this.elementUrl = when (this.environment) {
-                    Environment.DEVELOPMENT -> "https://elements.dev.deuna.io"
-                    Environment.STAGING -> "https://elements.stg.deuna.io"
-                    Environment.PRODUCTION -> "https://elements.deuna.io"
-                }
-
                 if (environment == Environment.DEVELOPMENT) {
                     this.loggingEnabled = true
                 }
 
                 if (userToken != null && apiKey != null && elementType != null) {
-                    var url = this.elementUrl
+                    var url = when (this.environment) {
+                        Environment.DEVELOPMENT -> "https://elements.dev.deuna.io"
+                        Environment.STAGING -> "https://elements.stg.deuna.io"
+                        Environment.PRODUCTION -> "https://elements.deuna.io"
+                    }
                     url += "/${elementType.toString().lowercase(Locale.getDefault())}"
                     val builder = Uri.parse(url).buildUpon()
                     builder.appendQueryParameter("userToken", userToken)

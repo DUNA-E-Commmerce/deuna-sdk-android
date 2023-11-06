@@ -26,6 +26,7 @@ class DeUnaBridge(
             Log.d("DeUnaBridge", message)
             val json = JSONObject(message)
             when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
+                // Flujo sin 3DS
                 CheckoutEvents.purchase -> {
                     callbacks.onSuccess?.invoke(
                         OrderSuccessResponse.fromJson(json.getJSONObject("data"))
@@ -60,7 +61,8 @@ class DeUnaBridge(
                 }
 
                 else -> {
-                    callbacks.onClose?.invoke(activity)
+                    Log.d("DeUnaBridge", "Unhandled event: $eventType")
+//                    callbacks.onClose?.invoke(activity)
                 }
             }
         } catch (e: JSONException) {
