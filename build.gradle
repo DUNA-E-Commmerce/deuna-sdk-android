@@ -4,16 +4,15 @@ plugins {
     id 'maven-publish'
 }
 
-
 ext {
-    urlMaven = System.getProperty("urlMaven", "");
+    urlMaven = System.getProperty("urlMaven", "https://s01.oss.sonatype.org/content/repositories/snapshots/");
     usernameMaven = System.getProperty("usernameMaven", "");
     passwordMaven = System.getProperty("passwordMaven", "");
 }
 
 android {
     namespace 'com.deuna.maven'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 33
@@ -45,8 +44,8 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version '1.0.0-SNAPSHOT'
-            artifact("$buildDir/outputs/aar/android-debug.aar")
+            version '0.3.1-SNAPSHOT'
+            artifact("$buildDir/outputs/aar/deuna-sdk-android-debug.aar")
             pom {
                 name = 'Android SDK DEUNA'
                 description = 'SDK for use in external merchants DEUNA'
@@ -87,9 +86,15 @@ publishing {
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'androidx.webkit:webkit:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    runtimeOnly("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

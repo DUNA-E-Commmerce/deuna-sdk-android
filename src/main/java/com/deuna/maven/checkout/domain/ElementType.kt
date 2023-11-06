@@ -1,4 +1,4 @@
-package com.deuna.maven.domain
+package com.deuna.maven.checkout.domain
 
 enum class ElementType(val value: String) {
     SAVE_CARD("save_card"),
