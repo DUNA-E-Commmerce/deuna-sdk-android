@@ -113,6 +113,14 @@ open class DeUnaSdk {
             }
         }
 
+        fun closeCheckout() {
+            (instance.context as DeunaActivity).finish()
+        }
+
+        fun closeElements() {
+            (instance.context as DeunaElementActivity).finish()
+        }
+
         /**
          * Initialize the DeUna SDK Checkout with the configured parameters.
          */
