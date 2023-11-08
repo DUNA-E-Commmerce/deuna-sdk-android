@@ -57,7 +57,7 @@ class DeUnaBridge(
                     )
                 }
                 CheckoutEvents.changeAddress -> {
-                    callbacks.onClose?.invoke(activity)
+                    callbacks.onChangeAddress?.invoke(activity)
                 }
 
                 else -> {
