@@ -1,6 +1,9 @@
 package com.deuna.maven.element
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -32,6 +35,17 @@ class DeunaElementActivity : AppCompatActivity() {
         }
     }
 
+    private val closeAllReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            finish()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(closeAllReceiver)
+    }
+
     /**
      * Called when the activity is starting.
      */
@@ -43,6 +57,7 @@ class DeunaElementActivity : AppCompatActivity() {
         setupWebView(webView)
         if (url != null) {
             loadUrlWithNetworkCheck(webView, this, url)
+            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
         }
     }
 
@@ -71,13 +86,13 @@ class DeunaElementActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                setVisibilityProgressBar(false)
+//                setVisibilityProgressBar(false)
                 webView.visibility = View.VISIBLE
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
-                setVisibilityProgressBar(true)
+//                setVisibilityProgressBar(true)
             }
         }
     }

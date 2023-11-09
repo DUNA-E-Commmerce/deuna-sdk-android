@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/deuna_layout"
     tools:context=".checkout.DeunaActivity">
 
     <ProgressBar
@@ -16,6 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
+
+<!--    <WebView-->
+<!--        android:id="@+id/deuna_webview_redirect"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:visibility="gone" />-->
 
     <Button
         android:id="@+id/close_button"

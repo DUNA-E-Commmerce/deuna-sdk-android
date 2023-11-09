@@ -34,8 +34,8 @@ class DeUnaBridge(
                 }
                 CheckoutEvents.purchaseRejected -> {
                     callbacks.onError?.invoke(
-                        OrderErrorResponse.fromJson(json.getJSONObject("data")),
-                        null
+                        null,
+                        "Purchase was rejected"
                     )
                 }
                 CheckoutEvents.linkFailed -> {
@@ -44,22 +44,16 @@ class DeUnaBridge(
                         null
                     )
                 }
-                CheckoutEvents.paymentClick -> {
-                    Log.d("DeUnaBridge", "PAYMENT_CLICK")
-                }
-                CheckoutEvents.paymentProcessing -> {
-                    Log.d("DeUnaBridge", "PAYMENT_PROCESSING")
-                }
                 CheckoutEvents.purchaseError -> {
+                    // TODO: devolver en el onError, el activity para que el merchant cierre el proceso
                     callbacks.onError?.invoke(
                         OrderErrorResponse.fromJson(json.getJSONObject("data")),
                         null
                     )
                 }
                 CheckoutEvents.changeAddress -> {
-                    callbacks.onClose?.invoke(activity)
+                    callbacks.onChangeAddress?.invoke(activity)
                 }
-
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventType")
 //                    callbacks.onClose?.invoke(activity)

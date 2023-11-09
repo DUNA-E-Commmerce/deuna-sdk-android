@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
@@ -113,8 +114,9 @@ open class DeUnaSdk {
             }
         }
 
-        fun closeCheckout() {
-            (instance.context as DeunaActivity).finish()
+
+        fun close() {
+            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ALL"))
         }
 
         fun closeElements() {
