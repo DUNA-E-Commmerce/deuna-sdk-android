@@ -115,8 +115,8 @@ open class DeUnaSdk {
         }
 
 
-        fun closeCheckout() {
-            (instance.context as DeunaActivity).finish()
+        fun close() {
+            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ALL"))
         }
 
         fun closeElements() {

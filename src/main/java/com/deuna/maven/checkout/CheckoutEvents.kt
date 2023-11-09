@@ -5,8 +5,11 @@ enum class CheckoutEvents(val value: String) {
     paymentProcessing("paymentProcessing"),
     purchaseError("purchaseError"),
     purchase("purchase"),
-    APM_SUCCESS("apmSuccess"),
+    apmSuccess("apmSuccess"),
+    apmClickRedirect("apmClickRedirect"),
+    apmFailed("apmFailed"),
     changeAddress("changeAddress"),
+    paymentMethods3dsInitiated("paymentMethods3dsInitiated"),
     paymentClick("paymentClick"),
     paymentMethodsCardNumberInitiated("paymentMethodsCardNumberInitiated"),
     paymentMethodsEntered("paymentMethodsEntered"),
@@ -15,4 +18,13 @@ enum class CheckoutEvents(val value: String) {
     adBlock("adBlock"),
     couponStarted("couponStarted"),
     linkFailed("linkFailed"),
+    paymentMethodsAddCard("paymentMethodsAddCard"),
+    checkoutStarted("checkoutStarted"),
+    paymentMethodsCardExpirationDateInitiated("paymentMethodsCardExpirationDateInitiated"),
+    paymentMethodsCardNameInitiated("paymentMethodsCardNameInitiated"),
+    paymentMethodsCardSecurityCodeInitiated("paymentMethodsCardSecurityCodeInitiated"),
+    paymentMethodsCardNumberEntered("paymentMethodsCardNumberEntered"),
+    paymentMethodsCardExpirationDateEntered("paymentMethodsCardExpirationDateEntered"),
+    paymentMethodsCardSecurityCodeEntered("paymentMethodsCardSecurityCodeEntered")
+
 }

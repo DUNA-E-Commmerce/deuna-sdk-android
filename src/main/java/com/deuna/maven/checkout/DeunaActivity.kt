@@ -1,16 +1,22 @@
 package com.deuna.maven.checkout
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
 import android.view.View
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
@@ -19,6 +25,7 @@ import com.deuna.maven.client.sendOrder
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URL
 
 /**
  * Activity for Deuna.
@@ -38,6 +45,12 @@ class DeunaActivity : AppCompatActivity() {
         }
     }
 
+    private val closeAllReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            finish()
+        }
+    }
+
     /**
      * Called when the activity is starting.
      */
@@ -45,22 +58,27 @@ class DeunaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna)
         instance = this
-        setVisibilityProgressBar(true)
+//        setVisibilityProgressBar(true)
         getOrderApi(intent.getStringExtra(ORDER_TOKEN)!!, intent.getStringExtra(API_KEY)!!)
+        registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(closeAllReceiver)
     }
 
     private fun launchActivity(url: String) {
-        Log.d("DeunaActivityUrl", url)
         val webView: WebView = findViewById(R.id.deuna_webview)
         webView.visibility = View.VISIBLE
-        setupWebView(webView)
+        setupWebView(webView, url)
         loadUrlWithNetworkCheck(webView, this, url)
     }
 
     /**
      * Setup the WebView with necessary settings and JavascriptInterface.
      */
-    private fun setupWebView(webView: WebView) {
+    private fun setupWebView(webView: WebView, url: String) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
@@ -70,7 +88,7 @@ class DeunaActivity : AppCompatActivity() {
             DeUnaBridge(this, callbacks!!),
             "android"
         ) // Add JavascriptInterface
-        setupWebChromeClient(webView)
+        setupWebChromeClient(webView, url)
 
         val closeButton: View = findViewById(R.id.close_button)
 
@@ -82,16 +100,60 @@ class DeunaActivity : AppCompatActivity() {
     /**
      * Setup the WebChromeClient to handle creation of new windows.
      */
-    private fun setupWebChromeClient(webView: WebView) {
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-            }
+    private fun setupWebChromeClient(webView: WebView, targetUrl: String) {
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
+            ): Boolean {
+                val newWebView = WebView(this@DeunaActivity).apply {
+                    webViewClient = WebViewClient()
+                    settings.javaScriptEnabled = true
+                }
 
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
+                val transport = resultMsg.obj as WebView.WebViewTransport
+                transport.webView = newWebView
+                resultMsg.sendToTarget()
+
+                newWebView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        val newUrl = request?.url.toString()
+                        Log.d("WebView", "Nueva URL: $newUrl")
+                        view?.loadUrl(newUrl)
+                        return true
+                    }
+                }
+
+                newWebView.webChromeClient = object : WebChromeClient() {
+                    override fun onCreateWindow(
+                        view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
+                    ): Boolean {
+                        // Aquí puedes agregar la misma lógica para manejar nuevas ventanas
+                        return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+                    }
+                }
+
+                // Oculta el WebView existente
+                webView.visibility = View.GONE
+
+                // Agrega el nuevo WebView a tu layout y lo hace visible
+                val layout = findViewById<RelativeLayout>(R.id.deuna_layout) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
+                layout.addView(newWebView)
+                newWebView.layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+                )
+                newWebView.visibility = View.VISIBLE
+
+                return true
             }
         }
+    }
+
+    fun cleanUrl(url: String): String {
+        val protocolEndIndex = url.indexOf("//") + 2
+        val protocol = url.substring(0, protocolEndIndex)
+        val restOfUrl = url.substring(protocolEndIndex).replace("//", "/")
+        return "$protocol$restOfUrl"
     }
 
     private fun getOrderApi(orderToken: String, apiKey: String) {
@@ -101,9 +163,11 @@ class DeunaActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val responseBody = response.body() as? Map<*, *>
                     val orderMap = responseBody?.get("order") as? Map<*, *>
-                    setVisibilityProgressBar(false)
+                    Log.d("DeunaActivity", orderMap.toString())
                     if (orderMap != null) {
-                        launchActivity(orderMap.get("payment_link").toString())
+                        val parsedUrl = URL(orderMap.get("payment_link").toString())
+                        Log.d("PArsed Url", cleanUrl(parsedUrl.toString()))
+                        launchActivity(cleanUrl(parsedUrl.toString()))
                     }
                 } else {
                     Toast.makeText(
@@ -166,7 +230,6 @@ class DeunaActivity : AppCompatActivity() {
                 NetworkCapabilities.NET_CAPABILITY_INTERNET
             )
         ) {
-            Log.d("DeunaActivity", url)
             view.loadUrl(url)
         } else {
             log("No internet connection")
