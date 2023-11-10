@@ -72,11 +72,7 @@ class DeunaElementActivity : AppCompatActivity() {
         }
         webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, this), "android") // Add JavascriptInterface
         setupWebChromeClient(webView)
-        val closeButton: View = findViewById(R.id.close_button_element)
 
-        closeButton.setOnClickListener {
-            finish()
-        }
     }
 
     /**

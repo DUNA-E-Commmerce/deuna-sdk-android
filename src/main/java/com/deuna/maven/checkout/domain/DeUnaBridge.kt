@@ -17,8 +17,7 @@ class DeUnaBridge(
     private val callbacks: Callbacks
 ) {
     /**
-     * The postMessage function is called when a message is received from JavaScript code in a WebView.
-     * The message is parsed and the corresponding callbacks are called based on the event type.
+     * Called when the activity is starting.
      */
     @JavascriptInterface
     fun postMessage(message: String) {

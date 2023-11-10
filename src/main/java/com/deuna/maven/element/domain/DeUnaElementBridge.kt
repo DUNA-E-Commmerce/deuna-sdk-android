@@ -29,14 +29,13 @@ class DeUnaElementBridge(
         try {
             val json = JSONObject(eventTypeString)
             val eventType = ElementEvent.valueOf(json.getString("type"))
-            Log.d("DeUnaElementBridge", "handleEvent: $eventType")
             when (eventType) {
                 ElementEvent.vaultSaveClick -> Log.d("DeUnaElementBridge", "VAULT_SAVE_CLICK")
                 ElementEvent.vaultStarted -> Log.d("DeUnaElementBridge", "VAULT_STARTED")
                 ElementEvent.vaultFailed -> handleError(json)
                 ElementEvent.cardCreationError -> handleError(json)
-                ElementEvent.vaultSavingError -> handleError(json)
-                ElementEvent.vaultSavingSuccess -> handleSuccess(json)
+                ElementEvent.vaultSaveError -> handleError(json)
+                ElementEvent.vaultSaveSuccess -> handleSuccess(json)
                 ElementEvent.vaultProcessing -> Log.d("DeUnaElementBridge", "VAULT_PROCESSING")
                 ElementEvent.vaultClosed -> handleCloseEvent(activity)
                 ElementEvent.cardSuccessfullyCreated -> handleSuccess(json)

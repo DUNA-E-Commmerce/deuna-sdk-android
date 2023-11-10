@@ -21,6 +21,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.Locale
 
+
 open class DeUnaSdk {
     private lateinit var apiKey: String
     private lateinit var orderToken: String
@@ -34,6 +35,7 @@ open class DeUnaSdk {
     private var context: Context? = null
     private var callbacks: Callbacks? = null
     private var elementCallbacks: ElementCallbacks? = null
+    private var showCloseButton: Boolean? = null
 
     companion object {
         private lateinit var instance: DeUnaSdk
@@ -58,9 +60,14 @@ open class DeUnaSdk {
             closeOnEvents: Array<CheckoutEvents>? = null,
             context: Context,
             callbacks: Callbacks? = null,
-            elementCallbacks: ElementCallbacks? = null
+            elementCallbacks: ElementCallbacks? = null,
+            showCloseButton: Boolean? = null
         ) {
             instance = DeUnaSdk().apply {
+
+                if (showCloseButton != null) {
+                    this.showCloseButton = showCloseButton
+                }
 
                 if (callbacks != null) {
                     this.callbacks = callbacks
@@ -100,6 +107,9 @@ open class DeUnaSdk {
                     val builder = Uri.parse(url).buildUpon()
                     builder.appendQueryParameter("userToken", userToken)
                     builder.appendQueryParameter("publicApiKey", apiKey)
+                    if (showCloseButton != null) {
+                        builder.appendQueryParameter("mode", "widget")
+                    }
                     this.elementUrl = builder.build().toString()
                 }
 
@@ -114,13 +124,11 @@ open class DeUnaSdk {
             }
         }
 
-
+        /**
+         * Close the DeUna SDK.
+         */
         fun close() {
             instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ALL"))
-        }
-
-        fun closeElements() {
-            (instance.context as DeunaElementActivity).finish()
         }
 
         /**
@@ -151,9 +159,5 @@ open class DeUnaSdk {
                 startActivity(instance.context!!, this, null)
             }
         }
-
-
-
-
     }
 }

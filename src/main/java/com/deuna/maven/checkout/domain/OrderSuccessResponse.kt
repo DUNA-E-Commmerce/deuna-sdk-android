@@ -141,8 +141,6 @@ data class OrderSuccessResponse(
                 items.add(item)
             }
 
-
-
             val order = Order(
                 orderData.getString("order_id"),
                 orderData.getString("currency"),
