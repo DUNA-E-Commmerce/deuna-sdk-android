@@ -36,6 +36,7 @@ open class DeUnaSdk {
     private var callbacks: Callbacks? = null
     private var elementCallbacks: ElementCallbacks? = null
     private var showCloseButton: Boolean? = null
+    private var apigatewayUrl: String = "https://api.dev.deuna.io"
 
     companion object {
         private lateinit var instance: DeUnaSdk
@@ -97,6 +98,12 @@ open class DeUnaSdk {
                     this.loggingEnabled = true
                 }
 
+                if (environment == Environment.STAGING) {
+                    this.apigatewayUrl = "https://api.stg.deuna.io"
+                } else if(environment == Environment.PRODUCTION) {
+                    this.apigatewayUrl = "https://api.deuna.io"
+                }
+
                 if (userToken != null && apiKey != null && elementType != null) {
                     var url = when (this.environment) {
                         Environment.DEVELOPMENT -> "https://elements.dev.deuna.io"
@@ -140,6 +147,7 @@ open class DeUnaSdk {
             Intent(instance.context!!, DeunaActivity::class.java).apply {
                 putExtra(DeunaActivity.ORDER_TOKEN, instance.orderToken)
                 putExtra(DeunaActivity.API_KEY, instance.apiKey)
+                putExtra(DeunaActivity.BASE_URL, instance.apigatewayUrl)
                 putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
                 startActivity(instance.context!!, this, null)
             }
@@ -152,7 +160,6 @@ open class DeUnaSdk {
         fun initElements(
         ) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
-            Log.d("DeUnaSdkUrl", instance.elementUrl)
             Intent(instance.context!!, DeunaElementActivity::class.java).apply {
                 putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
                 putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)

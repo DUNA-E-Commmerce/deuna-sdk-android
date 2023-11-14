@@ -3,6 +3,7 @@ package com.deuna.maven.checkout.domain
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
+import com.deuna.maven.DeUnaSdk
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
 import org.json.JSONException
@@ -22,7 +23,6 @@ class DeUnaBridge(
     @JavascriptInterface
     fun postMessage(message: String) {
         try {
-            Log.d("DeUnaBridge", message)
             val json = JSONObject(message)
             when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
                 // Flujo sin 3DS
@@ -55,7 +55,6 @@ class DeUnaBridge(
                 }
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventType")
-//                    callbacks.onClose?.invoke(activity)
                 }
             }
         } catch (e: JSONException) {

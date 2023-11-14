@@ -7,7 +7,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object RetrofitClient {
-    private const val BASE_URL = "https://api.stg.deuna.io/"
 
     // Crear una instancia del interceptor
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -18,13 +17,13 @@ object RetrofitClient {
         .addInterceptor(loggingInterceptor)  // Añadir el interceptor al cliente
         .build()
 
-    val instance: ApiService by lazy {
+    fun getInstance(baseUrl: String): ApiService {
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(baseUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        retrofit.create(ApiService::class.java)
+        return retrofit.create(ApiService::class.java)
     }
 }

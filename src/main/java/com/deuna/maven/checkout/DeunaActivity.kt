@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -38,6 +37,7 @@ class DeunaActivity : AppCompatActivity() {
         const val ORDER_TOKEN = "order_token"
         const val API_KEY = "api_key"
         const val LOGGING_ENABLED = "logging_enabled"
+        const val BASE_URL = "BASE_URL"
         var callbacks: Callbacks? = null
 
         fun setCallback(callback: Callbacks?) {
@@ -59,7 +59,11 @@ class DeunaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_deuna)
         instance = this
 //        setVisibilityProgressBar(true)
-        getOrderApi(intent.getStringExtra(ORDER_TOKEN)!!, intent.getStringExtra(API_KEY)!!)
+        getOrderApi(
+            intent.getStringExtra(BASE_URL)!!,
+            intent.getStringExtra(ORDER_TOKEN)!!,
+            intent.getStringExtra(API_KEY)!!
+        )
         registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
     }
 
@@ -115,9 +119,11 @@ class DeunaActivity : AppCompatActivity() {
                 resultMsg.sendToTarget()
 
                 newWebView.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
                         val newUrl = request?.url.toString()
-                        Log.d("WebView", "Nueva URL: $newUrl")
                         view?.loadUrl(newUrl)
                         return true
                     }
@@ -136,7 +142,8 @@ class DeunaActivity : AppCompatActivity() {
                 webView.visibility = View.GONE
 
                 // Agrega el nuevo WebView a tu layout y lo hace visible
-                val layout = findViewById<RelativeLayout>(R.id.deuna_layout) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
+                val layout =
+                    findViewById<RelativeLayout>(R.id.deuna_layout) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
                 layout.addView(newWebView)
                 newWebView.layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -156,17 +163,15 @@ class DeunaActivity : AppCompatActivity() {
         return "$protocol$restOfUrl"
     }
 
-    private fun getOrderApi(orderToken: String, apiKey: String) {
+    private fun getOrderApi(baseUrl: String, orderToken: String, apiKey: String) {
 
-        sendOrder(orderToken, apiKey, object : Callback<Any> {
+        sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body() as? Map<*, *>
                     val orderMap = responseBody?.get("order") as? Map<*, *>
-                    Log.d("DeunaActivity", orderMap.toString())
                     if (orderMap != null) {
                         val parsedUrl = URL(orderMap.get("payment_link").toString())
-                        Log.d("PArsed Url", cleanUrl(parsedUrl.toString()))
                         launchActivity(cleanUrl(parsedUrl.toString()))
                     }
                 } else {
