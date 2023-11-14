@@ -25,6 +25,7 @@ class DeUnaBridge(
         try {
             val json = JSONObject(message)
             val eventType = CheckoutEvents.valueOf(json.getString("type"))
+            Log.d("DeUnaBridge", "eventType: $eventType")
             when (eventType) {
                 // Flujo sin 3DS
                 CheckoutEvents.purchase -> {
@@ -57,7 +58,7 @@ class DeUnaBridge(
                     )
                 }
                 CheckoutEvents.changeAddress -> {
-                    callbacks.onChangeAddress?.invoke(activity)
+                    activity.finish()
                 }
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventType")

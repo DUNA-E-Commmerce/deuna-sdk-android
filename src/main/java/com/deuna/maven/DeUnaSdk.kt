@@ -102,6 +102,10 @@ open class DeUnaSdk {
                     this.apigatewayUrl = "https://api.stg.deuna.io"
                 } else if(environment == Environment.PRODUCTION) {
                     this.apigatewayUrl = "https://api.deuna.io"
+                } else if(environment == Environment.SANDBOX) {
+                    this.apigatewayUrl = "https://api.sbx.deuna.io"
+                } else {
+                    this.apigatewayUrl = "https://api.dev.deuna.io"
                 }
 
                 if (userToken != null && apiKey != null && elementType != null) {
@@ -109,6 +113,7 @@ open class DeUnaSdk {
                         Environment.DEVELOPMENT -> "https://elements.dev.deuna.io"
                         Environment.STAGING -> "https://elements.stg.deuna.io"
                         Environment.PRODUCTION -> "https://elements.deuna.io"
+                        Environment.SANDBOX -> "https://elements.sbx.deuna.io"
                     }
                     url += "/${elementType.toString().lowercase(Locale.getDefault())}"
                     val builder = Uri.parse(url).buildUpon()
