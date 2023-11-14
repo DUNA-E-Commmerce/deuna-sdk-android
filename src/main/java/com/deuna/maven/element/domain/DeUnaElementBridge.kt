@@ -37,6 +37,7 @@ class DeUnaElementBridge(
                 ElementEvent.vaultSaveSuccess -> handleSuccess(json)
                 ElementEvent.vaultClosed -> handleCloseEvent(activity)
                 ElementEvent.cardSuccessfullyCreated -> handleSuccess(json)
+                ElementEvent.changeAddress -> handleChangeAddressEvent()
                 else -> Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
             }
         } catch (e: Exception) {
@@ -62,11 +63,7 @@ class DeUnaElementBridge(
     }
 
     private fun handleChangeAddressEvent() {
+        callbacks.onChangeAddress?.invoke(activity)
     }
 
-//    private fun handleOtherEvent(eventType: ElementEvent) {
-//        if (eventType in (closeOnEvents ?: emptyArray())) {
-//            callbacks.onClose?.invoke(webView)
-//        }
-//    }
 }

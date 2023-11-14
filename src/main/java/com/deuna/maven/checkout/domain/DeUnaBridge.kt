@@ -24,9 +24,15 @@ class DeUnaBridge(
     fun postMessage(message: String) {
         try {
             val json = JSONObject(message)
-            when (val eventType = CheckoutEvents.valueOf(json.getString("type"))) {
+            val eventType = CheckoutEvents.valueOf(json.getString("type"))
+            when (eventType) {
                 // Flujo sin 3DS
                 CheckoutEvents.purchase -> {
+                    callbacks.onSuccess?.invoke(
+                        OrderSuccessResponse.fromJson(json.getJSONObject("data"))
+                    )
+                }
+                CheckoutEvents.apmSuccess -> {
                     callbacks.onSuccess?.invoke(
                         OrderSuccessResponse.fromJson(json.getJSONObject("data"))
                     )
