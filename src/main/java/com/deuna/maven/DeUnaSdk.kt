@@ -1,24 +1,17 @@
 package com.deuna.maven
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
-import com.deuna.maven.client.sendOrder
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.Locale
 
 
@@ -26,7 +19,6 @@ open class DeUnaSdk {
     private lateinit var apiKey: String
     private lateinit var orderToken: String
     private lateinit var environment: Environment
-    private lateinit var elementType: ElementType
     private lateinit var userToken: String
     private var baseUrl: String = ""
     private var elementUrl: String = "https://elements.deuna.io"
@@ -46,7 +38,6 @@ open class DeUnaSdk {
          * @param apiKey The API key to use for the DeUna SDK.
          * @param orderToken The order token to use for the DeUna SDK.
          * @param environment The environment to use for the DeUna SDK.
-         * @param elementType The element type to use for the DeUna SDK.
          * @param closeOnEvents The events to close the DeUna SDK on.
          * @param loggingEnabled Whether to enable logging for the DeUna SDK.
          * @param context The context to use for the DeUna SDK.
@@ -57,7 +48,6 @@ open class DeUnaSdk {
             orderToken: String? = null,
             userToken: String? = null,
             environment: Environment,
-            elementType: ElementType? = null,
             closeOnEvents: Array<CheckoutEvents>? = null,
             context: Context,
             callbacks: Callbacks? = null,
@@ -100,22 +90,21 @@ open class DeUnaSdk {
 
                 if (environment == Environment.STAGING) {
                     this.apigatewayUrl = "https://api.stg.deuna.io"
-                } else if(environment == Environment.PRODUCTION) {
+                } else if (environment == Environment.PRODUCTION) {
                     this.apigatewayUrl = "https://api.deuna.io"
-                } else if(environment == Environment.SANDBOX) {
+                } else if (environment == Environment.SANDBOX) {
                     this.apigatewayUrl = "https://api.sbx.deuna.io"
                 } else {
                     this.apigatewayUrl = "https://api.dev.deuna.io"
                 }
 
-                if (userToken != null && apiKey != null && elementType != null) {
+                if (userToken != null && apiKey != null) {
                     var url = when (this.environment) {
-                        Environment.DEVELOPMENT -> "https://elements.dev.deuna.io"
-                        Environment.STAGING -> "https://elements.stg.deuna.io"
-                        Environment.PRODUCTION -> "https://elements.deuna.io"
-                        Environment.SANDBOX -> "https://elements.sbx.deuna.io"
+                        Environment.DEVELOPMENT -> "https://elements.dev.deuna.io/{type}"
+                        Environment.STAGING -> "https://elements.stg.deuna.io/{type}"
+                        Environment.PRODUCTION -> "https://elements.deuna.io/{type}"
+                        Environment.SANDBOX -> "https://elements.sbx.deuna.io/{type}"
                     }
-                    url += "/${elementType.toString().lowercase(Locale.getDefault())}"
                     val builder = Uri.parse(url).buildUpon()
                     builder.appendQueryParameter("userToken", userToken)
                     builder.appendQueryParameter("publicApiKey", apiKey)
@@ -125,7 +114,7 @@ open class DeUnaSdk {
                     this.elementUrl = builder.build().toString()
                 }
 
-                if (userToken != null || apiKey != null || elementType != null) {
+                if (userToken != null || apiKey != null) {
                     val url = this.baseUrl
                     val builder = Uri.parse(url).buildUpon()
                     if (userToken != null) {
@@ -145,6 +134,7 @@ open class DeUnaSdk {
 
         /**
          * Initialize the DeUna SDK Checkout with the configured parameters.
+         * @throws IllegalStateException if the SDK has not been configured.
          */
         fun initCheckout(
         ) {
@@ -160,13 +150,16 @@ open class DeUnaSdk {
 
         /**
          * Initialize the DeUna SDK Elements with the configured parameters.
+         * @param element The element to initialize.
          * @throws IllegalStateException if the SDK has not been configured.
          */
-        fun initElements(
-        ) {
+        fun initElements(element: ElementType) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
+            var newUrl = instance.elementUrl
+                .replace("{type}", element.toString().lowercase(Locale.ROOT))
+            Log.d("elementUrl", newUrl)
             Intent(instance.context!!, DeunaElementActivity::class.java).apply {
-                putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
+                putExtra(DeunaElementActivity.EXTRA_URL, newUrl)
                 putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
                 startActivity(instance.context!!, this, null)
             }
