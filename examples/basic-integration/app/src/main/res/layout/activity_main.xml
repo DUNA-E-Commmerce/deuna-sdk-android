@@ -79,34 +79,34 @@
             android:id="@+id/inputApiKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter API Key"
-            android:inputType="textMultiLine"
+            android:hint="@string/enter_api_key"
+            android:inputType="text"
             android:textSize="16sp"
-            android:textIsSelectable="true"
             android:padding="16dp"
             android:scrollbars="vertical"
-            android:text="799680ba34b854854a44039397e77d89054a8be84ebb7c06731ab69018ea53fab13cf96bd5cfcfa3e1dc3cc9ea17e68c1b0d76380ee77d7db7c5572ce3e1"/>
-
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="@string/copia_y_pega_tu_api_key"/>
         <!-- Spinner para seleccionar Environment -->
         <Spinner
             android:id="@+id/environmentOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/environment_options"
-            android:textSize="10sp"/>
+            android:textSize="11sp"/>
 
         <!-- Botón para aplicar configuración -->
         <Button
             android:id="@+id/applyConfigButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Apply Config"/>
+            android:text="@string/apply_config"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/orderTokenTextView"
-            android:text="Current Token: "/>
+            android:text="@string/current_token"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -117,7 +117,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/userTokenTextView"
-            android:text="User Token: "/>
+            android:text="@string/user_token"/>
 
         <TextView
             android:layout_width="match_parent"

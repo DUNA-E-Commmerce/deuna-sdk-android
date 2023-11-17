@@ -12,20 +12,20 @@ import android.widget.TextView
 import android.widget.Toast
 //import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.deuna.maven.DeUnaSdk
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.domain.ElementCallbacks
-import com.bumptech.glide.Glide
 
 // PASO 1: Importar librería de DEUNA
 
 class MainActivity : AppCompatActivity() {
     private var orderToken = ""
     private var userToken = ""
-    private var apiKey = ""
+    private var apiKey = "799680ba34b854854a44039397e77d89054a8be84ebb7c06731ab69018ea53fab13cf96bd5cfcfa3e1dc3cc9ea17e68c1b0d76380ee77d7db7c5572ce3e1"
     private var environment: Environment = Environment.STAGING
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,8 +71,13 @@ class MainActivity : AppCompatActivity() {
                 Log.d("Success", newOrderToken)
                 orderToken = newOrderToken
                 userToken = newUserToken
+                val maxChars = 15
                 orderTokenTextView.text = orderToken
-                userTokenTextView.text = userToken
+                userTokenTextView.text = if (userToken.length > maxChars) {
+                    userToken.substring(0, maxChars) + "..."
+                } else {
+                    userToken
+                }
 
                 Log.d("debug", "Success message")
             } else {
@@ -90,7 +95,8 @@ class MainActivity : AppCompatActivity() {
         environment = when (environmentSpinner.selectedItemPosition) {
             0 -> Environment.STAGING
             1 -> Environment.PRODUCTION
-            else -> Environment.DEVELOPMENT
+            2 -> Environment.DEVELOPMENT
+            else -> Environment.SANDBOX
         }
 
         if (apiKey.isNotEmpty() && orderToken.isNotEmpty()) {
@@ -125,7 +131,6 @@ class MainActivity : AppCompatActivity() {
             environment = environment,
             userToken = userToken,
             context = this@MainActivity,
-            elementType = ElementType.VAULT,
             elementCallbacks = createElementCallbacks(),
             showCloseButton = true
         )
@@ -190,6 +195,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initElements() {
         configureForElements()
-        DeUnaSdk.initElements()
+        DeUnaSdk.initElements(element = ElementType.VAULT)
     }
 }

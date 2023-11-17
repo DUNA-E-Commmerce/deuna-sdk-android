@@ -50,7 +50,12 @@ class DeunaApiService(private val apiKey: String, private val environment: Envir
                     val gson = Gson()
                     val orderResponse = gson.fromJson(responseData, OrderResponse::class.java)
                     val orderToken = orderResponse.token
-                    val userToken = extractUserToken(orderResponse.order.payment_link)
+                    var userToken = extractUserToken(orderResponse.order.payment_link)
+
+                    if (userToken=="") {
+                        userToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlZOUDlOVGM2SWdxVDhhYVRqYlFnOTRPa2wzZHgtLWZfQjdNdXdTNmYzdmMiLCJ0eXAiOiJKV1QifQ.eyJhY3QiOiJyZWFkIiwiYXVkIjpbIjU5YmEwYzgxLTYzNTAtNDUyMy05ZjJmLTU0NTdkNzM3ZmRkNCJdLCJleHAiOjE3MDAyNTMyNjgsImV4dGVybmFsIjp0cnVlLCJpYXQiOjE3MDAxNjY4NjgsImlzcyI6IjU5YmEwYzgxLTYzNTAtNDUyMy05ZjJmLTU0NTdkNzM3ZmRkNCIsInJlZmVyZXIiOiIiLCJzdWIiOiI0MGMzZWMyOS04NTYyLTQxYzYtYmI0Ny05NmNhN2M4NTJlMDEiLCJ1c2VyX3JvbGUiOiJleHRlcm5hbCJ9.c5-0DyAVd8t-4QVmGdAgp2wHbcA5_eh_UwVfT8uMHjIEJBCA5FEpgzLp0Nc1TNWPw5a-IwjsNzxvB4DkUMRfQw4vzd6rPU3zcMT-mc2MBQOKmgYKFcckex0_-M_K6sY7Oa4RL_XJMKkBwiBcqArUpg4AhYxuJbZPizaGPB2LoXVravPEnTvQHf4UrPZyK99x4lRf_c1tNRAX-wJuVatCTIdz-UX9nRHQZjtIa9x3J2K4OXTsDPv6tD4mOU66jXuLeIcLhDFENPsgeJkYdMoRCnY1kQhFq8vV_4u13EUe0ZaFJAC1RAVs5Z41mZALZlCyPpMztjMUyiSQdRnN0PWL5CmuEu6UJuFPmRkL2CDT184Icn4f1FC99AqU0FaMyFfmwKdbn6dguTUgqajQFxiI8kdeZqoC_bBxaF0XABfVjWkqBrqxeBZI_xEvvL6MPPJLp7h5-rXNYj40LA-b53Uvn2HBxnuG-QGJgALurmN23cLq1ZHxWMluPQafad3sJav4ONHQeZxYh8nPKGUQ6_M5zVzZHVtjkxe2gH1hbdjSODZ9RQzaeO7jTOexlDEACy-ai_SDJQDvdCjqPqZDMFR7v7Tjt-eGsmsg733Y8mecE0BSXX5IBdkP_oDv1Neldev_FgMQHCLUd-tjcaa03IOSUJIgFbxDdJ5BZPjxspdjTE4"
+                    }
+
                     onResult(orderToken, userToken)
                 } catch (e: Exception) {
                     Log.d("debug", e.toString())
@@ -74,51 +79,59 @@ class Merchant() {
                 "order_type": "PAYMENT_LINK",
                 "order": {
                     "order_id": "$orderId",
-                    
-                    "payer_info": {
-                        "email": "scatalan@deuna.com"
-                    },
                     "currency": "MXN",
-                    "timezone": "America/Mexico_City",
-                    "total_amount": 10900,
-                    "total_discount": 0,
-                    "total_tax_amount": 0,
-                    "tax_amount": 0,
-                    "sub_total": 10900,
-                    "items_total_amount": 10900,
+                    "timezone": "America/Mexico_City",      
+                    "items_total_amount": 2800,                
+                    "sub_total": 3000,
+                    "total_tax_amount": 500,
+                    "shipping_amount": 0,
+                    "total_amount": 3500,   
                     "store_code": "all",
+                    "payer_info": {
+                          "email": "eposada@deuna.com"
+                    },
                     "webhook_urls": {
-                        "notify_order": "https://internal.deuna.io/api/v1/orders",
-                        "apply_coupon": "https://internal.deuna.io/api/v1/orders/{order_token}/coupons",
-                        "remove_coupon": "https://internal.deuna.io/api/v1/orders/{order_token}/coupons/{coupon_code}",
-                        "get_shipping_methods": "https://internal.deuna.io/api/v1/orders/{order_token}/shipping-methods",
-                        "update_shipping_method": "https://internal.deuna.io/api/v1/orders/{order_token}/shipping-method",
-                        "shipping_rate": "https://internal.deuna.io/api/v1/orders/{order_token}/shipping"
+                        "notify_order": "https://internal.deuna.io/api/v1/orders"        
                     },
                     "items": [
                         {
-                            "id": "67166",
-                            "name": "Caldo tlalpeño (500 ml)",
-                            "description": "Caldo tlalpeño (500 ml)",
-                            "quantity": 1,
-                            "sku": "Yy-l-LNVyI",
-                            "category": "3885",
-                            "image_url": "https://d347gjkxx0g7x1.cloudfront.net/menu/img/vips/44031.JPG",
+                            "id": "79",
+                            "name": "10 ALITAS VOLANTE",
+                            "description": "10 alitas picantes",
+                            "options": "string option",
                             "total_amount": {
-                                "amount": 10900,
+                                "amount": 1200,
                                 "currency": "MXN",
                                 "currency_symbol": "${'$'}"
                             },
                             "unit_price": {
-                                "amount": 10900,
+                                "amount": 850,
                                 "currency": "MXN",
                                 "currency_symbol": "${'$'}"
                             },
                             "tax_amount": {
-                                "amount": 0,
+                                "amount": 100,
                                 "currency": "MXN",
                                 "currency_symbol": "${'$'}"
-                            }
+                            },
+                            "quantity": 1,
+                            "uom": "string",
+                            "upc": "string",
+                            "sku": "SKU-11021",
+                            "isbn": "12-345-678-90123",
+                            "brand": "Bolt Swagstore",
+                            "manufacturer": "Bolt Factory",
+                            "category": "hats",
+                            "color": "Red",
+                            "size": "XXL",
+                            "weight": {
+                                "weight": 22,
+                                "unit": "kg"
+                            },
+                            "image_url": "https://boltswagstore.com/inventory/hats/red-hat.png",
+                            "details_url": "https://boltswagstore.com/inventory/hats/red-hat.png",
+                            "type": "physical",
+                            "taxable": true
                         }
                     ],
                     "shipping_options": {
@@ -139,47 +152,22 @@ class Merchant() {
                                 "stock_location": ""
                             }
                         }
-                    },
-                    "shipping_methods": [
-                        {
-                            "code": "123",
-                            "name": "name",
-                            "scheduler": [
-                                {
-                                    "date": "2023-03-03",
-                                    "start_time": "11:11",
-                                    "end_time": "12:00",
-                                    "steps_minutes": 1
-                                }
-                            ]
-                        }
-                    ],
-                    "user_instructions": "This item is a gift."
-                },
-                "custom_fields": {
-                    "data": {
-                        "external_auth_token": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWxzZWEtYXBpLXN0YWdpbmcub3JkZXJpbmcuY28vdjQwMC9lcy00MTktMS9hbHNlYS1zdGFnaW5nL2F1dGgiLCJpYXQiOjE2OTM0Mzk5MzEsImV4cCI6MTcyNDk3NTkzMSwibmJmIjoxNjkzNDM5OTMxLCJqdGkiOiJ1UGxmNHNpVDJPTkdxR2JpIiwic3ViIjoiMzc3MCIsImxldmVsIjozfQ.GMrUTFLo3PI7k1x5IGeNZzXlUT8Li8_NlI94EqYiXI4",
-                        
-                        
-                        
-                        "business_id": 174,
-            
-                        
-                        "brand_id": 8,
-            
-                        
-                        "user_id": 3770,
-                        
-                        
-                        "wow_rewards_user_id": "2bd4e894-4791-11ee-8b97-3a96e2a65f99",
-                        
-                        "reward": 1000,
-                        "cash_rule": {
-                            "min_amount": 10,
-                            "max_amount": 100
-                        },
-                        "employee_coupon": "G.O.A.T"
                     }
+                },
+                "custom_fields" : {
+                    "data" : {
+                        "external_auth_token" : "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWxzZWEtYXBpLXN0YWdpbmcub3JkZXJpbmcuY28vdjQwMC9lcy00MTktMS9hbHNlYS1zdGFnaW5nL2F1dGgiLCJpYXQiOjE2OTM0Mzk5MzEsImV4cCI6MTcyNDk3NTkzMSwibmJmIjoxNjkzNDM5OTMxLCJqdGkiOiJ1UGxmNHNpVDJPTkdxR2JpIiwic3ViIjoiMzc3MCIsImxldmVsIjozfQ.GMrUTFLo3PI7k1x5IGeNZzXlUT8Li8_NlI94EqYiXI4",
+                        "business_id" : 143,
+                          "brand_id": 9,
+                        "user_id": 3770,
+                        "wow_rewards_user_id": "2bd4e894-4791-11ee-8b97-3a96e2a65f99",
+                        "employee_coupon": "KDHHDBNCN",
+                        "cash_rule" : {
+                            "min_amount" : 10,
+                            "max_amount" : 100
+                        }
+                    }
+                   
                 }
             }
         """.trimIndent()
