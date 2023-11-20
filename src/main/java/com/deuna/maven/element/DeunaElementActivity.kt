@@ -29,6 +29,7 @@ class DeunaElementActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_URL = "extra_url"
         const val LOGGING_ENABLED = "logging_enabled"
+        const val CLOSE_ON_EVENTS = ""
         var callbacks: ElementCallbacks? = null
         fun setCallback(callback: ElementCallbacks?) {
             this.callbacks = callback
@@ -54,9 +55,10 @@ class DeunaElementActivity : AppCompatActivity() {
         setContentView(R.layout.activity_deuna_element)
         val url = intent.getStringExtra(EXTRA_URL)
         val webView: WebView = findViewById(R.id.deuna_webview_element)
-        setupWebView(webView)
+        setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
         if (url != null) {
             loadUrlWithNetworkCheck(webView, this, url)
+
             registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
         }
     }
@@ -64,13 +66,13 @@ class DeunaElementActivity : AppCompatActivity() {
     /**
      * Setup the WebView with necessary settings and JavascriptInterface.
      */
-    private fun setupWebView(webView: WebView) {
+    private fun setupWebView(webView: WebView, closeOnEvents: ArrayList<String>? = null) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, this), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, this, closeOnEvents), "android") // Add JavascriptInterface
         setupWebChromeClient(webView)
 
     }
