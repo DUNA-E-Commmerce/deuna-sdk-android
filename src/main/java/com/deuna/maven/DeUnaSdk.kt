@@ -144,6 +144,10 @@ open class DeUnaSdk {
                 putExtra(DeunaActivity.API_KEY, instance.apiKey)
                 putExtra(DeunaActivity.BASE_URL, instance.apigatewayUrl)
                 putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
+                putStringArrayListExtra(
+                    DeunaActivity.CLOSE_ON_EVENTS,
+                    ArrayList(instance.closeOnEvents!!.map { it.name })
+                )
                 startActivity(instance.context!!, this, null)
             }
         }
@@ -161,6 +165,10 @@ open class DeUnaSdk {
             Intent(instance.context!!, DeunaElementActivity::class.java).apply {
                 putExtra(DeunaElementActivity.EXTRA_URL, newUrl)
                 putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
+                putStringArrayListExtra(
+                    DeunaElementActivity.CLOSE_ON_EVENTS,
+                    ArrayList(instance.closeOnEvents!!.map { it.name })
+                )
                 startActivity(instance.context!!, this, null)
             }
         }

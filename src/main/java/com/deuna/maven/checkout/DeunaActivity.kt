@@ -38,6 +38,7 @@ class DeunaActivity : AppCompatActivity() {
         const val API_KEY = "api_key"
         const val LOGGING_ENABLED = "logging_enabled"
         const val BASE_URL = "BASE_URL"
+        const val CLOSE_ON_EVENTS = ""
         var callbacks: Callbacks? = null
 
         fun setCallback(callback: Callbacks?) {
@@ -58,11 +59,11 @@ class DeunaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna)
         instance = this
-//        setVisibilityProgressBar(true)
         getOrderApi(
             intent.getStringExtra(BASE_URL)!!,
             intent.getStringExtra(ORDER_TOKEN)!!,
-            intent.getStringExtra(API_KEY)!!
+            intent.getStringExtra(API_KEY)!!,
+            intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
         )
         registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
     }
@@ -72,24 +73,28 @@ class DeunaActivity : AppCompatActivity() {
         unregisterReceiver(closeAllReceiver)
     }
 
-    private fun launchActivity(url: String) {
+    private fun launchActivity(url: String, closeOnEvents: ArrayList<String>? = null) {
         val webView: WebView = findViewById(R.id.deuna_webview)
         webView.visibility = View.VISIBLE
-        setupWebView(webView, url)
+        setupWebView(webView, url, closeOnEvents)
         loadUrlWithNetworkCheck(webView, this, url)
     }
 
     /**
      * Setup the WebView with necessary settings and JavascriptInterface.
      */
-    private fun setupWebView(webView: WebView, url: String) {
+    private fun setupWebView(
+        webView: WebView,
+        url: String,
+        closeOnEvents: ArrayList<String>? = null
+    ) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
         webView.addJavascriptInterface(
-            DeUnaBridge(this, callbacks!!),
+            DeUnaBridge(this, callbacks!!, closeOnEvents),
             "android"
         ) // Add JavascriptInterface
         setupWebChromeClient(webView, url)
@@ -163,7 +168,12 @@ class DeunaActivity : AppCompatActivity() {
         return "$protocol$restOfUrl"
     }
 
-    private fun getOrderApi(baseUrl: String, orderToken: String, apiKey: String) {
+    private fun getOrderApi(
+        baseUrl: String,
+        orderToken: String,
+        apiKey: String,
+        closeOnEvents: ArrayList<String>? = null
+    ) {
 
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
@@ -172,7 +182,7 @@ class DeunaActivity : AppCompatActivity() {
                     val orderMap = responseBody?.get("order") as? Map<*, *>
                     if (orderMap != null) {
                         val parsedUrl = URL(orderMap.get("payment_link").toString())
-                        launchActivity(cleanUrl(parsedUrl.toString()))
+                        launchActivity(cleanUrl(parsedUrl.toString()), closeOnEvents)
                     }
                 } else {
                     Toast.makeText(

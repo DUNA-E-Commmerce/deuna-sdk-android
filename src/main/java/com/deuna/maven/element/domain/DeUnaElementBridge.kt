@@ -11,7 +11,8 @@ import org.json.JSONObject
  */
 class DeUnaElementBridge(
     private val callbacks: ElementCallbacks,
-    private val activity: Activity
+    private val activity: Activity,
+    private val closeOnEvents: ArrayList<String>? = null
 ) {
     /**
      * The postMessage function is called when a message is received from JavaScript code in a WebView.
@@ -35,17 +36,24 @@ class DeUnaElementBridge(
                 ElementEvent.cardCreationError -> handleError(json)
                 ElementEvent.vaultSaveError -> handleError(json)
                 ElementEvent.vaultSaveSuccess -> handleSuccess(json)
-                ElementEvent.vaultClosed -> handleCloseEvent(activity)
+                ElementEvent.vaultClosed -> handleCloseEvent()
                 ElementEvent.cardSuccessfullyCreated -> handleSuccess(json)
                 ElementEvent.changeAddress -> handleChangeAddressEvent()
-                else -> Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
+                else -> {
+                    Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
+                    eventType.let {
+                        if (closeOnEvents?.contains(it.name) == true) {
+                            handleCloseEvent()
+                        }
+                    }
+                }
             }
         } catch (e: Exception) {
             Log.d("DeUnaElementBridge", "handleEvent: $e")
         }
     }
 
-    private fun handleCloseEvent(activity: Activity) {
+    private fun handleCloseEvent() {
         activity.finish()
     }
 
