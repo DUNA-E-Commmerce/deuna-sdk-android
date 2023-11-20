@@ -166,7 +166,7 @@ open class DeUnaSdk {
                 putExtra(DeunaElementActivity.EXTRA_URL, newUrl)
                 putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
                 putStringArrayListExtra(
-                    DeunaActivity.CLOSE_ON_EVENTS,
+                    DeunaElementActivity.CLOSE_ON_EVENTS,
                     ArrayList(instance.closeOnEvents!!.map { it.name })
                 )
                 startActivity(instance.context!!, this, null)
