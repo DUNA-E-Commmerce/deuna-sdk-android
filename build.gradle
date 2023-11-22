@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library' version '8.1.2' apply true
     id 'org.jetbrains.kotlin.android' version '1.8.20' apply true
     id 'maven-publish'
+    id 'signing'
 }
 
 ext {
@@ -91,6 +92,10 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications
 }
 
 dependencies {

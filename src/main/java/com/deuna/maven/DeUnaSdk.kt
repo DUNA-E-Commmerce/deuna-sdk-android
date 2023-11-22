@@ -128,7 +128,7 @@ open class DeUnaSdk {
         /**
          * Close the DeUna SDK.
          */
-        fun close() {
+        fun closeCheckout() {
             instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ALL"))
         }
 
