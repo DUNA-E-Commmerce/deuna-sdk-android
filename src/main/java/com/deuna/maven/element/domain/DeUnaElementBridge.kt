@@ -38,7 +38,6 @@ class DeUnaElementBridge(
                 ElementEvent.vaultSaveSuccess -> handleSuccess(json)
                 ElementEvent.vaultClosed -> handleCloseEvent()
                 ElementEvent.cardSuccessfullyCreated -> handleSuccess(json)
-                ElementEvent.changeAddress -> handleChangeAddressEvent()
                 else -> {
                     Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
                     eventType.let {
@@ -68,10 +67,6 @@ class DeUnaElementBridge(
             ElementErrorResponse.fromJson(jsonObject.getJSONObject("data")),
             null
         )
-    }
-
-    private fun handleChangeAddressEvent() {
-        callbacks.onChangeAddress?.invoke(activity)
     }
 
 }
