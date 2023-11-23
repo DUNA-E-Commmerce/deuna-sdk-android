@@ -11,6 +11,7 @@ import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.shared.ApiGatewayUrl
 import java.util.Locale
 
 
@@ -81,13 +82,13 @@ open class DeUnaSdk {
                 }
 
                 if (environment == Environment.STAGING) {
-                    this.apigatewayUrl = "https://api.stg.deuna.io"
+                    this.apigatewayUrl = ApiGatewayUrl.STAGING.url
                 } else if (environment == Environment.PRODUCTION) {
-                    this.apigatewayUrl = "https://api.deuna.io"
+                    this.apigatewayUrl = ApiGatewayUrl.PRODUCTION.url
                 } else if (environment == Environment.SANDBOX) {
-                    this.apigatewayUrl = "https://api.sbx.deuna.io"
+                    this.apigatewayUrl = ApiGatewayUrl.SANDBOX.url
                 } else {
-                    this.apigatewayUrl = "https://api.dev.deuna.io"
+                    this.apigatewayUrl = ApiGatewayUrl.DEVELOPMENT.url
                 }
             }
         }
