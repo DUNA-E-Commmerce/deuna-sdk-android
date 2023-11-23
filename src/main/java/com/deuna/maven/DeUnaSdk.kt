@@ -17,7 +17,6 @@ import java.util.Locale
 
 open class DeUnaSdk {
     private lateinit var apiKey: String
-    private lateinit var orderToken: String
     private lateinit var environment: Environment
     private lateinit var userToken: String
     private var baseUrl: String = ""
@@ -45,7 +44,6 @@ open class DeUnaSdk {
          */
         fun config(
             apiKey: String? = null,
-            orderToken: String? = null,
             userToken: String? = null,
             environment: Environment,
             closeOnEvents: Array<CheckoutEvents>? = null,
@@ -70,10 +68,6 @@ open class DeUnaSdk {
 
                 if (apiKey != null) {
                     this.apiKey = apiKey
-                }
-
-                if (orderToken != null) {
-                    this.orderToken = orderToken
                 }
 
                 this.context = context
@@ -137,10 +131,11 @@ open class DeUnaSdk {
          * @throws IllegalStateException if the SDK has not been configured.
          */
         fun initCheckout(
+            orderToken: String
         ) {
             DeunaActivity.setCallback(instance.callbacks)
             Intent(instance.context!!, DeunaActivity::class.java).apply {
-                putExtra(DeunaActivity.ORDER_TOKEN, instance.orderToken)
+                putExtra(DeunaActivity.ORDER_TOKEN, orderToken)
                 putExtra(DeunaActivity.API_KEY, instance.apiKey)
                 putExtra(DeunaActivity.BASE_URL, instance.apigatewayUrl)
                 putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
