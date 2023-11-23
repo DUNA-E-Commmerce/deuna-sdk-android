@@ -12,6 +12,7 @@ import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
 import com.deuna.maven.shared.ApiGatewayUrl
+import com.deuna.maven.shared.ElementUrl
 import java.util.Locale
 
 
@@ -150,10 +151,10 @@ open class DeUnaSdk {
          */
         private fun buildElementUrl(userToken: String, apiKey: String, element: ElementType) {
             val url = when (instance.environment) {
-                Environment.DEVELOPMENT -> "https://elements.dev.deuna.io/{type}"
-                Environment.STAGING -> "https://elements.stg.deuna.io/{type}"
-                Environment.PRODUCTION -> "https://elements.deuna.io/{type}"
-                Environment.SANDBOX -> "https://elements.sbx.deuna.io/{type}"
+                Environment.DEVELOPMENT -> "${ElementUrl.DEVELOPMENT.url}/{type}"
+                Environment.STAGING -> "${ElementUrl.STAGING.url}/{type}"
+                Environment.PRODUCTION -> "${ElementUrl.PRODUCTION.url}/{type}"
+                Environment.SANDBOX -> "${ElementUrl.SANDBOX.url}/{type}"
             }
             instance.elementUrl = Uri.parse(url).buildUpon().apply {
                 appendQueryParameter("userToken", userToken)
