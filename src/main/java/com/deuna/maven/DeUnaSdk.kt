@@ -3,7 +3,6 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
@@ -18,7 +17,6 @@ import java.util.Locale
 open class DeUnaSdk {
     private lateinit var apiKey: String
     private lateinit var environment: Environment
-    private lateinit var userToken: String
     private var baseUrl: String = ""
     private var elementUrl: String = "https://elements.deuna.io"
     private var closeOnEvents: Array<CheckoutEvents>? = null
@@ -35,16 +33,16 @@ open class DeUnaSdk {
         /**
          * Configure the DeUna SDK with the given parameters.
          * @param apiKey The API key to use for the DeUna SDK.
-         * @param orderToken The order token to use for the DeUna SDK.
          * @param environment The environment to use for the DeUna SDK.
          * @param closeOnEvents The events to close the DeUna SDK on.
-         * @param loggingEnabled Whether to enable logging for the DeUna SDK.
          * @param context The context to use for the DeUna SDK.
+         * @param callbacks The callbacks to use for the DeUna SDK.
+         * @param elementCallbacks The element callbacks to use for the DeUna SDK.
+         * @param showCloseButton Whether to show the close button in the DeUna SDK.
          * @throws IllegalStateException if the SDK has already been configured.
          */
         fun config(
             apiKey: String? = null,
-            userToken: String? = null,
             environment: Environment,
             closeOnEvents: Array<CheckoutEvents>? = null,
             context: Context,
@@ -91,31 +89,6 @@ open class DeUnaSdk {
                 } else {
                     this.apigatewayUrl = "https://api.dev.deuna.io"
                 }
-
-                if (userToken != null && apiKey != null) {
-                    var url = when (this.environment) {
-                        Environment.DEVELOPMENT -> "https://elements.dev.deuna.io/{type}"
-                        Environment.STAGING -> "https://elements.stg.deuna.io/{type}"
-                        Environment.PRODUCTION -> "https://elements.deuna.io/{type}"
-                        Environment.SANDBOX -> "https://elements.sbx.deuna.io/{type}"
-                    }
-                    val builder = Uri.parse(url).buildUpon()
-                    builder.appendQueryParameter("userToken", userToken)
-                    builder.appendQueryParameter("publicApiKey", apiKey)
-                    if (showCloseButton != null) {
-                        builder.appendQueryParameter("mode", "widget")
-                    }
-                    this.elementUrl = builder.build().toString()
-                }
-
-                if (userToken != null || apiKey != null) {
-                    val url = this.baseUrl
-                    val builder = Uri.parse(url).buildUpon()
-                    if (userToken != null) {
-                        builder.appendQueryParameter("userToken", userToken)
-                    }
-                    this.baseUrl = builder.build().toString()
-                }
             }
         }
 
@@ -128,6 +101,7 @@ open class DeUnaSdk {
 
         /**
          * Initialize the DeUna SDK Checkout with the configured parameters.
+         * @param orderToken The order token to use for the DeUna SDK.
          * @throws IllegalStateException if the SDK has not been configured.
          */
         fun initCheckout(
@@ -150,22 +124,43 @@ open class DeUnaSdk {
         /**
          * Initialize the DeUna SDK Elements with the configured parameters.
          * @param element The element to initialize.
+         * @param userToken The user token to use for the DeUna SDK.
          * @throws IllegalStateException if the SDK has not been configured.
          */
-        fun initElements(element: ElementType) {
+        fun initElements(element: ElementType, userToken: String) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
-            var newUrl = instance.elementUrl
-                .replace("{type}", element.toString().lowercase(Locale.ROOT))
-            Log.d("elementUrl", newUrl)
-            Intent(instance.context!!, DeunaElementActivity::class.java).apply {
-                putExtra(DeunaElementActivity.EXTRA_URL, newUrl)
-                putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
-                putStringArrayListExtra(
+            buildElementUrl(userToken, instance.apiKey, element)
+            Intent(instance.context!!, DeunaElementActivity::class.java).also {
+                it.putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
+                it.putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
+                it.putStringArrayListExtra(
                     DeunaElementActivity.CLOSE_ON_EVENTS,
                     ArrayList(instance.closeOnEvents!!.map { it.name })
                 )
-                startActivity(instance.context!!, this, null)
+                startActivity(instance.context!!, it, null)
             }
+        }
+
+        /**
+         * Build the element URL with the given parameters.
+         * @param userToken The user token to use for the DeUna SDK.
+         * @param apiKey The API key to use for the DeUna SDK.
+         * @param element The element to use for the DeUna SDK.
+         */
+        private fun buildElementUrl(userToken: String, apiKey: String, element: ElementType) {
+            val url = when (instance.environment) {
+                Environment.DEVELOPMENT -> "https://elements.dev.deuna.io/{type}"
+                Environment.STAGING -> "https://elements.stg.deuna.io/{type}"
+                Environment.PRODUCTION -> "https://elements.deuna.io/{type}"
+                Environment.SANDBOX -> "https://elements.sbx.deuna.io/{type}"
+            }
+            instance.elementUrl = Uri.parse(url).buildUpon().apply {
+                appendQueryParameter("userToken", userToken)
+                appendQueryParameter("publicApiKey", apiKey)
+                if (instance.showCloseButton != null) {
+                    appendQueryParameter("mode", "widget")
+                }
+            }.build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
         }
     }
 }
