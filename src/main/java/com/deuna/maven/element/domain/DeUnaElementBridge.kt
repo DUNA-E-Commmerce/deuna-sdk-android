@@ -31,6 +31,7 @@ class DeUnaElementBridge(
         try {
             val json = JSONObject(eventTypeString)
             val eventType = ElementEvent.valueOf(json.getString("type"))
+            callbacks.eventListener?.invoke(json)
             when (eventType) {
                 ElementEvent.vaultFailed -> handleError(json)
                 ElementEvent.cardCreationError -> handleError(json)
