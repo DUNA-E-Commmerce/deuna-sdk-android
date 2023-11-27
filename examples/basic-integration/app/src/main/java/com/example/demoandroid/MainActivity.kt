@@ -25,7 +25,7 @@ import com.deuna.maven.element.domain.ElementCallbacks
 class MainActivity : AppCompatActivity() {
     private var orderToken = ""
     private var userToken = ""
-    private var apiKey = "799680ba34b854854a44039397e77d89054a8be84ebb7c06731ab69018ea53fab13cf96bd5cfcfa3e1dc3cc9ea17e68c1b0d76380ee77d7db7c5572ce3e1"
+    private var apiKey = ""
     private var environment: Environment = Environment.STAGING
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,7 +116,6 @@ class MainActivity : AppCompatActivity() {
     private fun configureForCheckout() {
         DeUnaSdk.config(
             apiKey = apiKey,
-            orderToken = orderToken,
             environment = environment,
             context = this@MainActivity,
             callbacks = createCheckoutCallbacks(),
@@ -127,11 +126,10 @@ class MainActivity : AppCompatActivity() {
     private fun configureForElements() {
         DeUnaSdk.config(
             apiKey = apiKey,
-            orderToken = orderToken,
             environment = environment,
-            userToken = userToken,
             context = this@MainActivity,
             elementCallbacks = createElementCallbacks(),
+            closeOnEvents = arrayOf(CheckoutEvents.linkFailed),
             showCloseButton = true
         )
     }
@@ -149,11 +147,12 @@ class MainActivity : AppCompatActivity() {
                     Log.d("DeunaSdkOnError", orderErrorResponse.order.items_total_amount.toString())
                 }
             }
+            eventListener = { it ->
+                // Código para manejar los eventos de cierre
+                Log.d("DeunaSdkEventListener", "eventListener")
+            }
             onClose = { _ ->
                 Log.d("DeunaSdkOnClose", "onClose")
-            }
-            onChangeAddress = { act ->
-                act.finish()
             }
             onCloseEvents = { _ ->
                 // Código para manejar los eventos de cierre
@@ -170,6 +169,10 @@ class MainActivity : AppCompatActivity() {
 //                    startActivity(this)
 //                }
             }
+            eventListener = { it ->
+                // Código para manejar los eventos de cierre
+                Log.d("DeunaSdkEventListener", "eventListener")
+            }
             onError = { orderErrorResponse, _ ->
                 if (orderErrorResponse != null) {
                     Log.d("DeunaSdkOnError", "DeunaSdkOnError")
@@ -177,9 +180,6 @@ class MainActivity : AppCompatActivity() {
             }
             onClose = { _ ->
                 Log.d("DeunaSdkOnClose", "onClose")
-            }
-            onChangeAddress = { act ->
-                act.finish()
             }
             onCloseEvents = { _ ->
                 // Código para manejar los eventos de cierre
@@ -190,11 +190,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun initCheckout() {
         configureForCheckout()
-        DeUnaSdk.initCheckout()
+        DeUnaSdk.initCheckout(orderToken = orderToken)
     }
 
+    // TODO : revisar el nullPointerException
     private fun initElements() {
         configureForElements()
-        DeUnaSdk.initElements(element = ElementType.VAULT)
+        DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)
     }
 }

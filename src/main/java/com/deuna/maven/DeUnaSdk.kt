@@ -3,6 +3,7 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
@@ -132,6 +133,7 @@ open class DeUnaSdk {
         fun initElements(element: ElementType, userToken: String) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
             buildElementUrl(userToken, instance.apiKey, element)
+            Log.d("DeUnaSdk", "elementUrl: ${instance.elementUrl}")
             Intent(instance.context!!, DeunaElementActivity::class.java).also {
                 it.putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
                 it.putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)

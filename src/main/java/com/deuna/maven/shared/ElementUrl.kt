@@ -1,8 +1,8 @@
 package com.deuna.maven.shared
 
 enum class ElementUrl (var url: String) {
-    DEVELOPMENT("https://element.dev.deuna.io"),
-    STAGING("https://element.stg.deuna.io"),
-    PRODUCTION("https://element.deuna.io"),
-    SANDBOX("https://element.sbx.deuna.io");
+    DEVELOPMENT("https://elements.dev.deuna.io"),
+    STAGING("https://elements.stg.deuna.io"),
+    PRODUCTION("https://elements.deuna.io"),
+    SANDBOX("https://elements.sbx.deuna.io");
 }
