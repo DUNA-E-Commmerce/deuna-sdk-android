@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
     private fun createCheckoutCallbacks(): Callbacks {
         return Callbacks().apply {
             onSuccess = { orderSuccessResponse ->
-                DeUnaSdk.close()
+                DeUnaSdk.closeCheckout()
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
     private fun createElementCallbacks(): ElementCallbacks {
         return ElementCallbacks().apply {
             onSuccess = { orderSuccessResponse ->
-                DeUnaSdk.close()
+                DeUnaSdk.closeCheckout()
 //                Intent(this@MainActivity, ThankYouActivity::class.java).apply {
 //                    startActivity(this)
 //                }

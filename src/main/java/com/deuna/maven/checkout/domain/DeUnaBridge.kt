@@ -27,6 +27,7 @@ class DeUnaBridge(
             val json = JSONObject(message)
             eventType = CheckoutEvents.valueOf(json.getString("type"))
             Log.d("DeUnaBridge", "eventType: $eventType")
+            callbacks.eventListener?.invoke(json)
             when (eventType) {
                 // Flujo sin 3DS
                 CheckoutEvents.purchase, CheckoutEvents.apmSuccess -> {
