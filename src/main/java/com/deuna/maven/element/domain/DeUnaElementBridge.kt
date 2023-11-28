@@ -43,7 +43,7 @@ class DeUnaElementBridge(
                     Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
                     eventType.let {
                         if (closeOnEvents?.contains(it.name) == true) {
-                            handleCloseEvent()
+                            callbacks.onClose?.invoke(activity)
                         }
                     }
                 }
@@ -65,8 +65,7 @@ class DeUnaElementBridge(
 
     private fun handleError(jsonObject: JSONObject) {
         callbacks.onError?.invoke(
-            ElementErrorResponse.fromJson(jsonObject.getJSONObject("data")),
-            null
+            ElementErrorResponse.fromJson(jsonObject.getJSONObject("data"))
         )
     }
 

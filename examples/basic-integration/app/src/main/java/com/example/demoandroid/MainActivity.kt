@@ -136,54 +136,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun createCheckoutCallbacks(): Callbacks {
         return Callbacks().apply {
-            onSuccess = { orderSuccessResponse ->
+            onSuccess = {
                 DeUnaSdk.closeCheckout()
+                if(it.type.equals("purchase")) {
+                    Log.d("DeunaSdkOnSuccess", it.data.toString())
+                }
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
             }
-            onError = { orderErrorResponse, _ ->
-                if (orderErrorResponse != null) {
-                    Log.d("DeunaSdkOnError", orderErrorResponse.order.items_total_amount.toString())
+            onError = {
+                if (it != null) {
+                    Log.d("DeunaSdkOnError", it.type)
                 }
             }
             eventListener = { it ->
                 // Código para manejar los eventos de cierre
-                Log.d("DeunaSdkEventListener", "eventListener")
+                Log.d("DeunaSdkEventListener", it.toString())
             }
             onClose = { _ ->
                 Log.d("DeunaSdkOnClose", "onClose")
-            }
-            onCloseEvents = { _ ->
-                // Código para manejar los eventos de cierre
-                Log.d("DeunaSdkOnCloseEvents", "onCloseEvents")
             }
         }
     }
 
     private fun createElementCallbacks(): ElementCallbacks {
         return ElementCallbacks().apply {
-            onSuccess = { orderSuccessResponse ->
-                DeUnaSdk.closeCheckout()
-//                Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-//                    startActivity(this)
-//                }
+            onSuccess = {
+                DeUnaSdk.closeElements()
+                Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+                    startActivity(this)
+                }
             }
             eventListener = { it ->
                 // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
             }
-            onError = { orderErrorResponse, _ ->
-                if (orderErrorResponse != null) {
-                    Log.d("DeunaSdkOnError", "DeunaSdkOnError")
+            onError = {
+                if (it != null) {
+                    DeUnaSdk.closeElements()
+                    Log.d("DeunaSdkOnError", it.metadata.errorMessage)
                 }
             }
             onClose = { _ ->
                 Log.d("DeunaSdkOnClose", "onClose")
-            }
-            onCloseEvents = { _ ->
-                // Código para manejar los eventos de cierre
-                Log.d("DeunaSdkOnCloseEvents", "onCloseEvents")
             }
         }
     }

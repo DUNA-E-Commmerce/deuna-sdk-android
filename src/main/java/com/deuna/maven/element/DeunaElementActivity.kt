@@ -8,18 +8,13 @@ import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.view.View
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.deuna.maven.R
-import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.element.domain.DeUnaElementBridge
 import com.deuna.maven.element.domain.ElementCallbacks
@@ -59,7 +54,7 @@ class DeunaElementActivity : AppCompatActivity() {
         if (url != null) {
             loadUrlWithNetworkCheck(webView, this, url)
 
-            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
+            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENT"))
         }
     }
 

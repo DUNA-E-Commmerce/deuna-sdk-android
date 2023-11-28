@@ -1,5 +1,6 @@
 package com.deuna.maven.checkout.domain
 
+import OrderResponse
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
@@ -22,35 +23,29 @@ class DeUnaBridge(
      */
     @JavascriptInterface
     fun postMessage(message: String) {
-        var eventType: CheckoutEvents? = null
+        val eventData: OrderResponse?
         try {
             val json = JSONObject(message)
-            eventType = CheckoutEvents.valueOf(json.getString("type"))
-            Log.d("DeUnaBridge", "eventType: $eventType")
-            callbacks.eventListener?.invoke(json)
-            when (eventType) {
-                // Flujo sin 3DS
+            eventData = OrderResponse.fromJson(json)
+            callbacks.eventListener?.invoke(eventData)
+            when (eventData.type) {
                 CheckoutEvents.purchase, CheckoutEvents.apmSuccess -> {
-                    handleSuccess(json.getJSONObject("data"))
+                    handleSuccess(eventData)
                 }
-
                 CheckoutEvents.purchaseRejected -> {
-                    handleError(json.getJSONObject("data"))
+                    handleError("An error ocurred while processing payment","", eventData)
                 }
-
                 CheckoutEvents.linkFailed, CheckoutEvents.purchaseError -> {
-                    handleError(json.getJSONObject("data"))
+                    handleError("Failed to initialize the checkout","", eventData)
                 }
-
                 CheckoutEvents.changeAddress -> {
-                    handleCloseActivity()
+                    handleCloseActivity(eventData)
                 }
-
                 else -> {
-                    Log.d("DeUnaBridge", "Unhandled event: $eventType")
-                    eventType.let {
-                        if (closeOnEvents?.contains(it.name) == true) {
-                            handleCloseActivity()
+                    Log.d("DeUnaBridge", "Unhandled event: $eventData")
+                    eventData.let {
+                        if (closeOnEvents?.contains(it.type.value) == true) {
+                            callbacks.onClose?.invoke(activity)
                         }
                     }
                 }
@@ -60,20 +55,24 @@ class DeUnaBridge(
         }
     }
 
-    private fun handleCloseActivity() {
-        activity.finish()
+    private fun handleCloseActivity(data: OrderResponse) {
+        callbacks.eventListener?.invoke(data)
     }
 
-    private fun handleError(jsonObject: JSONObject) {
+    private fun handleError(message: String, type: String, response: OrderResponse) {
         callbacks.onError?.invoke(
-            OrderErrorResponse.fromJson(jsonObject.getJSONObject("data")),
-            null
+            DeunaErrorMessage(
+                message,
+                type, // Internet Connection // Checkout failed
+                response.data.order,
+                response.data.user
+            )
         )
     }
 
-    private fun handleSuccess(jsonObject: JSONObject) {
+    private fun handleSuccess(data: OrderResponse) {
         callbacks.onSuccess?.invoke(
-            OrderSuccessResponse.fromJson(JSONObject())
+            data
         )
     }
 
