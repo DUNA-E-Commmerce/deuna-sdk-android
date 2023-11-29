@@ -151,8 +151,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             eventListener = { it ->
-                // Código para manejar los eventos de cierre
-                Log.d("DeunaSdkEventListener", it.toString())
+                if(it.type.value == "changeAddress") {
+                    Log.d("changeAddress", it.data.toString())
+                    DeUnaSdk.closeCheckout()
+                }
+
+                if(it.type.value == "paymentProcessing") {
+                    Log.d("paymentProcessing", it.data.toString())
+                }
             }
             onClose = { _ ->
                 Log.d("DeunaSdkOnClose", "onClose")
@@ -175,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             onError = {
                 if (it != null) {
                     DeUnaSdk.closeElements()
-                    Log.d("DeunaSdkOnError", it.metadata.errorMessage)
+                    Log.d("DeunaSdkOnError", it.message)
                 }
             }
             onClose = { _ ->
