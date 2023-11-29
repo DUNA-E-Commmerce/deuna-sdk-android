@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.DeUnaBridge
+import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
 import retrofit2.Call
 import retrofit2.Callback
@@ -65,7 +66,7 @@ class DeunaActivity : AppCompatActivity() {
             intent.getStringExtra(API_KEY)!!,
             intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
         )
-        registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ALL"))
+        registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_CHECKOUT"))
     }
 
     override fun onDestroy() {
@@ -210,26 +211,6 @@ class DeunaActivity : AppCompatActivity() {
     }
 
     /**
-     * Create a new WebView with a WebViewClient that handles URL loading.
-     */
-//    private fun createNewWebView(): WebView {
-//        return WebView(this@DeunaActivity).apply {
-//            webViewClient = object : WebViewClient() {
-//                override fun shouldOverrideUrlLoading(
-//                    view: WebView?,
-//                    request: WebResourceRequest?
-//                ): Boolean {
-//                    val newUrl = request?.url.toString()
-//                    Log.d("URL", newUrl)
-//                    view?.loadUrl(newUrl) // Load the URL in the same WebView
-//                    return true // Indicate that we have handled the URL loading
-//                }
-//            }
-//            addJavascriptInterface(DeUnaBridge(null , callbacks!!), "android") // Add JavascriptInterface
-//        }
-//    }
-
-    /**
      * Load a URL if there is an active internet connection.
      */
     private fun loadUrlWithNetworkCheck(
@@ -248,6 +229,14 @@ class DeunaActivity : AppCompatActivity() {
             view.loadUrl(url)
         } else {
             log("No internet connection")
+            callbacks?.onError?.invoke(
+                DeunaErrorMessage(
+                    "No internet connection",
+                    "",
+                    null,
+                    null
+                )
+            )
         }
     }
 
