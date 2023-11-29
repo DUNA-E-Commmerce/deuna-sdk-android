@@ -142,7 +142,6 @@ data class OrderResponse(
 
     companion object {
         fun fromJson(jsonObject: JSONObject): OrderResponse {
-            Log.d("debug order", "OrderResponse: $jsonObject")
             val data = jsonObject.getJSONObject("data")
             val user = data.getJSONObject("user").let {
                 Data.User(it.getString("id"), it.getString("email"), it.getBoolean("is_guest"))

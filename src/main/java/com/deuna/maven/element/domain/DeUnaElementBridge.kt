@@ -1,5 +1,6 @@
 package com.deuna.maven.element.domain
 
+import ElementResponse
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
@@ -30,20 +31,36 @@ class DeUnaElementBridge(
     private fun handleEvent(eventTypeString: String) {
         try {
             val json = JSONObject(eventTypeString)
-            val eventType = ElementEvent.valueOf(json.getString("type"))
-            callbacks.eventListener?.invoke(json)
-            when (eventType) {
-                ElementEvent.vaultFailed -> handleError(json)
-                ElementEvent.cardCreationError -> handleError(json)
-                ElementEvent.vaultSaveError -> handleError(json)
-                ElementEvent.vaultSaveSuccess -> handleSuccess(json)
+            val eventData = ElementResponse.fromJson(json)
+            Log.d("DeUnaElementBridge", "handleEvent: $json")
+            callbacks.eventListener?.invoke(eventData)
+            when (eventData.type) {
+                ElementEvent.vaultFailed -> handleError(
+                    eventData.data.metadata.errorMessage,
+                    "vaultFailed",
+                    eventData
+                )
+
+                ElementEvent.cardCreationError -> handleError(
+                    eventData.data.metadata.errorMessage,
+                    "cardCreationError",
+                    eventData
+                )
+
+                ElementEvent.vaultSaveError -> handleError(
+                    eventData.data.metadata.errorMessage,
+                    "vaultSaveError",
+                    eventData
+                )
+
+                ElementEvent.vaultSaveSuccess -> handleSuccess(eventData)
                 ElementEvent.vaultClosed -> handleCloseEvent()
-                ElementEvent.cardSuccessfullyCreated -> handleSuccess(json)
+                ElementEvent.cardSuccessfullyCreated -> handleSuccess(eventData)
                 else -> {
-                    Log.d("DeUnaElementBridge", "Unhandled event: $eventType")
-                    eventType.let {
-                        if (closeOnEvents?.contains(it.name) == true) {
-                            callbacks.onClose?.invoke(activity)
+                    Log.d("DeUnaElementBridge", "Unhandled event: ${eventData.type}")
+                    eventData.let {
+                        if (closeOnEvents?.contains(it.type.value) == true) {
+                            callbacks.eventListener?.invoke(it)
                         }
                     }
                 }
@@ -57,16 +74,22 @@ class DeUnaElementBridge(
         activity.finish()
     }
 
-    private fun handleSuccess(jsonObject: JSONObject) {
+    private fun handleSuccess(data: ElementResponse) {
         callbacks.onSuccess?.invoke(
-            ElementSuccessResponse.fromJson(jsonObject.getJSONObject("data"))
+            data
         )
     }
 
-    private fun handleError(jsonObject: JSONObject) {
+    private fun handleError(message: String, type: String, response: ElementResponse) {
         callbacks.onError?.invoke(
-            ElementErrorResponse.fromJson(jsonObject.getJSONObject("data"))
+            ElementErrorMessage(
+                message,
+                type, // Internet Connection // Checkout failed
+                response.data.order,
+                response.data.user
+            )
         )
     }
+
 
 }
