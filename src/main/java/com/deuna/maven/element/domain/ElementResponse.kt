@@ -11,7 +11,7 @@ data class ElementResponse(
         val merchant: Merchant,
         val checkoutVersion: String,
         val schemaRegistry: SchemaRegistry,
-        val metadata: Metadata
+        val metadata: Metadata?
     )
 
     data class User(
@@ -188,7 +188,7 @@ data class ElementResponse(
                 )
             }
 
-            val metadata = data.getJSONObject("metadata").let {
+            val metadata = data.optJSONObject("metadata")?.let {
                 Metadata(
                     it.getString("errorMessage"),
                     it.getString("errorCode")

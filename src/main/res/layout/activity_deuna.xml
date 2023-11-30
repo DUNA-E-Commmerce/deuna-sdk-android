@@ -22,9 +22,13 @@
         android:id="@+id/close_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:text="x"
+        android:backgroundTint="@android:color/transparent"
+        android:stateListAnimator="@null"
+        android:text="@string/close"
         android:textColor="@color/black"
-        android:textSize="18sp" />
+        android:textSize="18px"
+        android:layout_alignParentTop="true" />
+
+
 
 </RelativeLayout>

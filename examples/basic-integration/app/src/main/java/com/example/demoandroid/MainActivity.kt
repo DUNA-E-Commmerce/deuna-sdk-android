@@ -136,28 +136,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun createCheckoutCallbacks(): Callbacks {
         return Callbacks().apply {
-            onSuccess = {
+            onSuccess = { response ->
                 DeUnaSdk.closeCheckout()
-                if(it.type.equals("purchase")) {
-                    Log.d("DeunaSdkOnSuccess", it.data.toString())
+                if(response.type.value == "purchase") {
+                    Log.d("purchase", response.data.order.payment.data.status)
                 }
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
             }
-            onError = {
-                if (it != null) {
-                    Log.d("DeunaSdkOnError", it.type)
+            onError = { error ->
+                if (error != null) {
+                    Log.d("DeunaSdkOnError", error.type)
                 }
             }
-            eventListener = { it ->
-                if(it.type.value == "changeAddress") {
-                    Log.d("changeAddress", it.data.toString())
+            eventListener = { response ->
+                if(response.type.value == "changeAddress") {
+                    Log.d("changeAddress", response.data.toString())
                     DeUnaSdk.closeCheckout()
                 }
 
-                if(it.type.value == "paymentProcessing") {
-                    Log.d("paymentProcessing", it.data.toString())
+                if(response.type.value == "paymentProcessing") {
+                    Log.d("paymentProcessing", response.data.toString())
                 }
             }
             onClose = { _ ->
@@ -168,20 +168,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun createElementCallbacks(): ElementCallbacks {
         return ElementCallbacks().apply {
-            onSuccess = {
-                DeUnaSdk.closeElements()
+            onSuccess = { response ->
+                Log.d("closeElements Success", response.data.toString())
+                DeUnaSdk.closeElements() // No cerró, revisar
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
             }
-            eventListener = { it ->
+            eventListener = { response ->
                 // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
+
             }
-            onError = {
-                if (it != null) {
+            onError = { error ->
+                if (error != null) {
                     DeUnaSdk.closeElements()
-                    Log.d("DeunaSdkOnError", it.message)
+                    Log.d("DeunaSdkOnError", error.message)
                 }
             }
             onClose = { _ ->

@@ -35,23 +35,29 @@ class DeUnaElementBridge(
             Log.d("DeUnaElementBridge", "handleEvent: $json")
             callbacks.eventListener?.invoke(eventData)
             when (eventData.type) {
-                ElementEvent.vaultFailed -> handleError(
-                    eventData.data.metadata.errorMessage,
-                    "vaultFailed",
-                    eventData
-                )
+                ElementEvent.vaultFailed -> eventData.data.metadata?.let {
+                    handleError(
+                        it.errorMessage,
+                        "vaultFailed",
+                        eventData
+                    )
+                }
 
-                ElementEvent.cardCreationError -> handleError(
-                    eventData.data.metadata.errorMessage,
-                    "cardCreationError",
-                    eventData
-                )
+                ElementEvent.cardCreationError -> eventData.data.metadata?.let {
+                    handleError(
+                        it.errorMessage,
+                        "cardCreationError",
+                        eventData
+                    )
+                }
 
-                ElementEvent.vaultSaveError -> handleError(
-                    eventData.data.metadata.errorMessage,
-                    "vaultSaveError",
-                    eventData
-                )
+                ElementEvent.vaultSaveError -> eventData.data.metadata?.let {
+                    handleError(
+                        it.errorMessage,
+                        "vaultSaveError",
+                        eventData
+                    )
+                }
 
                 ElementEvent.vaultSaveSuccess -> handleSuccess(eventData)
                 ElementEvent.vaultClosed -> handleCloseEvent()

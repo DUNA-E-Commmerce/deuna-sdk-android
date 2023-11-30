@@ -33,10 +33,10 @@ class DeUnaBridge(
                     handleSuccess(eventData)
                 }
                 CheckoutEvents.purchaseRejected -> {
-                    handleError("An error ocurred while processing payment","", eventData)
+                    handleError("An error ocurred while processing payment","purchaseRejected", eventData)
                 }
                 CheckoutEvents.linkFailed, CheckoutEvents.purchaseError -> {
-                    handleError("Failed to initialize the checkout","", eventData)
+                    handleError("Failed to initialize the checkout","checkoutError", eventData)
                 }
                 CheckoutEvents.changeAddress -> {
                     handleCloseActivity(eventData)
