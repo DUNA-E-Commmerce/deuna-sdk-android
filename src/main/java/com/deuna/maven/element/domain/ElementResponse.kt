@@ -190,8 +190,8 @@ data class ElementResponse(
 
             val metadata = data.optJSONObject("metadata")?.let {
                 Metadata(
-                    it.getString("errorMessage"),
-                    it.getString("errorCode")
+                    it.optString("errorMessage"),
+                    it.optString("errorCode")
                 )
             }
             val dataResponse = Data(user, order, merchant, data.getString("checkoutVersion"), schemaRegistry, metadata)

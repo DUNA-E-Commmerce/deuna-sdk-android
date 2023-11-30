@@ -9,5 +9,5 @@ class ElementCallbacks {
     var onSuccess: ((ElementResponse) -> Unit)? = null
     var onError: ((ElementErrorMessage?) -> Unit)? = null
     var onClose: ((Activity) -> Unit)? = null
-    var eventListener: ((ElementResponse) -> Unit)? = null
+    var eventListener: ((ElementResponse, ElementEvent) -> Unit)? = null
 }

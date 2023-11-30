@@ -6,6 +6,7 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.element.domain.ElementEvent
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -27,7 +28,7 @@ class DeUnaBridge(
         try {
             val json = JSONObject(message)
             eventData = OrderResponse.fromJson(json)
-            callbacks.eventListener?.invoke(eventData)
+            callbacks.eventListener?.invoke(eventData, eventData.type)
             when (eventData.type) {
                 CheckoutEvents.purchase, CheckoutEvents.apmSuccess -> {
                     handleSuccess(eventData)
@@ -39,7 +40,7 @@ class DeUnaBridge(
                     handleError("Failed to initialize the checkout","checkoutError", eventData)
                 }
                 CheckoutEvents.changeAddress -> {
-                    handleCloseActivity(eventData)
+                    handleCloseActivity(eventData, eventData.type)
                 }
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
@@ -55,8 +56,8 @@ class DeUnaBridge(
         }
     }
 
-    private fun handleCloseActivity(data: OrderResponse) {
-        callbacks.eventListener?.invoke(data)
+    private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvents) {
+        callbacks.eventListener?.invoke(data, type)
     }
 
     private fun handleError(message: String, type: String, response: OrderResponse) {

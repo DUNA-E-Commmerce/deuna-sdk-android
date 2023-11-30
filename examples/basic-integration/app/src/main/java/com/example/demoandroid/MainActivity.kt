@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("DeunaSdkOnError", error.type)
                 }
             }
-            eventListener = { response ->
+            eventListener = { response, type ->
                 if(response.type.value == "changeAddress") {
                     Log.d("changeAddress", response.data.toString())
                     DeUnaSdk.closeCheckout()
@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
                     startActivity(this)
                 }
             }
-            eventListener = { response ->
+            eventListener = { response, type ->
                 // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
 
