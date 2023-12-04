@@ -100,11 +100,6 @@ class DeunaActivity : AppCompatActivity() {
         ) // Add JavascriptInterface
         setupWebChromeClient(webView, url)
 
-        val closeButton: View = findViewById(R.id.close_button)
-
-        closeButton.setOnClickListener {
-            finish()
-        }
     }
 
     /**

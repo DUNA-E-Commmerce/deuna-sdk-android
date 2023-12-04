@@ -8,11 +8,15 @@ import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
 import android.view.View
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
@@ -52,8 +56,8 @@ class DeunaElementActivity : AppCompatActivity() {
         val webView: WebView = findViewById(R.id.deuna_webview_element)
         setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
         if (url != null) {
+            webView.visibility = View.VISIBLE
             loadUrlWithNetworkCheck(webView, this, url)
-
             registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENT"))
         }
     }
@@ -76,16 +80,53 @@ class DeunaElementActivity : AppCompatActivity() {
      * Setup the WebChromeClient to handle creation of new windows.
      */
     private fun setupWebChromeClient(webView: WebView) {
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-//                setVisibilityProgressBar(false)
-                webView.visibility = View.VISIBLE
-            }
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
+            ): Boolean {
+                val newWebView = WebView(this@DeunaElementActivity).apply {
+                    webViewClient = WebViewClient()
+                    settings.javaScriptEnabled = true
+                }
 
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-//                setVisibilityProgressBar(true)
+                val transport = resultMsg.obj as WebView.WebViewTransport
+                transport.webView = newWebView
+                resultMsg.sendToTarget()
+
+                newWebView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        val newUrl = request?.url.toString()
+                        view?.loadUrl(newUrl)
+                        return true
+                    }
+                }
+
+                newWebView.webChromeClient = object : WebChromeClient() {
+                    override fun onCreateWindow(
+                        view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
+                    ): Boolean {
+                        // Aquí puedes agregar la misma lógica para manejar nuevas ventanas
+                        return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+                    }
+                }
+
+                // Oculta el WebView existente
+                webView.visibility = View.GONE
+
+                // Agrega el nuevo WebView a tu layout y lo hace visible
+                val layout =
+                    findViewById<RelativeLayout>(R.id.deuna_layout_element) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
+                layout.addView(newWebView)
+                newWebView.layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+                )
+                newWebView.visibility = View.VISIBLE
+
+                return true
             }
         }
     }

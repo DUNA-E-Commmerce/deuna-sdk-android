@@ -18,6 +18,7 @@ enum class CheckoutEvents(val value: String) {
     linkStarted("linkStarted"),
     paymentMethodsStarted("paymentMethodsStarted"),
     adBlock("adBlock"),
+    linkClose("linkClose"),
     couponStarted("couponStarted"),
     linkFailed("linkFailed"),
     paymentMethodsAddCard("paymentMethodsAddCard"),

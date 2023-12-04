@@ -19,6 +19,7 @@ import com.deuna.maven.checkout.CheckoutEvents
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementEvent
 
 // PASO 1: Importar librería de DEUNA
 
@@ -138,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         return Callbacks().apply {
             onSuccess = { response ->
                 DeUnaSdk.closeCheckout()
-                if(response.type.value == "purchase") {
+                if(response.type == CheckoutEvents.purchase) {
                     Log.d("purchase", response.data.order.payment.data.status)
                 }
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
@@ -147,21 +148,22 @@ class MainActivity : AppCompatActivity() {
             }
             onError = { error ->
                 if (error != null) {
-                    Log.d("DeunaSdkOnError", error.type)
+                    Log.d("Error ", error.toString())
                 }
             }
             eventListener = { response, type ->
-                if(response.type.value == "changeAddress") {
+                if(response.type == CheckoutEvents.changeAddress) {
                     Log.d("changeAddress", response.data.toString())
                     DeUnaSdk.closeCheckout()
                 }
 
-                if(response.type.value == "paymentProcessing") {
+                if(response.type == CheckoutEvents.paymentProcessing) {
                     Log.d("paymentProcessing", response.data.toString())
                 }
             }
-            onClose = { _ ->
+            onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
+                DeUnaSdk.closeCheckout()
             }
         }
     }
@@ -178,7 +180,6 @@ class MainActivity : AppCompatActivity() {
             eventListener = { response, type ->
                 // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
-
             }
             onError = { error ->
                 if (error != null) {
@@ -186,8 +187,9 @@ class MainActivity : AppCompatActivity() {
                     Log.d("DeunaSdkOnError", error.message)
                 }
             }
-            onClose = { _ ->
+            onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
+                DeUnaSdk.closeElements()
             }
         }
     }
@@ -198,7 +200,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // TODO : revisar el nullPointerException
-    private fun initElements() {
+    private fun initElements() { // TODO: cambiar la vista a input y no tokenizar
         configureForElements()
         DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)
     }

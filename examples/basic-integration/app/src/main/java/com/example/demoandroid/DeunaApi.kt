@@ -88,7 +88,7 @@ class Merchant() {
                     "total_amount": 3500,   
                     "store_code": "all",
                     "payer_info": {
-                          "email": "eposada@deuna.com"
+                          "email": "egarcia@deuna.com"
                     },
                     "webhook_urls": {
                         "notify_order": "https://internal.deuna.io/api/v1/orders"        

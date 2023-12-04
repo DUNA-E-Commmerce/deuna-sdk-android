@@ -77,7 +77,7 @@ class DeUnaElementBridge(
     }
 
     private fun handleCloseEvent() {
-        activity.finish()
+       callbacks.onClose?.invoke()
     }
 
     private fun handleSuccess(data: ElementResponse) {
