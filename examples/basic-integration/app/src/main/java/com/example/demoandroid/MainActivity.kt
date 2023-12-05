@@ -150,7 +150,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             eventListener = { response, type ->
-                // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
             }
             onError = { error ->
@@ -172,8 +171,8 @@ class MainActivity : AppCompatActivity() {
         DeUnaSdk.initCheckout(orderToken = orderToken)
     }
 
-    // TODO : revisar el nullPointerException
-    private fun initElements() { // TODO: cambiar la vista a input y no tokenizar
+
+    private fun initElements() {
         configureForElements()
         val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
         DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)

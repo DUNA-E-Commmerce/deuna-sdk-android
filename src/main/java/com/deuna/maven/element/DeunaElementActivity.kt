@@ -108,15 +108,12 @@ class DeunaElementActivity : AppCompatActivity() {
                     override fun onCreateWindow(
                         view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message
                     ): Boolean {
-                        // Aquí puedes agregar la misma lógica para manejar nuevas ventanas
                         return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
                     }
                 }
 
-                // Oculta el WebView existente
                 webView.visibility = View.GONE
 
-                // Agrega el nuevo WebView a tu layout y lo hace visible
                 val layout =
                     findViewById<RelativeLayout>(R.id.deuna_layout_element) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
                 layout.addView(newWebView)
