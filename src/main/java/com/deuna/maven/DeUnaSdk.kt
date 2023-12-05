@@ -138,6 +138,7 @@ open class DeUnaSdk {
         fun initElements(element: ElementType, userToken: String) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
             buildElementUrl(userToken, instance.apiKey, element)
+            Log.d("elementUrl", instance.elementUrl)
             Intent(instance.context!!, DeunaElementActivity::class.java).also {
                 it.putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
                 it.putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)

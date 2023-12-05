@@ -50,41 +50,10 @@ class MainActivity : AppCompatActivity() {
         val payButton: Button = findViewById(R.id.payButton)
         val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
         val applyConfigButton: Button = findViewById(R.id.applyConfigButton)
-        val createOrderButton: Button = findViewById(R.id.createOrderButton)
 
         applyConfigButton.setOnClickListener { applyConfig() }
         payButton.setOnClickListener { initCheckout() }
         savePaymentMethodButton.setOnClickListener { initElements() }
-        createOrderButton.setOnClickListener { createOrder() }
-    }
-
-    private fun createOrder() {
-        Log.d("apiKey", apiKey)
-        Log.d("environment", environment.toString())
-        val deunaService = DeunaApiService(apiKey, environment)
-        val merchant = Merchant()
-        val orderTokenTextView: TextView = findViewById(R.id.orderToken)
-        val userTokenTextView: TextView = findViewById(R.id.userToken)
-
-        Log.d("debug", "createOrder")
-        deunaService.fetchOrderToken(merchant) { newOrderToken, newUserToken ->
-            if (newOrderToken != null && newUserToken != null) {
-                Log.d("Success", newOrderToken)
-                orderToken = newOrderToken
-                userToken = newUserToken
-                val maxChars = 15
-                orderTokenTextView.text = orderToken
-                userTokenTextView.text = if (userToken.length > maxChars) {
-                    userToken.substring(0, maxChars) + "..."
-                } else {
-                    userToken
-                }
-
-                Log.d("debug", "Success message")
-            } else {
-                Log.d("debug", "Error deunaService")
-            }
-        }
     }
 
     private fun applyConfig() {
@@ -115,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureForCheckout() {
+        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
         DeUnaSdk.config(
             apiKey = apiKey,
             environment = environment,
@@ -125,6 +95,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureForElements() {
+        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
+
         DeUnaSdk.config(
             apiKey = apiKey,
             environment = environment,
@@ -196,12 +168,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun initCheckout() {
         configureForCheckout()
+        val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString()
         DeUnaSdk.initCheckout(orderToken = orderToken)
     }
 
     // TODO : revisar el nullPointerException
     private fun initElements() { // TODO: cambiar la vista a input y no tokenizar
         configureForElements()
+        val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
         DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)
     }
 }

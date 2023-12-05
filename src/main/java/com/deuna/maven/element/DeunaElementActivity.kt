@@ -58,7 +58,7 @@ class DeunaElementActivity : AppCompatActivity() {
         if (url != null) {
             webView.visibility = View.VISIBLE
             loadUrlWithNetworkCheck(webView, this, url)
-            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENT"))
+            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENTS"))
         }
     }
 

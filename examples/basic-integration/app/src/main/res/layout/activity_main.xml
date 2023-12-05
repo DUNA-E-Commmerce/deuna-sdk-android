@@ -54,14 +54,6 @@
                 android:textColor="@android:color/white"
                 android:padding="8dp"/>
 
-            <Button
-                android:id="@+id/createOrderButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Crear Orden"
-                android:textColor="@android:color/white"
-                android:padding="8dp"/>
-
         </LinearLayout>
     </ScrollView>
 
@@ -74,6 +66,12 @@
         android:layout_alignParentBottom="true"
         android:padding="8dp">
 
+        <Spinner
+            android:id="@+id/environmentOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/environment_options"
+            android:textSize="11sp"/>
         <!-- LinearLayout para Enter API Key -->
         <EditText
             android:id="@+id/inputApiKey"
@@ -85,43 +83,36 @@
             android:padding="16dp"
             android:scrollbars="vertical"
             android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:text="@string/copia_y_pega_tu_api_key"/>
+            android:focusableInTouchMode="true"/>
         <!-- Spinner para seleccionar Environment -->
-        <Spinner
-            android:id="@+id/environmentOption"
+
+        <EditText
+            android:id="@+id/inputOrderToken"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/environment_options"
-            android:textSize="11sp"/>
-
+            android:hint="@string/enter_order_token"
+            android:inputType="text"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:scrollbars="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
+        <EditText
+            android:id="@+id/inputUserToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/user_token"
+            android:inputType="text"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:scrollbars="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
         <!-- Botón para aplicar configuración -->
         <Button
             android:id="@+id/applyConfigButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/apply_config"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/orderTokenTextView"
-            android:text="@string/current_token"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/orderToken" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/userTokenTextView"
-            android:text="@string/user_token"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/userToken" />
     </LinearLayout>
 </RelativeLayout>
