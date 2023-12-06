@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    implementation("com.deuna.maven:deunasdk:1.0.4")
+    implementation("com.deuna.maven:deunasdk:1.0.5")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
