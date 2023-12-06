@@ -19,6 +19,7 @@ import com.deuna.maven.checkout.CheckoutEvents
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementEvent
 
 // PASO 1: Importar librería de DEUNA
 
@@ -49,41 +50,10 @@ class MainActivity : AppCompatActivity() {
         val payButton: Button = findViewById(R.id.payButton)
         val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
         val applyConfigButton: Button = findViewById(R.id.applyConfigButton)
-        val createOrderButton: Button = findViewById(R.id.createOrderButton)
 
         applyConfigButton.setOnClickListener { applyConfig() }
         payButton.setOnClickListener { initCheckout() }
         savePaymentMethodButton.setOnClickListener { initElements() }
-        createOrderButton.setOnClickListener { createOrder() }
-    }
-
-    private fun createOrder() {
-        Log.d("apiKey", apiKey)
-        Log.d("environment", environment.toString())
-        val deunaService = DeunaApiService(apiKey, environment)
-        val merchant = Merchant()
-        val orderTokenTextView: TextView = findViewById(R.id.orderToken)
-        val userTokenTextView: TextView = findViewById(R.id.userToken)
-
-        Log.d("debug", "createOrder")
-        deunaService.fetchOrderToken(merchant) { newOrderToken, newUserToken ->
-            if (newOrderToken != null && newUserToken != null) {
-                Log.d("Success", newOrderToken)
-                orderToken = newOrderToken
-                userToken = newUserToken
-                val maxChars = 15
-                orderTokenTextView.text = orderToken
-                userTokenTextView.text = if (userToken.length > maxChars) {
-                    userToken.substring(0, maxChars) + "..."
-                } else {
-                    userToken
-                }
-
-                Log.d("debug", "Success message")
-            } else {
-                Log.d("debug", "Error deunaService")
-            }
-        }
     }
 
     private fun applyConfig() {
@@ -114,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureForCheckout() {
+        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
         DeUnaSdk.config(
             apiKey = apiKey,
             environment = environment,
@@ -124,6 +95,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureForElements() {
+        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
+
         DeUnaSdk.config(
             apiKey = apiKey,
             environment = environment,
@@ -138,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         return Callbacks().apply {
             onSuccess = { response ->
                 DeUnaSdk.closeCheckout()
-                if(response.type.value == "purchase") {
+                if(response.type == CheckoutEvents.purchase) {
                     Log.d("purchase", response.data.order.payment.data.status)
                 }
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
@@ -147,21 +120,22 @@ class MainActivity : AppCompatActivity() {
             }
             onError = { error ->
                 if (error != null) {
-                    Log.d("DeunaSdkOnError", error.type)
+                    Log.d("Error ", error.toString())
                 }
             }
             eventListener = { response, type ->
-                if(response.type.value == "changeAddress") {
+                if(response.type == CheckoutEvents.changeAddress) {
                     Log.d("changeAddress", response.data.toString())
                     DeUnaSdk.closeCheckout()
                 }
 
-                if(response.type.value == "paymentProcessing") {
+                if(response.type == CheckoutEvents.paymentProcessing) {
                     Log.d("paymentProcessing", response.data.toString())
                 }
             }
-            onClose = { _ ->
+            onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
+                DeUnaSdk.closeCheckout()
             }
         }
     }
@@ -176,9 +150,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             eventListener = { response, type ->
-                // Código para manejar los eventos de cierre
                 Log.d("DeunaSdkEventListener", "eventListener")
-
             }
             onError = { error ->
                 if (error != null) {
@@ -186,20 +158,23 @@ class MainActivity : AppCompatActivity() {
                     Log.d("DeunaSdkOnError", error.message)
                 }
             }
-            onClose = { _ ->
+            onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
+                DeUnaSdk.closeElements()
             }
         }
     }
 
     private fun initCheckout() {
         configureForCheckout()
+        val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString()
         DeUnaSdk.initCheckout(orderToken = orderToken)
     }
 
-    // TODO : revisar el nullPointerException
+
     private fun initElements() {
         configureForElements()
+        val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
         DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)
     }
 }

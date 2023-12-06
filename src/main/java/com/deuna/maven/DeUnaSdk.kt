@@ -12,6 +12,7 @@ import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementEvent
 import com.deuna.maven.shared.ApiGatewayUrl
 import com.deuna.maven.shared.ElementUrl
 import java.util.Locale
@@ -137,7 +138,7 @@ open class DeUnaSdk {
         fun initElements(element: ElementType, userToken: String) {
             DeunaElementActivity.setCallback(instance.elementCallbacks)
             buildElementUrl(userToken, instance.apiKey, element)
-            Log.d("DeUnaSdk", "elementUrl: ${instance.elementUrl}")
+            Log.d("elementUrl", instance.elementUrl)
             Intent(instance.context!!, DeunaElementActivity::class.java).also {
                 it.putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
                 it.putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)

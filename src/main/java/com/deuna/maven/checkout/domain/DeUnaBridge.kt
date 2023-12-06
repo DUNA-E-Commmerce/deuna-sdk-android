@@ -39,6 +39,9 @@ class DeUnaBridge(
                 CheckoutEvents.linkFailed, CheckoutEvents.purchaseError -> {
                     handleError("Failed to initialize the checkout","checkoutError", eventData)
                 }
+                CheckoutEvents.linkClose -> {
+                    handleClose()
+                }
                 CheckoutEvents.changeAddress -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
@@ -46,7 +49,7 @@ class DeUnaBridge(
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
-                            callbacks.onClose?.invoke(activity)
+                            callbacks.onClose?.invoke()
                         }
                     }
                 }
@@ -58,6 +61,10 @@ class DeUnaBridge(
 
     private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvents) {
         callbacks.eventListener?.invoke(data, type)
+    }
+
+    private fun handleClose() {
+        callbacks.onClose?.invoke()
     }
 
     private fun handleError(message: String, type: String, response: OrderResponse) {
