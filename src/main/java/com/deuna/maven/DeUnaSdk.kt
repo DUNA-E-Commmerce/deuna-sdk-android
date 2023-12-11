@@ -115,6 +115,7 @@ open class DeUnaSdk {
         fun initCheckout(
             orderToken: String
         ) {
+            instance.closeOnEvents = instance.closeOnEvents ?: emptyArray()
             DeunaActivity.setCallback(instance.callbacks)
             Intent(instance.context!!, DeunaActivity::class.java).apply {
                 putExtra(DeunaActivity.ORDER_TOKEN, orderToken)
@@ -136,6 +137,7 @@ open class DeUnaSdk {
          * @throws IllegalStateException if the SDK has not been configured.
          */
         fun initElements(element: ElementType, userToken: String) {
+            instance.closeOnEvents = instance.closeOnEvents ?: emptyArray()
             DeunaElementActivity.setCallback(instance.elementCallbacks)
             buildElementUrl(userToken, instance.apiKey, element)
             Log.d("elementUrl", instance.elementUrl)

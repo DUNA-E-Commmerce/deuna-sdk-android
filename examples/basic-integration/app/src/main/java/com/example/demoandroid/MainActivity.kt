@@ -89,8 +89,7 @@ class MainActivity : AppCompatActivity() {
             apiKey = apiKey,
             environment = environment,
             context = this@MainActivity,
-            callbacks = createCheckoutCallbacks(),
-            closeOnEvents = arrayOf(CheckoutEvents.linkFailed)
+            callbacks = createCheckoutCallbacks()
         )
     }
 
@@ -121,6 +120,7 @@ class MainActivity : AppCompatActivity() {
             onError = { error ->
                 if (error != null) {
                     Log.d("Error ", error.toString())
+                    DeUnaSdk.closeCheckout()
                 }
             }
             eventListener = { response, type ->
