@@ -4,6 +4,7 @@ import ElementResponse
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
+import com.deuna.maven.DeUnaSdk
 import org.json.JSONObject
 
 /**
@@ -66,7 +67,8 @@ class DeUnaElementBridge(
                     Log.d("DeUnaElementBridge", "Unhandled event: ${eventData.type}")
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
-                            callbacks.eventListener?.invoke(it, it.type)
+                            callbacks.onClose?.invoke()
+                            DeUnaSdk.closeElements()
                         }
                     }
                 }

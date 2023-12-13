@@ -30,5 +30,7 @@ enum class CheckoutEvents(val value: String) {
     paymentMethodsCardExpirationDateEntered("paymentMethodsCardExpirationDateEntered"),
     paymentMethodsCardSecurityCodeEntered("paymentMethodsCardSecurityCodeEntered"),
     pointsToWinStarted("pointsToWinStarted"),
-    paymentMethodsShowMyCards("paymentMethodsShowMyCards")
+    paymentMethodsShowMyCards("paymentMethodsShowMyCards"),
+    benefitsStarted("benefitsStarted"),
+    donationsStarted("donationsStarted"),
 }
