@@ -22,6 +22,10 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.DeUnaBridge
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -33,6 +37,9 @@ import java.net.URL
 class DeunaActivity : AppCompatActivity() {
 
     lateinit var instance: DeunaActivity
+
+    private val scope = CoroutineScope(Dispatchers.Main)
+
 
     companion object {
         const val ORDER_TOKEN = "order_token"
@@ -60,12 +67,20 @@ class DeunaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna)
         instance = this
-        getOrderApi(
-            intent.getStringExtra(BASE_URL)!!,
-            intent.getStringExtra(ORDER_TOKEN)!!,
-            intent.getStringExtra(API_KEY)!!,
-            intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
-        )
+        setProgressBarVisibilityBar(true)
+
+
+        scope.launch {
+            delay(3000L)
+            getOrderApi(
+                intent.getStringExtra(BASE_URL)!!,
+                intent.getStringExtra(ORDER_TOKEN)!!,
+                intent.getStringExtra(API_KEY)!!,
+                intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
+            )
+            setProgressBarVisibilityBar(false)
+        }
+
         registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_CHECKOUT"))
     }
 

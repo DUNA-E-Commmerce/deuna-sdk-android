@@ -22,8 +22,14 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.element.domain.DeUnaElementBridge
 import com.deuna.maven.element.domain.ElementCallbacks
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class DeunaElementActivity : AppCompatActivity() {
+
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
         const val EXTRA_URL = "extra_url"
@@ -54,12 +60,26 @@ class DeunaElementActivity : AppCompatActivity() {
         setContentView(R.layout.activity_deuna_element)
         val url = intent.getStringExtra(EXTRA_URL)
         val webView: WebView = findViewById(R.id.deuna_webview_element)
-        setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
-        if (url != null) {
-            webView.visibility = View.VISIBLE
-            loadUrlWithNetworkCheck(webView, this, url)
-            registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENTS"))
+
+        setProgressBarVisibilityBar(true)
+
+        scope.launch {
+            delay(3000L)
+            setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
+            if (url != null) {
+                webView.visibility = View.VISIBLE
+                setProgressBarVisibilityBar(false)
+                loadUrlWithNetworkCheck(webView, this@DeunaElementActivity, url)
+                registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENTS"))
+            }
         }
+
+
+    }
+
+    fun setProgressBarVisibilityBar(visible: Boolean) {
+        val progressBar: ProgressBar = findViewById(R.id.progress_circular_element)
+        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     /**
