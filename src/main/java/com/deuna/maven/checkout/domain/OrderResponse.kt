@@ -144,158 +144,158 @@ data class OrderResponse(
         fun fromJson(jsonObject: JSONObject): OrderResponse {
             val data = jsonObject.getJSONObject("data")
             val user = data.getJSONObject("user").let {
-                Data.User(it.getString("id"), it.getString("email"), it.getBoolean("is_guest"))
+                Data.User(it.optString("id"), it.optString("email"), it.optBoolean("is_guest"))
             }
             val items = data.getJSONObject("order").getJSONArray("items").let { itemsArray ->
                 List(itemsArray.length()) { i ->
                     val itemJson = itemsArray.getJSONObject(i)
                     val totalAmount = itemJson.optJSONObject("total_amount")?.let {
                         Data.Order.Item.Amount(
-                            it.getInt("amount"),
+                            it.optInt("amount"),
                             it.optInt("original_amount"),
-                            it.getString("display_amount"),
+                            it.optString("display_amount"),
                             it.optString("display_original_amount"),
-                            it.getString("currency"),
-                            it.getString("currency_symbol"),
+                            it.optString("currency"),
+                            it.optString("currency_symbol"),
                             it.optString("display_total_discount"),
                             it.optInt("total_discount")
                         )
                     }
                     val unitPrice = itemJson.optJSONObject("unit_price")?.let {
                         Data.Order.Item.Amount(
-                            it.getInt("amount"),
+                            it.optInt("amount"),
                             it.optInt("original_amount"),
-                            it.getString("display_amount"),
+                            it.optString("display_amount"),
                             it.optString("display_original_amount"),
-                            it.getString("currency"),
-                            it.getString("currency_symbol"),
+                            it.optString("currency"),
+                            it.optString("currency_symbol"),
                             it.optString("display_total_discount"),
                             it.optInt("total_discount")
                         )
                     }
                     val taxAmount = itemJson.optJSONObject("tax_amount")?.let {
                         Data.Order.Item.Amount(
-                            it.getInt("amount"),
+                            it.optInt("amount"),
                             it.optInt("original_amount"),
-                            it.getString("display_amount"),
+                            it.optString("display_amount"),
                             it.optString("display_original_amount"),
-                            it.getString("currency"),
-                            it.getString("currency_symbol"),
+                            it.optString("currency"),
+                            it.optString("currency_symbol"),
                             it.optString("display_total_discount"),
                             it.optInt("total_discount")
                         )
                     }
                     val weight = itemJson.optJSONObject("weight").let {
-                        Data.Order.Item.Weight(it.getInt("weight"), it.getString("unit"))
+                        Data.Order.Item.Weight(it.optInt("weight"), it.optString("unit"))
                     }
                     Data.Order.Item(
-                        itemJson.getString("id"),
-                        itemJson.getString("name"),
-                        itemJson.getString("description"),
-                        itemJson.getString("options"),
+                        itemJson.optString("id"),
+                        itemJson.optString("name"),
+                        itemJson.optString("description"),
+                        itemJson.optString("options"),
                         totalAmount,
                         unitPrice,
                         taxAmount,
-                        itemJson.getInt("quantity"),
-                        itemJson.getString("uom"),
-                        itemJson.getString("upc"),
-                        itemJson.getString("sku"),
-                        itemJson.getString("isbn"),
-                        itemJson.getString("brand"),
-                        itemJson.getString("manufacturer"),
-                        itemJson.getString("category"),
-                        itemJson.getString("color"),
-                        itemJson.getString("size"),
+                        itemJson.optInt("quantity"),
+                        itemJson.optString("uom"),
+                        itemJson.optString("upc"),
+                        itemJson.optString("sku"),
+                        itemJson.optString("isbn"),
+                        itemJson.optString("brand"),
+                        itemJson.optString("manufacturer"),
+                        itemJson.optString("category"),
+                        itemJson.optString("color"),
+                        itemJson.optString("size"),
                         weight,
-                        itemJson.getString("image_url"),
-                        itemJson.getString("details_url"),
-                        itemJson.getString("type"),
-                        itemJson.getBoolean("taxable"),
+                        itemJson.optString("image_url"),
+                        itemJson.optString("details_url"),
+                        itemJson.optString("type"),
+                        itemJson.optBoolean("taxable"),
                         listOf<Any>(), // As discounts is empty in provided JSON
-                        itemJson.getBoolean("included_in_subscription"),
-                        itemJson.getString("subscription_id")
+                        itemJson.optBoolean("included_in_subscription"),
+                        itemJson.optString("subscription_id")
                     )
                 }
             }
             val payment = data.getJSONObject("order").getJSONObject("payment").let { paymentJson ->
                 val paymentData = paymentJson.getJSONObject("data").let { paymentDataJson ->
                     val amount = paymentDataJson.getJSONObject("amount").let {
-                        Data.PaymentData.Amount(it.getInt("amount"), it.getString("currency"))
+                        Data.PaymentData.Amount(it.optInt("amount"), it.optString("currency"))
                     }
                     val fromCard = paymentDataJson.getJSONObject("from_card").let { fromCardJson ->
 
                         Data.PaymentData.FromCard(
-                            fromCardJson.getString("card_brand"),
-                            fromCardJson.getString("first_six"),
-                            fromCardJson.getString("last_four"),
-                            fromCardJson.getString("bank_name"),
-                            fromCardJson.getString("country_iso")
+                            fromCardJson.optString("card_brand"),
+                            fromCardJson.optString("first_six"),
+                            fromCardJson.optString("last_four"),
+                            fromCardJson.optString("bank_name"),
+                            fromCardJson.optString("country_iso")
                         )
                     }
                     val merchant = paymentDataJson.getJSONObject("merchant").let {
-                        Data.PaymentData.Merchant(it.getString("store_code"), it.getString("id"))
+                        Data.PaymentData.Merchant(it.optString("store_code"), it.optString("id"))
                     }
                     val customer = paymentDataJson.getJSONObject("customer").let {
                         Data.PaymentData.Customer(
-                            it.getString("email"),
-                            it.getString("id"),
-                            it.getString("first_name"),
-                            it.getString("last_name")
+                            it.optString("email"),
+                            it.optString("id"),
+                            it.optString("first_name"),
+                            it.optString("last_name")
                         )
                     }
                     Data.PaymentData(
                         amount,
                         Any(), // As metadata is empty in provided JSON
                         fromCard,
-                        paymentDataJson.getString("updated_at"),
-                        paymentDataJson.getString("method_type"),
+                        paymentDataJson.optString("updated_at"),
+                        paymentDataJson.optString("method_type"),
                         merchant,
-                        paymentDataJson.getString("created_at"),
-                        paymentDataJson.getString("id"),
-                        paymentDataJson.getString("processor"),
+                        paymentDataJson.optString("created_at"),
+                        paymentDataJson.optString("id"),
+                        paymentDataJson.optString("processor"),
                         customer,
-                        paymentDataJson.getString("status"),
-                        paymentDataJson.getString("reason"),
-                        paymentDataJson.getString("external_transaction_id")
+                        paymentDataJson.optString("status"),
+                        paymentDataJson.optString("reason"),
+                        paymentDataJson.optString("external_transaction_id")
                     )
                 }
                 Data.Order.Payment(paymentData)
             }
             val merchant = data.getJSONObject("merchant").let {
                 Data.Merchant(
-                    it.getString("id"),
-                    it.getString("name"),
-                    it.getString("code"),
-                    it.getString("country")
+                    it.optString("id"),
+                    it.optString("name"),
+                    it.optString("code"),
+                    it.optString("country")
                 )
             }
             val schemaRegistry = data.getJSONObject("schemaRegistry").let {
                 Data.SchemaRegistry(
-                    it.getString("source"),
-                    it.getString("schemaId"),
-                    it.getString("schema"),
-                    it.getString("registryName")
+                    it.optString("source"),
+                    it.optString("schemaId"),
+                    it.optString("schema"),
+                    it.optString("registryName")
                 )
             }
             val order = data.getJSONObject("order").let {
                 Data.Order(
-                    it.getString("order_id"),
-                    it.getString("currency"),
+                    it.optString("order_id"),
+                    it.optString("currency"),
                     it.optDouble("tax_amount"),
-                    it.getInt("items_total_amount"),
-                    it.getDouble("sub_total"),
-                    it.getInt("total_amount"),
+                    it.optInt("items_total_amount"),
+                    it.optDouble("sub_total"),
+                    it.optInt("total_amount"),
                     items,
                     listOf<Any>(), // As discounts is empty in provided JSON
                     Any(), // As metadata is empty in provided JSON
-                    it.getString("status"),
+                    it.optString("status"),
                     payment,
-                    it.getString("transaction_id")
+                    it.optString("transaction_id")
                 )
             }
             val dataOrder =
-                Data(user, order, merchant, data.getString("checkoutVersion"), schemaRegistry)
-            return OrderResponse(CheckoutEvents.valueOf(jsonObject.getString("type")), dataOrder)
+                Data(user, order, merchant, data.optString("checkoutVersion"), schemaRegistry)
+            return OrderResponse(CheckoutEvents.valueOf(jsonObject.optString("type")), dataOrder)
         }
     }
 }
