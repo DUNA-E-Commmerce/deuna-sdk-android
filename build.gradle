@@ -6,7 +6,7 @@ plugins {
 }
 
 ext {
-    urlMaven = System.getProperty("urlMaven", "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+    urlMaven = System.getProperty("urlMaven", "https://s01.oss.sonatype.org/content/repositories/snapshots/") // "https://s01.oss.sonatype.org/content/repositories/snapshots/"
     usernameMaven = System.getProperty("usernameMaven", "developersdeuna")
     passwordMaven = System.getProperty("passwordMaven", "J>y@RT]3>[v2%jM")
 }
@@ -44,7 +44,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version '1.0.5'
+            version '1.0.6-SNAPSHOT'
             artifact("$buildDir/outputs/aar/deuna-sdk-android-release.aar")
             pom {
                 name = 'Android SDK DEUNA'
