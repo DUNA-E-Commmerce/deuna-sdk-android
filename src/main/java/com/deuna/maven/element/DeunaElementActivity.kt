@@ -58,13 +58,13 @@ class DeunaElementActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna_element)
-        val url = intent.getStringExtra(EXTRA_URL)
-        val webView: WebView = findViewById(R.id.deuna_webview_element)
 
         setProgressBarVisibilityBar(true)
 
+        val url = intent.getStringExtra(EXTRA_URL)
+        val webView: WebView = findViewById(R.id.deuna_webview_element)
+
         scope.launch {
-            delay(3000L)
             setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
             if (url != null) {
                 webView.visibility = View.VISIBLE
@@ -74,10 +74,9 @@ class DeunaElementActivity : AppCompatActivity() {
             }
         }
 
-
     }
 
-    fun setProgressBarVisibilityBar(visible: Boolean) {
+    private fun setProgressBarVisibilityBar(visible: Boolean) {
         val progressBar: ProgressBar = findViewById(R.id.progress_circular_element)
         progressBar.visibility = if (visible) View.VISIBLE else View.GONE
     }
@@ -156,10 +155,9 @@ class DeunaElementActivity : AppCompatActivity() {
         context: Context,
         url: String
     ) {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
         if ((networkCapabilities != null) && networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_INTERNET
             )
@@ -168,12 +166,6 @@ class DeunaElementActivity : AppCompatActivity() {
         } else {
             log("No internet connection")
         }
-    }
-
-    private fun setVisibilityProgressBar(isVisible: Boolean) {
-        val progressBar: ProgressBar = findViewById(R.id.progress_circular_element)
-        progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
-//        webView.visibility = View.VISIBLE
     }
 
     /**
