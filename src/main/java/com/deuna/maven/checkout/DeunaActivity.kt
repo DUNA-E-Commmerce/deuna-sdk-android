@@ -34,7 +34,6 @@ import java.net.URL
 
 // Activity for Deuna.
 class DeunaActivity : AppCompatActivity() {
-
     lateinit var instance: DeunaActivity
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -206,11 +205,15 @@ class DeunaActivity : AppCompatActivity() {
 
     // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
     class CustomWebViewClient(private val callback: WebViewCallback, private val newWebView: WebView) : WebViewClient() {
+
+        // Keywords to recognize a url that should be opened externally in a browser.
+        private val keysForExternalUrls = arrayOf("vapormicuenta")
+
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
             val newUrl = request?.url.toString()
 
-            // If the URL contains "vapormicuenta" then it should be opened in an external browser.
-            if (newUrl.contains("vapormicuenta")) {
+            // Check if the url contains the declared keywords, if so, open the url in Browser and not in the app's webview
+            if (keysForExternalUrls.any { newUrl.contains(it) }) {
                 callback.onExternalUrl(view!!, newUrl)
                 return true
             }
