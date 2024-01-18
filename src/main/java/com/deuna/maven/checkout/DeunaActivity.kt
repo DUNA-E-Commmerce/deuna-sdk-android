@@ -61,7 +61,7 @@ class DeunaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deuna)
         instance = this
-        setProgressBarVisibilityBar(true)
+        showProgressBar(true)
 
         scope.launch {
             getOrderApi(
@@ -70,7 +70,6 @@ class DeunaActivity : AppCompatActivity() {
                 intent.getStringExtra(API_KEY)!!,
                 intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
             )
-            setProgressBarVisibilityBar(false)
         }
 
         registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_CHECKOUT"))
@@ -85,7 +84,6 @@ class DeunaActivity : AppCompatActivity() {
     // Render the checkout in a WebView.
     private fun launchActivity(url: String, closeOnEvents: ArrayList<String>? = null) {
         val webView: WebView = findViewById(R.id.deuna_webview)
-        webView.visibility = View.VISIBLE
         setupWebView(webView, url, closeOnEvents)
         loadUrlWithNetworkCheck(webView, this, url)
     }
@@ -97,10 +95,18 @@ class DeunaActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(
-            DeUnaBridge(this, callbacks!!, closeOnEvents),
-            "android"
-        ) // Add JavascriptInterface
+        webView.addJavascriptInterface(DeUnaBridge(this, callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+
+                // When the page finishes loading, the Web View is shown and the loader is hidden
+                view?.visibility = View.VISIBLE
+                showProgressBar(false)
+            }
+        }
+
         setupWebChromeClient(webView, url)
 
     }
@@ -189,12 +195,6 @@ class DeunaActivity : AppCompatActivity() {
         }
     }
 
-    // Set the visibility of the progress bar.
-    private fun setProgressBarVisibilityBar(visible: Boolean) {
-        val progressBar: ProgressBar = findViewById(R.id.progress_circular)
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
-    }
-
     // Log a message if logging is enabled.
     private fun log(message: String) {
         val loggingEnabled = intent.getBooleanExtra(LOGGING_ENABLED, false)
@@ -268,5 +268,14 @@ class DeunaActivity : AppCompatActivity() {
         // Create an Intent to open the URL in an external browser
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(intent)
+    }
+
+    // Show or Hide progress bar (loader)
+    private fun showProgressBar(show: Boolean) {
+        val loader: ProgressBar = findViewById(R.id.loader)
+        val layout: RelativeLayout = findViewById(R.id.progressLayout)
+
+        loader.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        layout.visibility = if (show) View.VISIBLE else View.INVISIBLE
     }
 }
