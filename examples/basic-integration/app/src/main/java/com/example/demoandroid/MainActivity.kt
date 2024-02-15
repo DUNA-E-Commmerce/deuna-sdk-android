@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                     DeUnaSdk.closeCheckout()
                 }
 
-                 if(response.type == CheckoutEvents.changeAddress) {
+                 if(response.type == CheckoutEvents.changeCart) {
                     Log.d("changeCart", response.data.toString())
                     DeUnaSdk.closeCheckout()
                 }
