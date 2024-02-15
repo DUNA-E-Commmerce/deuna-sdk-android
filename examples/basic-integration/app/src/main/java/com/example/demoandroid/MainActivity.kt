@@ -129,6 +129,11 @@ class MainActivity : AppCompatActivity() {
                     DeUnaSdk.closeCheckout()
                 }
 
+                 if(response.type == CheckoutEvents.changeAddress) {
+                    Log.d("changeCart", response.data.toString())
+                    DeUnaSdk.closeCheckout()
+                }
+
                 if(response.type == CheckoutEvents.paymentProcessing) {
                     Log.d("paymentProcessing", response.data.toString())
                 }

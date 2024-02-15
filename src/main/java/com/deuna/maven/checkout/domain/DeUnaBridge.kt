@@ -44,7 +44,10 @@ class DeUnaBridge(
                     handleClose()
                 }
                 CheckoutEvents.changeAddress -> {
-                    handleCloseActivity(eventData, eventData.type)
+                    handleChangeCart(eventData, eventData.type)
+                }
+                CheckoutEvents.changeCart -> {
+                    
                 }
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
@@ -59,6 +62,10 @@ class DeUnaBridge(
         } catch (e: JSONException) {
             Log.d("DeUnaBridge", "JSONException: $e")
         }
+    }
+
+     private fun handleChangeCart(data: OrderResponse, type: CheckoutEvents) {
+        callbacks.eventListener?.invoke(data, type)
     }
 
     private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvents) {
