@@ -9,7 +9,7 @@ enum class CheckoutEvents(val value: String) {
     apmClickRedirect("apmClickRedirect"),
     apmFailed("apmFailed"),
     changeAddress("changeAddress"),
-    chnageCart("changeCart"),
+    change("changeCart"),
     paymentMethods3dsInitiated("paymentMethods3dsInitiated"),
     paymentClick("paymentClick"),
     paymentMethodsCardNumberInitiated("paymentMethodsCardNumberInitiated"),
