@@ -46,6 +46,9 @@ class DeUnaBridge(
                 CheckoutEvents.changeAddress -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
+                CheckoutEvents.changeCart -> {
+                    handleCloseActivity(eventData, eventData.type)
+                }
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
                     eventData.let {

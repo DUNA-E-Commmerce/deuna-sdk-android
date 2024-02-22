@@ -8,6 +8,7 @@ enum class ElementEvent(val value: String) {
     vaultFailed("vaultFailed"),
     cardSuccessfullyCreated("cardSuccessfullyCreated"),
     changeAddress("changeAddress"),
+    changeCart("changeCart"),
     vaultSaveError("vaultSaveError"),
     vaultSaveSuccess("vaultSaveSuccess"),
     vaulClickRedirect3DS("vaulClickRedirect3DS"),
