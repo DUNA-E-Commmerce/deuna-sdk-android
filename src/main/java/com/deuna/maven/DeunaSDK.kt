@@ -82,14 +82,11 @@ open class DeunaSDK {
                     this.loggingEnabled = true
                 }
 
-                if (environment == Environment.STAGING) {
-                    this.apigatewayUrl = ApiGatewayUrl.STAGING.url
-                } else if (environment == Environment.PRODUCTION) {
-                    this.apigatewayUrl = ApiGatewayUrl.PRODUCTION.url
-                } else if (environment == Environment.SANDBOX) {
-                    this.apigatewayUrl = ApiGatewayUrl.SANDBOX.url
-                } else {
-                    this.apigatewayUrl = ApiGatewayUrl.DEVELOPMENT.url
+                this.apigatewayUrl = when (environment) {
+                    Environment.STAGING -> ApiGatewayUrl.STAGING.url
+                    Environment.PRODUCTION -> ApiGatewayUrl.PRODUCTION.url
+                    Environment.SANDBOX -> ApiGatewayUrl.SANDBOX.url
+                    Environment.DEVELOPMENT -> ApiGatewayUrl.DEVELOPMENT.url
                 }
             }
         }
