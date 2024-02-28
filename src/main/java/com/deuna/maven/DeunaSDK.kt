@@ -26,7 +26,7 @@ open class DeunaSDK {
     private var context: Context? = null
     private var callbacks: Callbacks? = null
     private var elementCallbacks: ElementCallbacks? = null
-    private var showCloseButton: Boolean? = null
+    private var showCloseButton: Boolean = false
     private var apigatewayUrl: String = "https://api.dev.deuna.io"
 
     companion object {
@@ -50,13 +50,11 @@ open class DeunaSDK {
             context: Context,
             callbacks: Callbacks? = null,
             elementCallbacks: ElementCallbacks? = null,
-            showCloseButton: Boolean? = null
+            showCloseButton: Boolean = false
         ) {
             instance = DeunaSDK().apply {
 
-                if (showCloseButton != null) {
-                    this.showCloseButton = showCloseButton
-                }
+                this.showCloseButton = showCloseButton
 
                 if (callbacks != null) {
                     this.callbacks = callbacks
@@ -163,7 +161,7 @@ open class DeunaSDK {
             instance.elementUrl = Uri.parse(url).buildUpon().apply {
                 appendQueryParameter("userToken", userToken)
                 appendQueryParameter("publicApiKey", apiKey)
-                if (instance.showCloseButton != null) {
+                if (instance.showCloseButton) {
                     appendQueryParameter("mode", "widget")
                 }
             }.build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
