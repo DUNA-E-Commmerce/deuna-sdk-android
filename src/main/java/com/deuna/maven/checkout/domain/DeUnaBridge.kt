@@ -1,7 +1,6 @@
 package com.deuna.maven.checkout.domain
 
 import OrderResponse
-import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
@@ -15,7 +14,6 @@ import org.json.JSONObject
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
 class DeUnaBridge(
-    private val activity: Activity,
     private val callbacks: Callbacks,
     private val closeOnEvents: ArrayList<String>? = null
 ) {

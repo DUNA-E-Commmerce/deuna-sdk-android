@@ -95,7 +95,7 @@ class DeunaActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(DeUnaBridge(this, callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(DeUnaBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {

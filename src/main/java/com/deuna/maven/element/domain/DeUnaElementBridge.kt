@@ -1,7 +1,6 @@
 package com.deuna.maven.element.domain
 
 import ElementResponse
-import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
