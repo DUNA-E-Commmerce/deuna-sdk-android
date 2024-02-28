@@ -20,7 +20,6 @@ import java.util.Locale
 open class DeunaSDK {
     private lateinit var apiKey: String
     private lateinit var environment: Environment
-    private var baseUrl: String = ""
     private var elementUrl: String = "https://elements.deuna.io"
     private var closeOnEvents: Array<CheckoutEvents>? = null
     private var loggingEnabled: Boolean? = false
