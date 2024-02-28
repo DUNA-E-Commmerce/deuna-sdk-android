@@ -26,26 +26,36 @@ class DeunaCheckoutBridge(
         try {
             val json = JSONObject(message)
             eventData = OrderResponse.fromJson(json)
-            callbacks.eventListener?.invoke(eventData, eventData.type)
+            callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
                     handleSuccess(eventData)
                 }
+
                 CheckoutEvent.purchaseRejected -> {
-                    handleError("An error ocurred while processing payment","purchaseRejected", eventData)
+                    handleError(
+                        "An error ocurred while processing payment",
+                        "purchaseRejected",
+                        eventData
+                    )
                 }
+
                 CheckoutEvent.linkFailed, CheckoutEvent.purchaseError -> {
-                    handleError("Failed to initialize the checkout","checkoutError", eventData)
+                    handleError("Failed to initialize the checkout", "checkoutError", eventData)
                 }
+
                 CheckoutEvent.linkClose -> {
                     handleClose()
                 }
+
                 CheckoutEvent.changeAddress -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
+
                 CheckoutEvent.changeCart -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
+
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
                     eventData.let {
@@ -62,7 +72,7 @@ class DeunaCheckoutBridge(
     }
 
     private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvent) {
-        callbacks.eventListener?.invoke(data, type)
+        callbacks.eventListener?.invoke(type, data)
     }
 
     private fun handleClose() {

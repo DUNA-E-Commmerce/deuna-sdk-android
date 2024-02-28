@@ -32,7 +32,7 @@ class DeUnaElementBridge(
             val json = JSONObject(eventTypeString)
             val eventData = ElementResponse.fromJson(json)
             Log.d("DeUnaElementBridge", "handleEvent: $json")
-            callbacks.eventListener?.invoke(eventData, eventData.type)
+            callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
                 ElementEvent.vaultFailed -> eventData.data.metadata?.let {
                     handleError(
@@ -77,7 +77,7 @@ class DeUnaElementBridge(
     }
 
     private fun handleCloseEvent() {
-       callbacks.onClose?.invoke()
+        callbacks.onClose?.invoke()
     }
 
     private fun handleSuccess(data: ElementResponse) {
