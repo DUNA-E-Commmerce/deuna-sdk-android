@@ -8,5 +8,5 @@ class Callbacks {
     var onSuccess: ((OrderResponse) -> Unit)? = null
     var onError: ((DeunaErrorMessage?) -> Unit)? = null
     var onClose: (() -> Unit)? = null
-    var eventListener: ((OrderResponse, CheckoutEvents) -> Unit)? = null
+    var eventListener: ((OrderResponse, CheckoutEvent) -> Unit)? = null
 }
