@@ -6,7 +6,7 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.Callbacks
-import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.checkout.CheckoutEvent
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -30,22 +30,22 @@ class DeUnaBridge(
             eventData = OrderResponse.fromJson(json)
             callbacks.eventListener?.invoke(eventData, eventData.type)
             when (eventData.type) {
-                CheckoutEvents.purchase, CheckoutEvents.apmSuccess -> {
+                CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
                     handleSuccess(eventData)
                 }
-                CheckoutEvents.purchaseRejected -> {
+                CheckoutEvent.purchaseRejected -> {
                     handleError("An error ocurred while processing payment","purchaseRejected", eventData)
                 }
-                CheckoutEvents.linkFailed, CheckoutEvents.purchaseError -> {
+                CheckoutEvent.linkFailed, CheckoutEvent.purchaseError -> {
                     handleError("Failed to initialize the checkout","checkoutError", eventData)
                 }
-                CheckoutEvents.linkClose -> {
+                CheckoutEvent.linkClose -> {
                     handleClose()
                 }
-                CheckoutEvents.changeAddress -> {
+                CheckoutEvent.changeAddress -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
-                CheckoutEvents.changeCart -> {
+                CheckoutEvent.changeCart -> {
                     handleCloseActivity(eventData, eventData.type)
                 }
                 else -> {
@@ -63,7 +63,7 @@ class DeUnaBridge(
         }
     }
 
-    private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvents) {
+    private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvent) {
         callbacks.eventListener?.invoke(data, type)
     }
 

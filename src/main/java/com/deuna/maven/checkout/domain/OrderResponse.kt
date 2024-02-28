@@ -1,9 +1,9 @@
 import android.util.Log
-import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.checkout.CheckoutEvent
 import org.json.JSONObject
 
 data class OrderResponse(
-    val type: CheckoutEvents,
+    val type: CheckoutEvent,
     val data: Data
 ) {
     data class Data(
@@ -295,7 +295,7 @@ data class OrderResponse(
             }
             val dataOrder =
                 Data(user, order, merchant, data.optString("checkoutVersion"), schemaRegistry)
-            return OrderResponse(CheckoutEvents.valueOf(jsonObject.optString("type")), dataOrder)
+            return OrderResponse(CheckoutEvent.valueOf(jsonObject.optString("type")), dataOrder)
         }
     }
 }
