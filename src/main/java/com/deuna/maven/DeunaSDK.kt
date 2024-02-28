@@ -6,7 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
 import com.deuna.maven.checkout.Callbacks
-import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
@@ -21,7 +21,7 @@ open class DeunaSDK {
     private lateinit var apiKey: String
     private lateinit var environment: Environment
     private var elementUrl: String = "https://elements.deuna.io"
-    private var closeOnEvents: Array<CheckoutEvents>? = null
+    private var closeOnEvents: Array<CheckoutEvent>? = null
     private var loggingEnabled: Boolean? = false
     private var context: Context? = null
     private var callbacks: Callbacks? = null
@@ -46,7 +46,7 @@ open class DeunaSDK {
         fun config(
             apiKey: String? = null,
             environment: Environment,
-            closeOnEvents: Array<CheckoutEvents>? = null,
+            closeOnEvents: Array<CheckoutEvent>? = null,
             context: Context,
             callbacks: Callbacks? = null,
             elementCallbacks: ElementCallbacks? = null,
