@@ -13,7 +13,6 @@ import org.json.JSONObject
  */
 class DeUnaElementBridge(
     private val callbacks: ElementCallbacks,
-    private val activity: Activity,
     private val closeOnEvents: ArrayList<String>? = null
 ) {
     /**
