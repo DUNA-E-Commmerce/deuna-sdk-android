@@ -152,12 +152,16 @@ open class DeunaSDK {
          * @param element The element to use for the DeUna SDK.
          */
         private fun buildElementUrl(userToken: String, apiKey: String, element: ElementType) {
-            val url = when (instance.environment) {
-                Environment.DEVELOPMENT -> "${ElementUrl.DEVELOPMENT.url}/{type}"
-                Environment.STAGING -> "${ElementUrl.STAGING.url}/{type}"
-                Environment.PRODUCTION -> "${ElementUrl.PRODUCTION.url}/{type}"
-                Environment.SANDBOX -> "${ElementUrl.SANDBOX.url}/{type}"
-            }
+
+            val url = "${
+                when (instance.environment) {
+                    Environment.DEVELOPMENT -> ElementUrl.DEVELOPMENT.url
+                    Environment.STAGING -> ElementUrl.STAGING.url
+                    Environment.PRODUCTION -> ElementUrl.PRODUCTION.url
+                    Environment.SANDBOX -> ElementUrl.SANDBOX.url
+                }
+            }/{type}"
+
             instance.elementUrl = Uri.parse(url).buildUpon().apply {
                 appendQueryParameter("userToken", userToken)
                 appendQueryParameter("publicApiKey", apiKey)
