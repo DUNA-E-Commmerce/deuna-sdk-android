@@ -21,6 +21,7 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.element.domain.DeUnaElementBridge
 import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,7 +77,7 @@ class DeunaElementActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, this, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(DeUnaElementBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
