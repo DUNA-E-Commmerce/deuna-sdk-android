@@ -12,13 +12,12 @@ import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.checkout.domain.Environment
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
-import com.deuna.maven.element.domain.ElementEvent
 import com.deuna.maven.shared.ApiGatewayUrl
 import com.deuna.maven.shared.ElementUrl
 import java.util.Locale
 
 
-open class DeUnaSdk {
+open class DeunaSDK {
     private lateinit var apiKey: String
     private lateinit var environment: Environment
     private var baseUrl: String = ""
@@ -32,7 +31,7 @@ open class DeUnaSdk {
     private var apigatewayUrl: String = "https://api.dev.deuna.io"
 
     companion object {
-        private lateinit var instance: DeUnaSdk
+        private lateinit var instance: DeunaSDK
 
         /**
          * Configure the DeUna SDK with the given parameters.
@@ -54,7 +53,7 @@ open class DeUnaSdk {
             elementCallbacks: ElementCallbacks? = null,
             showCloseButton: Boolean? = null
         ) {
-            instance = DeUnaSdk().apply {
+            instance = DeunaSDK().apply {
 
                 if (showCloseButton != null) {
                     this.showCloseButton = showCloseButton

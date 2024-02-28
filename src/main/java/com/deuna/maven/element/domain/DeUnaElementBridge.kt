@@ -4,7 +4,7 @@ import ElementResponse
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.DeUnaSdk
+import com.deuna.maven.DeunaSDK
 import org.json.JSONObject
 
 /**
@@ -68,7 +68,7 @@ class DeUnaElementBridge(
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
                             callbacks.onClose?.invoke()
-                            DeUnaSdk.closeElements()
+                            DeunaSDK.closeElements()
                         }
                     }
                 }

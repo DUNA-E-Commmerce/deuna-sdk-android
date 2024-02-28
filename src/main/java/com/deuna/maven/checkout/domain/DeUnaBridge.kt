@@ -4,10 +4,9 @@ import OrderResponse
 import android.app.Activity
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.DeUnaSdk
+import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvents
-import com.deuna.maven.element.domain.ElementEvent
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -54,7 +53,7 @@ class DeUnaBridge(
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
                             callbacks.onClose?.invoke()
-                            DeUnaSdk.closeCheckout()
+                            DeunaSDK.closeCheckout()
                         }
                     }
                 }
