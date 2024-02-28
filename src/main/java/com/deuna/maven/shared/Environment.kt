@@ -1,4 +1,4 @@
-package com.deuna.maven.checkout.domain
+package com.deuna.maven.shared
 
 enum class Environment {
     DEVELOPMENT,

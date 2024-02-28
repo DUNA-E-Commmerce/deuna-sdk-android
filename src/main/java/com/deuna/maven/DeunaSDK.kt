@@ -9,7 +9,7 @@ import com.deuna.maven.checkout.Callbacks
 import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
-import com.deuna.maven.checkout.domain.Environment
+import com.deuna.maven.shared.Environment
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementCallbacks
 import com.deuna.maven.shared.ApiGatewayUrl
