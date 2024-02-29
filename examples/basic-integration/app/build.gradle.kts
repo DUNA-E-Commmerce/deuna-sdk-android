@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-    implementation("com.deuna.maven:deunasdk:1.0.9")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
@@ -51,6 +50,7 @@ dependencies {
             strictly("2.8.9")
         }
     }
+    implementation(files("../../../build/outputs/aar/deuna-sdk-android-debug.aar"))
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

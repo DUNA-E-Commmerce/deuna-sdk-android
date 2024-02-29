@@ -21,6 +21,8 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.element.domain.ElementsBridge
 import com.deuna.maven.element.domain.ElementsCallbacks
+import com.deuna.maven.utils.BroadcastReceiverUtils
+import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,10 +57,14 @@ class DeunaElementActivity : AppCompatActivity() {
         val webView: WebView = findViewById(R.id.deuna_webview_element)
 
         scope.launch {
-            setupWebView(webView,  intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
+            setupWebView(webView, intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
             if (url != null) {
                 loadUrlWithNetworkCheck(webView, this@DeunaElementActivity, url)
-                registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_ELEMENTS"))
+                BroadcastReceiverUtils.register(
+                    context = this@DeunaElementActivity,
+                    broadcastReceiver = closeAllReceiver,
+                    action = DeunaBroadcastReceiverAction.ELEMENTS
+                )
             }
         }
     }
@@ -76,7 +82,10 @@ class DeunaElementActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(ElementsBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(
+            ElementsBridge(callbacks!!, closeOnEvents),
+            "android"
+        ) // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -94,7 +103,12 @@ class DeunaElementActivity : AppCompatActivity() {
     // Setup the WebChromeClient to handle creation of new windows.
     private fun setupWebChromeClient(webView: WebView) {
         webView.webChromeClient = object : WebChromeClient() {
-            override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+            override fun onCreateWindow(
+                view: WebView,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message
+            ): Boolean {
                 val newWebView = WebView(this@DeunaElementActivity).apply {
                     webViewClient = WebViewClient()
                     settings.javaScriptEnabled = true
@@ -105,7 +119,10 @@ class DeunaElementActivity : AppCompatActivity() {
                 resultMsg.sendToTarget()
 
                 newWebView.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
                         val newUrl = request?.url.toString()
                         view?.loadUrl(newUrl)
                         return true
@@ -113,14 +130,20 @@ class DeunaElementActivity : AppCompatActivity() {
                 }
 
                 newWebView.webChromeClient = object : WebChromeClient() {
-                    override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+                    override fun onCreateWindow(
+                        view: WebView,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: Message
+                    ): Boolean {
                         return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
                     }
                 }
 
                 webView.visibility = View.GONE
 
-                val layout = findViewById<RelativeLayout>(R.id.deuna_layout_element) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
+                val layout =
+                    findViewById<RelativeLayout>(R.id.deuna_layout_element) // Reemplaza 'your_layout_id' con el ID de tu RelativeLayout
                 layout.addView(newWebView)
 
                 newWebView.layoutParams = RelativeLayout.LayoutParams(
@@ -136,8 +159,10 @@ class DeunaElementActivity : AppCompatActivity() {
 
     // Load a URL if there is an active internet connection.
     private fun loadUrlWithNetworkCheck(view: WebView, context: Context, url: String) {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
 
         if ((networkCapabilities != null) && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             view.loadUrl(url)

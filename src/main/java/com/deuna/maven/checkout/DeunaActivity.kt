@@ -1,5 +1,6 @@
 package com.deuna.maven.checkout
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
@@ -23,6 +25,8 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.CheckoutBridge
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
+import com.deuna.maven.utils.BroadcastReceiverUtils
+import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,8 +75,11 @@ class DeunaActivity : AppCompatActivity() {
                 intent.getStringArrayListExtra(CLOSE_ON_EVENTS)
             )
         }
-
-        registerReceiver(closeAllReceiver, IntentFilter("com.deuna.maven.CLOSE_CHECKOUT"))
+        BroadcastReceiverUtils.register(
+            context = this@DeunaActivity,
+            broadcastReceiver = closeAllReceiver,
+            action = DeunaBroadcastReceiverAction.CHECKOUT,
+        )
     }
 
     // Called when the activity is destroyed.
@@ -89,13 +96,20 @@ class DeunaActivity : AppCompatActivity() {
     }
 
     // Setup the WebView with necessary settings and JavascriptInterface.
-    private fun setupWebView(webView: WebView, url: String, closeOnEvents: ArrayList<String>? = null) {
+    private fun setupWebView(
+        webView: WebView,
+        url: String,
+        closeOnEvents: ArrayList<String>? = null
+    ) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(CheckoutBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(
+            CheckoutBridge(callbacks!!, closeOnEvents),
+            "android"
+        ) // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -114,7 +128,12 @@ class DeunaActivity : AppCompatActivity() {
     // Setup the WebChromeClient to handle creation of new windows.
     private fun setupWebChromeClient(webView: WebView, targetUrl: String) {
         webView.webChromeClient = object : WebChromeClient() {
-            override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+            override fun onCreateWindow(
+                view: WebView,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message
+            ): Boolean {
                 val newWebView = WebView(this@DeunaActivity).apply {
                     webViewClient = WebViewClient()
                     settings.javaScriptEnabled = true
@@ -142,7 +161,12 @@ class DeunaActivity : AppCompatActivity() {
     }
 
     // Send the order to the API and launch the checkout.
-    private fun getOrderApi(baseUrl: String, orderToken: String, apiKey: String, closeOnEvents: ArrayList<String>? = null) {
+    private fun getOrderApi(
+        baseUrl: String,
+        orderToken: String,
+        apiKey: String,
+        closeOnEvents: ArrayList<String>? = null
+    ) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 if (response.isSuccessful) {
@@ -204,12 +228,18 @@ class DeunaActivity : AppCompatActivity() {
     }
 
     // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
-    class CustomWebViewClient(private val callback: WebViewCallback, private val newWebView: WebView) : WebViewClient() {
+    class CustomWebViewClient(
+        private val callback: WebViewCallback,
+        private val newWebView: WebView
+    ) : WebViewClient() {
 
         // Keywords to recognize a url that should be opened externally in a browser.
         private val keysForExternalUrls = arrayOf("vapormicuenta")
 
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        override fun shouldOverrideUrlLoading(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): Boolean {
             val newUrl = request?.url.toString()
 
             // Check if the url contains the declared keywords, if so, open the url in Browser and not in the app's webview
@@ -242,7 +272,12 @@ class DeunaActivity : AppCompatActivity() {
             webView.loadUrl(url)
 
             newWebView.webChromeClient = object : WebChromeClient() {
-                override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+                override fun onCreateWindow(
+                    view: WebView,
+                    isDialog: Boolean,
+                    isUserGesture: Boolean,
+                    resultMsg: Message
+                ): Boolean {
                     return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
                 }
             }

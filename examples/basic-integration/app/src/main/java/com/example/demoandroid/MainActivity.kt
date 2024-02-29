@@ -13,13 +13,12 @@ import android.widget.Toast
 //import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.deuna.maven.DeUnaSdk
-import com.deuna.maven.checkout.Callbacks
-import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.DeunaSDK
+import com.deuna.maven.checkout.CheckoutCallbacks
+import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.domain.ElementType
-import com.deuna.maven.checkout.domain.Environment
-import com.deuna.maven.element.domain.ElementCallbacks
-import com.deuna.maven.element.domain.ElementEvent
+import com.deuna.maven.element.domain.ElementsCallbacks
+import com.deuna.maven.shared.Environment
 
 // PASO 1: Importar librería de DEUNA
 
@@ -39,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         // Configurar listeners para botones
         setupListeners()
     }
+
     private fun setupUI() {
         val imageView: ImageView = findViewById(R.id.imageView)
         Glide.with(this)
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureForCheckout() {
         val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
-        DeUnaSdk.config(
+        DeunaSDK.config(
             apiKey = apiKey,
             environment = environment,
             context = this@MainActivity,
@@ -96,21 +96,21 @@ class MainActivity : AppCompatActivity() {
     private fun configureForElements() {
         val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
 
-        DeUnaSdk.config(
+        DeunaSDK.config(
             apiKey = apiKey,
             environment = environment,
             context = this@MainActivity,
             elementCallbacks = createElementCallbacks(),
-            closeOnEvents = arrayOf(CheckoutEvents.linkFailed),
+            closeOnEvents = arrayOf(CheckoutEvent.linkFailed),
             showCloseButton = true
         )
     }
 
-    private fun createCheckoutCallbacks(): Callbacks {
-        return Callbacks().apply {
+    private fun createCheckoutCallbacks(): CheckoutCallbacks {
+        return CheckoutCallbacks().apply {
             onSuccess = { response ->
-                DeUnaSdk.closeCheckout()
-                if(response.type == CheckoutEvents.purchase) {
+                DeunaSDK.closeCheckout()
+                if (response.type == CheckoutEvent.purchase) {
                     Log.d("purchase", response.data.order.payment.data.status)
                 }
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
@@ -120,36 +120,36 @@ class MainActivity : AppCompatActivity() {
             onError = { error ->
                 if (error != null) {
                     Log.d("Error ", error.toString())
-                    DeUnaSdk.closeCheckout()
+                    DeunaSDK.closeCheckout()
                 }
             }
-            eventListener = { response, type ->
-                if(response.type == CheckoutEvents.changeAddress) {
+            eventListener = { type, response ->
+                if (response.type == CheckoutEvent.changeAddress) {
                     Log.d("changeAddress", response.data.toString())
-                    DeUnaSdk.closeCheckout()
+                    DeunaSDK.closeCheckout()
                 }
 
-                 if(response.type == CheckoutEvents.changeCart) {
+                if (response.type == CheckoutEvent.changeCart) {
                     Log.d("changeCart", response.data.toString())
-                    DeUnaSdk.closeCheckout()
+                    DeunaSDK.closeCheckout()
                 }
 
-                if(response.type == CheckoutEvents.paymentProcessing) {
+                if (response.type == CheckoutEvent.paymentProcessing) {
                     Log.d("paymentProcessing", response.data.toString())
                 }
             }
             onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
-                DeUnaSdk.closeCheckout()
+                DeunaSDK.closeCheckout()
             }
         }
     }
 
-    private fun createElementCallbacks(): ElementCallbacks {
-        return ElementCallbacks().apply {
+    private fun createElementCallbacks(): ElementsCallbacks {
+        return ElementsCallbacks().apply {
             onSuccess = { response ->
                 Log.d("closeElements Success", response.data.toString())
-                DeUnaSdk.closeElements() // No cerró, revisar
+                DeunaSDK.closeElements() // No cerró, revisar
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
@@ -159,13 +159,13 @@ class MainActivity : AppCompatActivity() {
             }
             onError = { error ->
                 if (error != null) {
-                    DeUnaSdk.closeElements()
+                    DeunaSDK.closeElements()
                     Log.d("DeunaSdkOnError", error.message)
                 }
             }
             onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
-                DeUnaSdk.closeElements()
+                DeunaSDK.closeElements()
             }
         }
     }
@@ -173,13 +173,13 @@ class MainActivity : AppCompatActivity() {
     private fun initCheckout() {
         configureForCheckout()
         val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString()
-        DeUnaSdk.initCheckout(orderToken = orderToken)
+        DeunaSDK.initCheckout(orderToken = orderToken)
     }
 
 
     private fun initElements() {
         configureForElements()
         val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
-        DeUnaSdk.initElements(element = ElementType.VAULT, userToken = userToken)
+        DeunaSDK.initElements(element = ElementType.VAULT, userToken = userToken)
     }
 }
