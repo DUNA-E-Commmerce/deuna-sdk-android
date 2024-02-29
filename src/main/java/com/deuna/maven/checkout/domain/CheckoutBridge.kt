@@ -4,7 +4,7 @@ import CheckoutResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
-import com.deuna.maven.checkout.Callbacks
+import com.deuna.maven.checkout.CheckoutCallbacks
 import com.deuna.maven.checkout.CheckoutEvent
 import org.json.JSONException
 import org.json.JSONObject
@@ -14,7 +14,7 @@ import org.json.JSONObject
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
 class CheckoutBridge(
-    private val callbacks: Callbacks,
+    private val callbacks: CheckoutCallbacks,
     private val closeOnEvents: ArrayList<String>? = null
 ) {
     /**

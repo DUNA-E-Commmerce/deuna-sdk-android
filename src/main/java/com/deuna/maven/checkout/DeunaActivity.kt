@@ -43,9 +43,9 @@ class DeunaActivity : AppCompatActivity() {
         const val LOGGING_ENABLED = "logging_enabled"
         const val BASE_URL = "BASE_URL"
         const val CLOSE_ON_EVENTS = ""
-        var callbacks: Callbacks? = null
+        var callbacks: CheckoutCallbacks? = null
 
-        fun setCallback(callback: Callbacks?) {
+        fun setCallback(callback: CheckoutCallbacks?) {
             this.callbacks = callback
         }
     }

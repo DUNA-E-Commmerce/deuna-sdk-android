@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
-import com.deuna.maven.checkout.Callbacks
+import com.deuna.maven.checkout.CheckoutCallbacks
 import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
@@ -24,7 +24,7 @@ open class DeunaSDK {
     private var closeOnEvents: Array<CheckoutEvent>? = null
     private var loggingEnabled: Boolean? = false
     private var context: Context? = null
-    private var callbacks: Callbacks? = null
+    private var callbacks: CheckoutCallbacks? = null
     private var elementCallbacks: ElementsCallbacks? = null
     private var showCloseButton: Boolean = false
     private var apigatewayUrl: String = "https://api.dev.deuna.io"
@@ -48,7 +48,7 @@ open class DeunaSDK {
             environment: Environment,
             closeOnEvents: Array<CheckoutEvent>? = null,
             context: Context,
-            callbacks: Callbacks? = null,
+            callbacks: CheckoutCallbacks? = null,
             elementCallbacks: ElementsCallbacks? = null,
             showCloseButton: Boolean = false
         ) {
