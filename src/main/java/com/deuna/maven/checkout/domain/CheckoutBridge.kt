@@ -1,6 +1,6 @@
 package com.deuna.maven.checkout.domain
 
-import OrderResponse
+import CheckoutResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
@@ -22,10 +22,10 @@ class CheckoutBridge(
      */
     @JavascriptInterface
     fun postMessage(message: String) {
-        val eventData: OrderResponse?
+        val eventData: CheckoutResponse?
         try {
             val json = JSONObject(message)
-            eventData = OrderResponse.fromJson(json)
+            eventData = CheckoutResponse.fromJson(json)
             callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
@@ -71,7 +71,7 @@ class CheckoutBridge(
         }
     }
 
-    private fun handleCloseActivity(data: OrderResponse, type: CheckoutEvent) {
+    private fun handleCloseActivity(data: CheckoutResponse, type: CheckoutEvent) {
         callbacks.eventListener?.invoke(type, data)
     }
 
@@ -79,7 +79,7 @@ class CheckoutBridge(
         callbacks.onClose?.invoke()
     }
 
-    private fun handleError(message: String, type: String, response: OrderResponse) {
+    private fun handleError(message: String, type: String, response: CheckoutResponse) {
         callbacks.onError?.invoke(
             DeunaErrorMessage(
                 message,
@@ -90,7 +90,7 @@ class CheckoutBridge(
         )
     }
 
-    private fun handleSuccess(data: OrderResponse) {
+    private fun handleSuccess(data: CheckoutResponse) {
         callbacks.onSuccess?.invoke(
             data
         )

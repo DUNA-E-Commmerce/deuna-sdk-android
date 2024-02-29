@@ -1,12 +1,11 @@
 package com.deuna.maven.checkout
 
-import OrderResponse
-import android.app.Activity
+import CheckoutResponse
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 
 class Callbacks {
-    var onSuccess: ((OrderResponse) -> Unit)? = null
+    var onSuccess: ((CheckoutResponse) -> Unit)? = null
     var onError: ((DeunaErrorMessage?) -> Unit)? = null
     var onClose: (() -> Unit)? = null
-    var eventListener: ((CheckoutEvent, OrderResponse) -> Unit)? = null
+    var eventListener: ((CheckoutEvent, CheckoutResponse) -> Unit)? = null
 }

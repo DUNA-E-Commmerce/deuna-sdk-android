@@ -1,8 +1,7 @@
-import android.util.Log
 import com.deuna.maven.checkout.CheckoutEvent
 import org.json.JSONObject
 
-data class OrderResponse(
+data class CheckoutResponse(
     val type: CheckoutEvent,
     val data: Data
 ) {
@@ -141,7 +140,7 @@ data class OrderResponse(
     }
 
     companion object {
-        fun fromJson(jsonObject: JSONObject): OrderResponse {
+        fun fromJson(jsonObject: JSONObject): CheckoutResponse {
             val data = jsonObject.getJSONObject("data")
             val user = data.getJSONObject("user").let {
                 Data.User(it.optString("id"), it.optString("email"), it.optBoolean("is_guest"))
@@ -295,7 +294,7 @@ data class OrderResponse(
             }
             val dataOrder =
                 Data(user, order, merchant, data.optString("checkoutVersion"), schemaRegistry)
-            return OrderResponse(CheckoutEvent.valueOf(jsonObject.optString("type")), dataOrder)
+            return CheckoutResponse(CheckoutEvent.valueOf(jsonObject.optString("type")), dataOrder)
         }
     }
 }
