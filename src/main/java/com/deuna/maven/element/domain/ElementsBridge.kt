@@ -10,8 +10,8 @@ import org.json.JSONObject
  * The DeUnaElementBridge class is used to receive messages from JavaScript code in a WebView.
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
-class DeunaElementBridge(
-    private val callbacks: ElementCallbacks,
+class ElementsBridge(
+    private val callbacks: ElementsCallbacks,
     private val closeOnEvents: ArrayList<String>? = null
 ) {
     /**
@@ -34,7 +34,7 @@ class DeunaElementBridge(
             Log.d("DeUnaElementBridge", "handleEvent: $json")
             callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
-                ElementEvent.vaultFailed -> eventData.data.metadata?.let {
+                ElementsEvent.vaultFailed -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "vaultFailed",
@@ -42,7 +42,7 @@ class DeunaElementBridge(
                     )
                 }
 
-                ElementEvent.cardCreationError -> eventData.data.metadata?.let {
+                ElementsEvent.cardCreationError -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "cardCreationError",
@@ -50,7 +50,7 @@ class DeunaElementBridge(
                     )
                 }
 
-                ElementEvent.vaultSaveError -> eventData.data.metadata?.let {
+                ElementsEvent.vaultSaveError -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "vaultSaveError",
@@ -58,9 +58,9 @@ class DeunaElementBridge(
                     )
                 }
 
-                ElementEvent.vaultSaveSuccess -> handleSuccess(eventData)
-                ElementEvent.vaultClosed -> handleCloseEvent()
-                ElementEvent.cardSuccessfullyCreated -> handleSuccess(eventData)
+                ElementsEvent.vaultSaveSuccess -> handleSuccess(eventData)
+                ElementsEvent.vaultClosed -> handleCloseEvent()
+                ElementsEvent.cardSuccessfullyCreated -> handleSuccess(eventData)
                 else -> {
                     Log.d("DeUnaElementBridge", "Unhandled event: ${eventData.type}")
                     eventData.let {
@@ -88,7 +88,7 @@ class DeunaElementBridge(
 
     private fun handleError(message: String, type: String, response: ElementResponse) {
         callbacks.onError?.invoke(
-            ElementErrorMessage(
+            ElementsErrorMessage(
                 message,
                 type, // Internet Connection // Checkout failed
                 response.data.order,

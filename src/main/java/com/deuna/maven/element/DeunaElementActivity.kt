@@ -19,8 +19,8 @@ import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
-import com.deuna.maven.element.domain.DeunaElementBridge
-import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementsBridge
+import com.deuna.maven.element.domain.ElementsCallbacks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,8 +33,8 @@ class DeunaElementActivity : AppCompatActivity() {
         const val EXTRA_URL = "extra_url"
         const val LOGGING_ENABLED = "logging_enabled"
         const val CLOSE_ON_EVENTS = ""
-        var callbacks: ElementCallbacks? = null
-        fun setCallback(callback: ElementCallbacks?) {
+        var callbacks: ElementsCallbacks? = null
+        fun setCallback(callback: ElementsCallbacks?) {
             this.callbacks = callback
         }
     }
@@ -76,7 +76,7 @@ class DeunaElementActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(DeunaElementBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(ElementsBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {

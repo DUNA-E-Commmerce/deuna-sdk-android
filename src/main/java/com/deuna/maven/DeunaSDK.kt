@@ -11,7 +11,7 @@ import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.element.DeunaElementActivity
-import com.deuna.maven.element.domain.ElementCallbacks
+import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.shared.ApiGatewayUrl
 import com.deuna.maven.shared.ElementUrl
 import java.util.Locale
@@ -25,7 +25,7 @@ open class DeunaSDK {
     private var loggingEnabled: Boolean? = false
     private var context: Context? = null
     private var callbacks: Callbacks? = null
-    private var elementCallbacks: ElementCallbacks? = null
+    private var elementCallbacks: ElementsCallbacks? = null
     private var showCloseButton: Boolean = false
     private var apigatewayUrl: String = "https://api.dev.deuna.io"
 
@@ -49,7 +49,7 @@ open class DeunaSDK {
             closeOnEvents: Array<CheckoutEvent>? = null,
             context: Context,
             callbacks: Callbacks? = null,
-            elementCallbacks: ElementCallbacks? = null,
+            elementCallbacks: ElementsCallbacks? = null,
             showCloseButton: Boolean = false
         ) {
             instance = DeunaSDK().apply {
