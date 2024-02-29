@@ -1,6 +1,6 @@
 package com.deuna.maven.element.domain
 
-import ElementResponse
+import ElementsResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
@@ -30,7 +30,7 @@ class ElementsBridge(
     private fun handleEvent(eventTypeString: String) {
         try {
             val json = JSONObject(eventTypeString)
-            val eventData = ElementResponse.fromJson(json)
+            val eventData = ElementsResponse.fromJson(json)
             Log.d("DeUnaElementBridge", "handleEvent: $json")
             callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
@@ -80,13 +80,13 @@ class ElementsBridge(
         callbacks.onClose?.invoke()
     }
 
-    private fun handleSuccess(data: ElementResponse) {
+    private fun handleSuccess(data: ElementsResponse) {
         callbacks.onSuccess?.invoke(
             data
         )
     }
 
-    private fun handleError(message: String, type: String, response: ElementResponse) {
+    private fun handleError(message: String, type: String, response: ElementsResponse) {
         callbacks.onError?.invoke(
             ElementsErrorMessage(
                 message,

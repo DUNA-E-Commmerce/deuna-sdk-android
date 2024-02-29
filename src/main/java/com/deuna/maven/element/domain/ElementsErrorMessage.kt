@@ -1,8 +1,8 @@
 package com.deuna.maven.element.domain
 
-import ElementResponse
+import ElementsResponse
 
 data class ElementsErrorMessage(var message: String,
                                 var type: String,
-                                var order: ElementResponse.Order,
-                                var user: ElementResponse.User)
+                                var order: ElementsResponse.Order,
+                                var user: ElementsResponse.User)
