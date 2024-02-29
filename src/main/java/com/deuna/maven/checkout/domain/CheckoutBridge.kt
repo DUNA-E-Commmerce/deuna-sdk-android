@@ -13,7 +13,7 @@ import org.json.JSONObject
  * The DeUnaBridge class is used to receive messages from JavaScript code in a WebView.
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
-class DeunaCheckoutBridge(
+class CheckoutBridge(
     private val callbacks: Callbacks,
     private val closeOnEvents: ArrayList<String>? = null
 ) {

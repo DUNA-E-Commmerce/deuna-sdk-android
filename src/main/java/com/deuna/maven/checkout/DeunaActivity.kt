@@ -20,7 +20,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
-import com.deuna.maven.checkout.domain.DeunaCheckoutBridge
+import com.deuna.maven.checkout.domain.CheckoutBridge
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +95,7 @@ class DeunaActivity : AppCompatActivity() {
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
-        webView.addJavascriptInterface(DeunaCheckoutBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
+        webView.addJavascriptInterface(CheckoutBridge(callbacks!!, closeOnEvents), "android") // Add JavascriptInterface
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
