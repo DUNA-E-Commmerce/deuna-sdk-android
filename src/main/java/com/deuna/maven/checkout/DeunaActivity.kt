@@ -25,6 +25,7 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.CheckoutBridge
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
+import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import kotlinx.coroutines.CoroutineScope
@@ -197,26 +198,11 @@ class DeunaActivity : AppCompatActivity() {
 
     // Load a URL if there is an active internet connection.
     private fun loadUrlWithNetworkCheck(view: WebView, context: Context, url: String) {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        if ((networkCapabilities != null) && networkCapabilities.hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_INTERNET
-            )
-        ) {
-            view.loadUrl(url)
-        } else {
-            log("No internet connection")
-            callbacks?.onError?.invoke(
-                DeunaErrorMessage(
-                    "No internet connection",
-                    "",
-                    null,
-                    null
-                )
-            )
+        if (NetworkUtils(context).hasInternet) {
+            return view.loadUrl(url)
         }
+        log("No internet connection")
+        callbacks?.onError?.invoke(NetworkUtils.CHECKOUT_NO_INTERNET_ERROR)
     }
 
     // Log a message if logging is enabled.
