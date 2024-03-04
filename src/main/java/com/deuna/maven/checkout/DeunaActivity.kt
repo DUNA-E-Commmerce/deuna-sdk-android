@@ -275,10 +275,7 @@ class DeunaActivity : AppCompatActivity() {
 
             // The new WebView should be added and visible
             val layout = findViewById<RelativeLayout>(R.id.deuna_layout)
-
-            // fix The specified child already has a parent.
-            // You must call removeView() on the child's parent first.
-            layout.removeAllViews()
+            layout.removeAllViews() // remove previous rendered views in deuna_layout
             layout.addView(newWebView)
             newWebView.layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,

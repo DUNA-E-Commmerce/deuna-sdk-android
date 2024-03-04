@@ -14,6 +14,7 @@ import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.shared.ApiGatewayUrl
 import com.deuna.maven.shared.ElementUrl
+import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import java.util.Locale
 
 
@@ -93,11 +94,11 @@ open class DeunaSDK {
          * Close the DeUna SDK.
          */
         fun closeCheckout() {
-            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_CHECKOUT"))
+            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.CHECKOUT.value))
         }
 
         fun closeElements() {
-            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ELEMENTS"))
+            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.ELEMENTS.value))
         }
 
         /**
