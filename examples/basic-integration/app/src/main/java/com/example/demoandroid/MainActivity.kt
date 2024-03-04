@@ -124,18 +124,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             eventListener = { type, response ->
+                Log.d("👀 ${type.name}", response.data.toString())
                 if (response.type == CheckoutEvent.changeAddress) {
-                    Log.d("changeAddress", response.data.toString())
                     DeunaSDK.closeCheckout()
                 }
 
                 if (response.type == CheckoutEvent.changeCart) {
-                    Log.d("changeCart", response.data.toString())
                     DeunaSDK.closeCheckout()
                 }
 
                 if (response.type == CheckoutEvent.paymentProcessing) {
-                    Log.d("paymentProcessing", response.data.toString())
+//                    Log.d("paymentProcessing", response.data.toString())
                 }
             }
             onClose = {

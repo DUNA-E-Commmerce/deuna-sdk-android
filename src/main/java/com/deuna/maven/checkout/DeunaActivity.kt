@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Message
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -274,6 +275,10 @@ class DeunaActivity : AppCompatActivity() {
 
             // The new WebView should be added and visible
             val layout = findViewById<RelativeLayout>(R.id.deuna_layout)
+
+            // fix The specified child already has a parent.
+            // You must call removeView() on the child's parent first.
+            layout.removeAllViews()
             layout.addView(newWebView)
             newWebView.layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
