@@ -1,6 +1,6 @@
 package com.deuna.maven.element.domain
 
-enum class ElementEvent(val value: String) {
+enum class ElementsEvent(val value: String) {
     vaultClosed("vaultClosed"),
     vaultProcessing("vaultProcessing"),
     vaultSaveClick("vaultSaveClick"),

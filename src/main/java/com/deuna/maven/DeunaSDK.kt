@@ -5,34 +5,33 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
-import com.deuna.maven.checkout.Callbacks
-import com.deuna.maven.checkout.CheckoutEvents
+import com.deuna.maven.checkout.CheckoutCallbacks
+import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.ElementType
-import com.deuna.maven.checkout.domain.Environment
+import com.deuna.maven.shared.Environment
 import com.deuna.maven.element.DeunaElementActivity
-import com.deuna.maven.element.domain.ElementCallbacks
-import com.deuna.maven.element.domain.ElementEvent
+import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.shared.ApiGatewayUrl
 import com.deuna.maven.shared.ElementUrl
+import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import java.util.Locale
 
 
-open class DeUnaSdk {
+open class DeunaSDK {
     private lateinit var apiKey: String
     private lateinit var environment: Environment
-    private var baseUrl: String = ""
     private var elementUrl: String = "https://elements.deuna.io"
-    private var closeOnEvents: Array<CheckoutEvents>? = null
+    private var closeOnEvents: Array<CheckoutEvent>? = null
     private var loggingEnabled: Boolean? = false
     private var context: Context? = null
-    private var callbacks: Callbacks? = null
-    private var elementCallbacks: ElementCallbacks? = null
-    private var showCloseButton: Boolean? = null
+    private var callbacks: CheckoutCallbacks? = null
+    private var elementCallbacks: ElementsCallbacks? = null
+    private var showCloseButton: Boolean = false
     private var apigatewayUrl: String = "https://api.dev.deuna.io"
 
     companion object {
-        private lateinit var instance: DeUnaSdk
+        private lateinit var instance: DeunaSDK
 
         /**
          * Configure the DeUna SDK with the given parameters.
@@ -48,17 +47,15 @@ open class DeUnaSdk {
         fun config(
             apiKey: String? = null,
             environment: Environment,
-            closeOnEvents: Array<CheckoutEvents>? = null,
+            closeOnEvents: Array<CheckoutEvent>? = null,
             context: Context,
-            callbacks: Callbacks? = null,
-            elementCallbacks: ElementCallbacks? = null,
-            showCloseButton: Boolean? = null
+            callbacks: CheckoutCallbacks? = null,
+            elementCallbacks: ElementsCallbacks? = null,
+            showCloseButton: Boolean = false
         ) {
-            instance = DeUnaSdk().apply {
+            instance = DeunaSDK().apply {
 
-                if (showCloseButton != null) {
-                    this.showCloseButton = showCloseButton
-                }
+                this.showCloseButton = showCloseButton
 
                 if (callbacks != null) {
                     this.callbacks = callbacks
@@ -84,14 +81,11 @@ open class DeUnaSdk {
                     this.loggingEnabled = true
                 }
 
-                if (environment == Environment.STAGING) {
-                    this.apigatewayUrl = ApiGatewayUrl.STAGING.url
-                } else if (environment == Environment.PRODUCTION) {
-                    this.apigatewayUrl = ApiGatewayUrl.PRODUCTION.url
-                } else if (environment == Environment.SANDBOX) {
-                    this.apigatewayUrl = ApiGatewayUrl.SANDBOX.url
-                } else {
-                    this.apigatewayUrl = ApiGatewayUrl.DEVELOPMENT.url
+                this.apigatewayUrl = when (environment) {
+                    Environment.STAGING -> ApiGatewayUrl.STAGING.url
+                    Environment.PRODUCTION -> ApiGatewayUrl.PRODUCTION.url
+                    Environment.SANDBOX -> ApiGatewayUrl.SANDBOX.url
+                    Environment.DEVELOPMENT -> ApiGatewayUrl.DEVELOPMENT.url
                 }
             }
         }
@@ -100,11 +94,11 @@ open class DeUnaSdk {
          * Close the DeUna SDK.
          */
         fun closeCheckout() {
-            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_CHECKOUT"))
+            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.CHECKOUT.value))
         }
 
         fun closeElements() {
-            instance.context?.sendBroadcast(Intent("com.deuna.maven.CLOSE_ELEMENTS"))
+            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.ELEMENTS.value))
         }
 
         /**
@@ -159,16 +153,20 @@ open class DeUnaSdk {
          * @param element The element to use for the DeUna SDK.
          */
         private fun buildElementUrl(userToken: String, apiKey: String, element: ElementType) {
-            val url = when (instance.environment) {
-                Environment.DEVELOPMENT -> "${ElementUrl.DEVELOPMENT.url}/{type}"
-                Environment.STAGING -> "${ElementUrl.STAGING.url}/{type}"
-                Environment.PRODUCTION -> "${ElementUrl.PRODUCTION.url}/{type}"
-                Environment.SANDBOX -> "${ElementUrl.SANDBOX.url}/{type}"
-            }
+
+            val url = "${
+                when (instance.environment) {
+                    Environment.DEVELOPMENT -> ElementUrl.DEVELOPMENT.url
+                    Environment.STAGING -> ElementUrl.STAGING.url
+                    Environment.PRODUCTION -> ElementUrl.PRODUCTION.url
+                    Environment.SANDBOX -> ElementUrl.SANDBOX.url
+                }
+            }/{type}"
+
             instance.elementUrl = Uri.parse(url).buildUpon().apply {
                 appendQueryParameter("userToken", userToken)
                 appendQueryParameter("publicApiKey", apiKey)
-                if (instance.showCloseButton != null) {
+                if (instance.showCloseButton) {
                     appendQueryParameter("mode", "widget")
                 }
             }.build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))

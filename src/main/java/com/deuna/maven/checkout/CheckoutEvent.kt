@@ -1,6 +1,6 @@
 package com.deuna.maven.checkout
 
-enum class CheckoutEvents(val value: String) {
+enum class CheckoutEvent(val value: String) {
     purchaseRejected("purchaseRejected"),
     paymentProcessing("paymentProcessing"),
     purchaseError("purchaseError"),
