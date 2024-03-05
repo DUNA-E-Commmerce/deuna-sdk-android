@@ -192,3 +192,4 @@ class DeunaElementActivity : AppCompatActivity() {
         layout.visibility = if (show) View.VISIBLE else View.INVISIBLE
     }
 }
+

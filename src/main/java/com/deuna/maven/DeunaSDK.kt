@@ -5,7 +5,6 @@ import com.deuna.maven.shared.Environment
 import java.lang.IllegalStateException
 
 
-
 /**
  * Class representing the Deuna SDK.
  *
@@ -54,8 +53,9 @@ open class DeunaSDK(
             environment: Environment,
             publicApiKey: String,
             privateApiKey: String,
-        ) {
+        ): DeunaSDK {
             instance = DeunaSDK(environment, publicApiKey, privateApiKey)
+            return instance!!
         }
     }
 }
