@@ -1,8 +1,8 @@
-import com.deuna.maven.element.domain.ElementEvent
+import com.deuna.maven.element.domain.ElementsEvent
 import org.json.JSONObject
 
-data class ElementResponse(
-    val type: ElementEvent,
+data class ElementsResponse(
+    val type: ElementsEvent,
     val data: Data
 ) {
     data class Data(
@@ -96,7 +96,7 @@ data class ElementResponse(
     )
 
     companion object {
-        fun fromJson(json: JSONObject): ElementResponse {
+        fun fromJson(json: JSONObject): ElementsResponse {
             val data = json.getJSONObject("data")
             val user = data.getJSONObject("user").let {
                 User(
@@ -195,7 +195,7 @@ data class ElementResponse(
                 )
             }
             val dataResponse = Data(user, order, merchant, data.getString("checkoutVersion"), schemaRegistry, metadata)
-            return ElementResponse(ElementEvent.valueOf(json.getString("type")), dataResponse)
+            return ElementsResponse(ElementsEvent.valueOf(json.getString("type")), dataResponse)
         }
     }
 }

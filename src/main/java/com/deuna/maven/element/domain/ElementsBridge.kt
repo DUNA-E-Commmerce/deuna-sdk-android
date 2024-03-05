@@ -1,20 +1,19 @@
 package com.deuna.maven.element.domain
 
-import ElementResponse
-import android.app.Activity
+import ElementsResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.DeUnaSdk
+import com.deuna.maven.DeunaSDK
 import org.json.JSONObject
 
 /**
  * The DeUnaElementBridge class is used to receive messages from JavaScript code in a WebView.
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
-class DeUnaElementBridge(
-    private val callbacks: ElementCallbacks,
-    private val activity: Activity,
-    private val closeOnEvents: ArrayList<String>? = null
+class ElementsBridge(
+    private val callbacks: ElementsCallbacks,
+    private val closeOnEvents: ArrayList<String>? = null,
+    private val closeElements: () -> Unit
 ) {
     /**
      * The postMessage function is called when a message is received from JavaScript code in a WebView.
@@ -32,11 +31,11 @@ class DeUnaElementBridge(
     private fun handleEvent(eventTypeString: String) {
         try {
             val json = JSONObject(eventTypeString)
-            val eventData = ElementResponse.fromJson(json)
+            val eventData = ElementsResponse.fromJson(json)
             Log.d("DeUnaElementBridge", "handleEvent: $json")
-            callbacks.eventListener?.invoke(eventData, eventData.type)
+            callbacks.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
-                ElementEvent.vaultFailed -> eventData.data.metadata?.let {
+                ElementsEvent.vaultFailed -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "vaultFailed",
@@ -44,7 +43,7 @@ class DeUnaElementBridge(
                     )
                 }
 
-                ElementEvent.cardCreationError -> eventData.data.metadata?.let {
+                ElementsEvent.cardCreationError -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "cardCreationError",
@@ -52,7 +51,7 @@ class DeUnaElementBridge(
                     )
                 }
 
-                ElementEvent.vaultSaveError -> eventData.data.metadata?.let {
+                ElementsEvent.vaultSaveError -> eventData.data.metadata?.let {
                     handleError(
                         it.errorMessage,
                         "vaultSaveError",
@@ -60,15 +59,15 @@ class DeUnaElementBridge(
                     )
                 }
 
-                ElementEvent.vaultSaveSuccess -> handleSuccess(eventData)
-                ElementEvent.vaultClosed -> handleCloseEvent()
-                ElementEvent.cardSuccessfullyCreated -> handleSuccess(eventData)
+                ElementsEvent.vaultSaveSuccess -> handleSuccess(eventData)
+                ElementsEvent.vaultClosed -> handleCloseEvent()
+                ElementsEvent.cardSuccessfullyCreated -> handleSuccess(eventData)
                 else -> {
                     Log.d("DeUnaElementBridge", "Unhandled event: ${eventData.type}")
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
                             callbacks.onClose?.invoke()
-                            DeUnaSdk.closeElements()
+                            closeElements()
                         }
                     }
                 }
@@ -79,18 +78,18 @@ class DeUnaElementBridge(
     }
 
     private fun handleCloseEvent() {
-       callbacks.onClose?.invoke()
+        callbacks.onClose?.invoke()
     }
 
-    private fun handleSuccess(data: ElementResponse) {
+    private fun handleSuccess(data: ElementsResponse) {
         callbacks.onSuccess?.invoke(
             data
         )
     }
 
-    private fun handleError(message: String, type: String, response: ElementResponse) {
+    private fun handleError(message: String, type: String, response: ElementsResponse) {
         callbacks.onError?.invoke(
-            ElementErrorMessage(
+            ElementsErrorMessage(
                 message,
                 type, // Internet Connection // Checkout failed
                 response.data.order,
