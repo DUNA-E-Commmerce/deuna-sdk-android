@@ -26,6 +26,7 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.CheckoutBridge
 import com.deuna.maven.checkout.domain.DeunaErrorMessage
 import com.deuna.maven.client.sendOrder
+import com.deuna.maven.closeCheckout
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
@@ -109,7 +110,13 @@ class DeunaActivity : AppCompatActivity() {
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
         webView.addJavascriptInterface(
-            CheckoutBridge(callbacks!!, closeOnEvents),
+            CheckoutBridge(
+                callbacks = callbacks!!,
+                closeOnEvents = closeOnEvents,
+                closeCheckout = {
+                    closeCheckout(this)
+                }
+            ),
             "android"
         ) // Add JavascriptInterface
 

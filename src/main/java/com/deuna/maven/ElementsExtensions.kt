@@ -78,5 +78,12 @@ private fun buildElementUrl(
  * @param context The application or activity context
  */
 fun DeunaSDK.closeElements(context: Context) {
+    com.deuna.maven.closeElements(context)
+}
+
+/**
+ * Global function used to send a broadcast event to close the elements view
+ */
+fun closeElements(context: Context) {
     context.sendBroadcast(Intent(DeunaBroadcastReceiverAction.ELEMENTS.value))
 }

@@ -19,6 +19,7 @@ import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
 import com.deuna.maven.checkout.DeunaActivity
+import com.deuna.maven.closeElements
 import com.deuna.maven.element.domain.ElementsBridge
 import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.element.domain.ElementsErrorMessage
@@ -85,7 +86,13 @@ class DeunaElementActivity : AppCompatActivity() {
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
         webView.addJavascriptInterface(
-            ElementsBridge(callbacks!!, closeOnEvents),
+            ElementsBridge(
+                callbacks = callbacks!!,
+                closeOnEvents = closeOnEvents,
+                closeElements = {
+                    closeElements(this)
+                }
+            ),
             "android"
         ) // Add JavascriptInterface
 

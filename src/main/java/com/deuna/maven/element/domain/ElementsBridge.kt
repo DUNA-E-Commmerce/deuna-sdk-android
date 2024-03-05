@@ -12,7 +12,8 @@ import org.json.JSONObject
  */
 class ElementsBridge(
     private val callbacks: ElementsCallbacks,
-    private val closeOnEvents: ArrayList<String>? = null
+    private val closeOnEvents: ArrayList<String>? = null,
+    private val closeElements: () -> Unit
 ) {
     /**
      * The postMessage function is called when a message is received from JavaScript code in a WebView.
@@ -66,7 +67,7 @@ class ElementsBridge(
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
                             callbacks.onClose?.invoke()
-                            DeunaSDK.closeElements()
+                            closeElements()
                         }
                     }
                 }

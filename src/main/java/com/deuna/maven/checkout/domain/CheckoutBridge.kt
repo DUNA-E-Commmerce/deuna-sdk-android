@@ -15,7 +15,8 @@ import org.json.JSONObject
  */
 class CheckoutBridge(
     private val callbacks: CheckoutCallbacks,
-    private val closeOnEvents: ArrayList<String>? = null
+    private val closeOnEvents: ArrayList<String>? = null,
+    private val closeCheckout: () -> Unit
 ) {
     /**
      * Called when the activity is starting.
@@ -61,7 +62,7 @@ class CheckoutBridge(
                     eventData.let {
                         if (closeOnEvents?.contains(it.type.value) == true) {
                             callbacks.onClose?.invoke()
-                            DeunaSDK.closeCheckout()
+                            closeCheckout()
                         }
                     }
                 }
