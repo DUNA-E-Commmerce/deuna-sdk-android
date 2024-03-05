@@ -18,7 +18,7 @@ import java.lang.IllegalStateException
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeOnEvents (Optional) An array of CheckoutEvent values specifying when to close the checkout activity automatically.
  *
- * @throws IllegalStateException if the passed orderToken is not valid
+ * @throws IllegalArgumentExceptio if the passed orderToken is not valid
  */
 fun DeunaSDK.initCheckout(
     context: Context,
@@ -26,6 +26,10 @@ fun DeunaSDK.initCheckout(
     callbacks: CheckoutCallbacks,
     closeOnEvents: Array<CheckoutEvent>? = null,
 ) {
+    require(orderToken.isNotEmpty()) {
+        "orderToken must not be empty"
+    }
+
     val closeEvents = closeOnEvents ?: emptyArray()
     val apiKey = this.privateApiKey
     val baseUrl = this.environment.checkoutBaseUrl
@@ -48,14 +52,14 @@ fun DeunaSDK.initCheckout(
  *
  * @param context The application or activity context
  */
-fun DeunaSDK.closeCheckout(context: Context){
-   com.deuna.maven.closeCheckout(context)
+fun DeunaSDK.closeCheckout(context: Context) {
+    com.deuna.maven.closeCheckout(context)
 }
 
 /**
  * Global function used to send a broadcast event to close the checkout view
  */
-fun closeCheckout(context: Context){
+fun closeCheckout(context: Context) {
     context.sendBroadcast(
         Intent(DeunaBroadcastReceiverAction.CHECKOUT.value)
     )

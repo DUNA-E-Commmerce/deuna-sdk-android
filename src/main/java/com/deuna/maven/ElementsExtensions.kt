@@ -31,18 +31,24 @@ fun DeunaSDK.initElements(
     showCloseButton: Boolean = false,
     closeOnEvents: Array<ElementsEvent>? = null,
 ) {
+    require(userToken.isNotEmpty()) {
+        "userToken must not be empty"
+    }
+
     val closeEvents = closeOnEvents ?: emptyArray()
     val apiKey = this.publicApiKey
+    val baseUrl = this.environment.elementsBaseUrl
 
     DeunaElementActivity.setCallback(callbacks)
 
-    val elementUrl = buildElementUrl(
-        baseUrl = this.environment.elementsBaseUrl,
-        element = element,
-        userToken = userToken,
-        apiKey = apiKey,
-        showCloseButton = showCloseButton
-    )
+    val mode = if (showCloseButton) "widget" else ""
+    val elementUrl =Uri.parse("$baseUrl/{type}")
+        .buildUpon()
+        .appendQueryParameter("userToken", userToken)
+        .appendQueryParameter("publicApiKey", apiKey)
+        .appendQueryParameter("mode", mode)
+        .build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
+
 
     val intent = Intent(context, DeunaElementActivity::class.java).apply {
         putExtra(DeunaElementActivity.EXTRA_URL, elementUrl)
@@ -53,22 +59,6 @@ fun DeunaSDK.initElements(
         )
     }
     context.startActivity(intent)
-}
-
-private fun buildElementUrl(
-    baseUrl: String,
-    element: ElementType,
-    userToken: String,
-    apiKey: String,
-    showCloseButton: Boolean
-): String {
-    val mode = if (showCloseButton) "widget" else ""
-    return Uri.parse("$baseUrl/{type}")
-        .buildUpon()
-        .appendQueryParameter("userToken", userToken)
-        .appendQueryParameter("publicApiKey", apiKey)
-        .appendQueryParameter("mode", mode)
-        .build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
 }
 
 
