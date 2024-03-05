@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
         DeunaSDK.initializeSingleton(
             environment = environment,
-            privateApiKey = "YOUR_PUBLIC_API_KEY",
+            privateApiKey = "YOUR_PRIVATE_API_KEY",
             publicApiKey = apiKey
         )
     }
