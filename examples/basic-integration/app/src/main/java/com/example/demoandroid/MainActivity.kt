@@ -17,14 +17,18 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.CheckoutCallbacks
 import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.domain.ElementType
+import com.deuna.maven.closeCheckout
+import com.deuna.maven.closeElements
 import com.deuna.maven.element.domain.ElementsCallbacks
+import com.deuna.maven.element.domain.ElementsEvent
+import com.deuna.maven.initCheckout
+import com.deuna.maven.initElements
 import com.deuna.maven.shared.Environment
 
 // PASO 1: Importar librería de DEUNA
 
 class MainActivity : AppCompatActivity() {
     private var orderToken = ""
-    private var userToken = ""
     private var apiKey = ""
     private var environment: Environment = Environment.STAGING
 
@@ -85,31 +89,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureForCheckout() {
         val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
-        DeunaSDK.config(
-            apiKey = apiKey,
+        DeunaSDK.initializeSingleton(
             environment = environment,
-            context = this@MainActivity,
-            callbacks = createCheckoutCallbacks()
+            privateApiKey = apiKey,
+            publicApiKey = "YOUR_PUBLIC_API_KEY"
         )
     }
 
     private fun configureForElements() {
         val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
 
-        DeunaSDK.config(
-            apiKey = apiKey,
+        DeunaSDK.initializeSingleton(
             environment = environment,
-            context = this@MainActivity,
-            elementCallbacks = createElementCallbacks(),
-            closeOnEvents = arrayOf(CheckoutEvent.linkFailed),
-            showCloseButton = true
+            privateApiKey = "YOUR_PUBLIC_API_KEY",
+            publicApiKey = apiKey
         )
     }
 
     private fun createCheckoutCallbacks(): CheckoutCallbacks {
         return CheckoutCallbacks().apply {
             onSuccess = { response ->
-                DeunaSDK.closeCheckout()
+                closeCheckout()
                 if (response.type == CheckoutEvent.purchase) {
                     Log.d("purchase", response.data.order.payment.data.status)
                 }
@@ -120,17 +120,17 @@ class MainActivity : AppCompatActivity() {
             onError = { error ->
                 if (error != null) {
                     Log.d("Error ", error.toString())
-                    DeunaSDK.closeCheckout()
+                    closeCheckout()
                 }
             }
             eventListener = { type, response ->
                 Log.d("👀 ${type.name}", response.data.toString())
                 if (response.type == CheckoutEvent.changeAddress) {
-                    DeunaSDK.closeCheckout()
+                    closeCheckout()
                 }
 
                 if (response.type == CheckoutEvent.changeCart) {
-                    DeunaSDK.closeCheckout()
+                    closeCheckout()
                 }
 
                 if (response.type == CheckoutEvent.paymentProcessing) {
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
             }
             onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
-                DeunaSDK.closeCheckout()
+                closeCheckout()
             }
         }
     }
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
         return ElementsCallbacks().apply {
             onSuccess = { response ->
                 Log.d("closeElements Success", response.data.toString())
-                DeunaSDK.closeElements() // No cerró, revisar
+                closeElements() // No cerró, revisar
                 Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                     startActivity(this)
                 }
@@ -158,13 +158,13 @@ class MainActivity : AppCompatActivity() {
             }
             onError = { error ->
                 if (error != null) {
-                    DeunaSDK.closeElements()
+                    closeElements()
                     Log.d("DeunaSdkOnError", error.message)
                 }
             }
             onClose = {
                 Log.d("DeunaSdkOnClose", "onClose")
-                DeunaSDK.closeElements()
+                closeElements()
             }
         }
     }
@@ -172,13 +172,32 @@ class MainActivity : AppCompatActivity() {
     private fun initCheckout() {
         configureForCheckout()
         val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString()
-        DeunaSDK.initCheckout(orderToken = orderToken)
+        DeunaSDK.shared.initCheckout(
+            context = this,
+            orderToken = orderToken,
+            callbacks = createCheckoutCallbacks(),
+            closeOnEvents = arrayOf(CheckoutEvent.linkFailed)
+        )
     }
 
 
     private fun initElements() {
         configureForElements()
         val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
-        DeunaSDK.initElements(element = ElementType.VAULT, userToken = userToken)
+        DeunaSDK.shared.initElements(
+            context = this,
+            userToken = userToken,
+            callbacks = createElementCallbacks(),
+            element = ElementType.VAULT,
+            showCloseButton = true
+        )
+    }
+
+    private fun closeCheckout() {
+        DeunaSDK.shared.closeCheckout(this)
+    }
+
+    private fun closeElements() {
+        DeunaSDK.shared.closeElements(this)
     }
 }
