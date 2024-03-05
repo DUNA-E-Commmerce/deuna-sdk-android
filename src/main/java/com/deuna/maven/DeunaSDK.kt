@@ -1,175 +1,61 @@
 package com.deuna.maven
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
-import com.deuna.maven.checkout.CheckoutCallbacks
-import com.deuna.maven.checkout.CheckoutEvent
-import com.deuna.maven.checkout.DeunaActivity
-import com.deuna.maven.checkout.domain.ElementType
+
 import com.deuna.maven.shared.Environment
-import com.deuna.maven.element.DeunaElementActivity
-import com.deuna.maven.element.domain.ElementsCallbacks
-import com.deuna.maven.shared.ApiGatewayUrl
-import com.deuna.maven.shared.ElementUrl
-import com.deuna.maven.utils.DeunaBroadcastReceiverAction
-import java.util.Locale
+import java.lang.IllegalStateException
 
 
-open class DeunaSDK {
-    private lateinit var apiKey: String
-    private lateinit var environment: Environment
-    private var elementUrl: String = "https://elements.deuna.io"
-    private var closeOnEvents: Array<CheckoutEvent>? = null
-    private var loggingEnabled: Boolean? = false
-    private var context: Context? = null
-    private var callbacks: CheckoutCallbacks? = null
-    private var elementCallbacks: ElementsCallbacks? = null
-    private var showCloseButton: Boolean = false
-    private var apigatewayUrl: String = "https://api.dev.deuna.io"
+
+/**
+ * Class representing the Deuna SDK.
+ *
+ * @property environment The Deuna environment (Environment.PRODUCTION, Environment.DEVELOPMENT, etc).
+ * @property publicApiKey The public API key to access Deuna services (for elements operations).
+ * @property privateApiKey The private API key to access Deuna services (for checkout operations).
+ */
+open class DeunaSDK(
+    val environment: Environment,
+    val publicApiKey: String,
+    val privateApiKey: String,
+) {
+
+    init {
+        require(publicApiKey.isNotEmpty() && privateApiKey.isNotEmpty()) {
+            "Public and private API keys must not be empty"
+        }
+    }
+
 
     companion object {
-        private lateinit var instance: DeunaSDK
+        // Unique instance of the Deuna SDK
+        private var instance: DeunaSDK? = null
 
         /**
-         * Configure the DeUna SDK with the given parameters.
-         * @param apiKey The API key to use for the DeUna SDK.
-         * @param environment The environment to use for the DeUna SDK.
-         * @param closeOnEvents The events to close the DeUna SDK on.
-         * @param context The context to use for the DeUna SDK.
-         * @param callbacks The callbacks to use for the DeUna SDK.
-         * @param elementCallbacks The element callbacks to use for the DeUna SDK.
-         * @param showCloseButton Whether to show the close button in the DeUna SDK.
-         * @throws IllegalStateException if the SDK has already been configured.
+         * Gets the shared instance of the Deuna SDK.
+         *
+         * @throws IllegalStateException if DeunaSDK.initializeSingleton is not called before accessing this instance.
+         * @return The same instance of DeunaSDK
          */
-        fun config(
-            apiKey: String? = null,
+        val shared: DeunaSDK
+            get() {
+                return instance ?: throw IllegalStateException(
+                    "DeunaSDK.initializeSingleton must be called before accessing shared instance"
+                )
+            }
+
+        /**
+         * Registers an unique instance of the Deuna SDK.
+         *
+         * @param environment The Deuna environment (Environment.PRODUCTION, Environment.DEVELOPMENT, etc).
+         * @param publicApiKey The public API key to access Deuna services.
+         * @param privateApiKey The private API key to access Deuna services.
+         */
+        fun initializeSingleton(
             environment: Environment,
-            closeOnEvents: Array<CheckoutEvent>? = null,
-            context: Context,
-            callbacks: CheckoutCallbacks? = null,
-            elementCallbacks: ElementsCallbacks? = null,
-            showCloseButton: Boolean = false
+            publicApiKey: String,
+            privateApiKey: String,
         ) {
-            instance = DeunaSDK().apply {
-
-                this.showCloseButton = showCloseButton
-
-                if (callbacks != null) {
-                    this.callbacks = callbacks
-                }
-
-                if (elementCallbacks != null) {
-                    this.elementCallbacks = elementCallbacks
-                }
-
-                if (apiKey != null) {
-                    this.apiKey = apiKey
-                }
-
-                this.context = context
-
-                if (closeOnEvents != null) {
-                    this.closeOnEvents = closeOnEvents
-                }
-
-                this.environment = environment
-
-                if (environment == Environment.DEVELOPMENT) {
-                    this.loggingEnabled = true
-                }
-
-                this.apigatewayUrl = when (environment) {
-                    Environment.STAGING -> ApiGatewayUrl.STAGING.url
-                    Environment.PRODUCTION -> ApiGatewayUrl.PRODUCTION.url
-                    Environment.SANDBOX -> ApiGatewayUrl.SANDBOX.url
-                    Environment.DEVELOPMENT -> ApiGatewayUrl.DEVELOPMENT.url
-                }
-            }
-        }
-
-        /**
-         * Close the DeUna SDK.
-         */
-        fun closeCheckout() {
-            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.CHECKOUT.value))
-        }
-
-        fun closeElements() {
-            instance.context?.sendBroadcast(Intent(DeunaBroadcastReceiverAction.ELEMENTS.value))
-        }
-
-        /**
-         * Initialize the DeUna SDK Checkout with the configured parameters.
-         * @param orderToken The order token to use for the DeUna SDK.
-         * @throws IllegalStateException if the SDK has not been configured.
-         */
-        fun initCheckout(
-            orderToken: String
-        ) {
-            instance.closeOnEvents = instance.closeOnEvents ?: emptyArray()
-            DeunaActivity.setCallback(instance.callbacks)
-            Intent(instance.context!!, DeunaActivity::class.java).apply {
-                putExtra(DeunaActivity.ORDER_TOKEN, orderToken)
-                putExtra(DeunaActivity.API_KEY, instance.apiKey)
-                putExtra(DeunaActivity.BASE_URL, instance.apigatewayUrl)
-                putExtra(DeunaActivity.LOGGING_ENABLED, instance.loggingEnabled)
-                putStringArrayListExtra(
-                    DeunaActivity.CLOSE_ON_EVENTS,
-                    ArrayList(instance.closeOnEvents!!.map { it.name })
-                )
-                startActivity(instance.context!!, this, null)
-            }
-        }
-
-        /**
-         * Initialize the DeUna SDK Elements with the configured parameters.
-         * @param element The element to initialize.
-         * @param userToken The user token to use for the DeUna SDK.
-         * @throws IllegalStateException if the SDK has not been configured.
-         */
-        fun initElements(element: ElementType, userToken: String) {
-            instance.closeOnEvents = instance.closeOnEvents ?: emptyArray()
-            DeunaElementActivity.setCallback(instance.elementCallbacks)
-            buildElementUrl(userToken, instance.apiKey, element)
-            Log.d("elementUrl", instance.elementUrl)
-            Intent(instance.context!!, DeunaElementActivity::class.java).also {
-                it.putExtra(DeunaElementActivity.EXTRA_URL, instance.elementUrl)
-                it.putExtra(DeunaElementActivity.LOGGING_ENABLED, instance.loggingEnabled)
-                it.putStringArrayListExtra(
-                    DeunaElementActivity.CLOSE_ON_EVENTS,
-                    ArrayList(instance.closeOnEvents!!.map { it.name })
-                )
-                startActivity(instance.context!!, it, null)
-            }
-        }
-
-        /**
-         * Build the element URL with the given parameters.
-         * @param userToken The user token to use for the DeUna SDK.
-         * @param apiKey The API key to use for the DeUna SDK.
-         * @param element The element to use for the DeUna SDK.
-         */
-        private fun buildElementUrl(userToken: String, apiKey: String, element: ElementType) {
-
-            val url = "${
-                when (instance.environment) {
-                    Environment.DEVELOPMENT -> ElementUrl.DEVELOPMENT.url
-                    Environment.STAGING -> ElementUrl.STAGING.url
-                    Environment.PRODUCTION -> ElementUrl.PRODUCTION.url
-                    Environment.SANDBOX -> ElementUrl.SANDBOX.url
-                }
-            }/{type}"
-
-            instance.elementUrl = Uri.parse(url).buildUpon().apply {
-                appendQueryParameter("userToken", userToken)
-                appendQueryParameter("publicApiKey", apiKey)
-                if (instance.showCloseButton) {
-                    appendQueryParameter("mode", "widget")
-                }
-            }.build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
+            instance = DeunaSDK(environment, publicApiKey, privateApiKey)
         }
     }
 }
