@@ -19,7 +19,7 @@ import java.util.Locale
  * @param userToken The user token
  * @param context The application or activity context
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
- * @param closeOnEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
+ * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  *
  * @throws IllegalStateException if the passed userToken is not valid
  */
@@ -29,13 +29,12 @@ fun DeunaSDK.initElements(
     element: ElementType,
     callbacks: ElementsCallbacks,
     showCloseButton: Boolean = false,
-    closeOnEvents: Array<ElementsEvent>? = null,
+    closeEvents: Set<ElementsEvent> = emptySet(),
 ) {
     require(userToken.isNotEmpty()) {
         "userToken must not be empty"
     }
 
-    val closeEvents = closeOnEvents ?: emptyArray()
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.elementsBaseUrl
 

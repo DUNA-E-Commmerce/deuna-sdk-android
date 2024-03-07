@@ -3,9 +3,6 @@ package com.deuna.maven.element
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
@@ -18,11 +15,9 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
-import com.deuna.maven.checkout.DeunaActivity
+import com.deuna.maven.checkout.*
 import com.deuna.maven.closeElements
-import com.deuna.maven.element.domain.ElementsBridge
-import com.deuna.maven.element.domain.ElementsCallbacks
-import com.deuna.maven.element.domain.ElementsErrorMessage
+import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
@@ -37,7 +32,7 @@ class DeunaElementActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_URL = "extra_url"
         const val LOGGING_ENABLED = "logging_enabled"
-        const val CLOSE_ON_EVENTS = ""
+        const val CLOSE_ON_EVENTS = "CLOSE_EVENTS"
         var callbacks: ElementsCallbacks? = null
         fun setCallback(callback: ElementsCallbacks?) {
             this.callbacks = callback
@@ -60,7 +55,17 @@ class DeunaElementActivity : AppCompatActivity() {
         val webView: WebView = findViewById(R.id.deuna_webview_element)
 
         scope.launch {
-            setupWebView(webView, intent.getStringArrayListExtra(DeunaActivity.CLOSE_ON_EVENTS))
+            val closeEventAsStrings = intent.getStringArrayListExtra(CLOSE_ON_EVENTS) ?: emptyList<String>()
+
+            val closeEvents = closeEventAsStrings.mapNotNull { stringValue ->
+                try {
+                    enumValueOf<ElementsEvent>(stringValue)
+                } catch (e: IllegalArgumentException) {
+                    null // Ignore invalid enum constant names
+                }
+            }.toSet()
+
+            setupWebView(webView, closeEvents)
             if (url != null) {
                 loadUrlWithNetworkCheck(webView, this@DeunaElementActivity, url)
                 BroadcastReceiverUtils.register(
@@ -79,7 +84,7 @@ class DeunaElementActivity : AppCompatActivity() {
     }
 
     // Setup the WebView with necessary settings and JavascriptInterface.
-    private fun setupWebView(webView: WebView, closeOnEvents: ArrayList<String>? = null) {
+    private fun setupWebView(webView: WebView, closeOnEvents: Set<ElementsEvent>) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true

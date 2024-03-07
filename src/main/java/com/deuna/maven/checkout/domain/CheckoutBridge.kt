@@ -10,12 +10,12 @@ import org.json.JSONException
 import org.json.JSONObject
 
 /**
- * The DeUnaBridge class is used to receive messages from JavaScript code in a WebView.
+ * The CheckoutBridge class is used to receive messages from JavaScript code in a WebView.
  * The messages are parsed and the corresponding callbacks are called based on the event type.
  */
 class CheckoutBridge(
     private val callbacks: CheckoutCallbacks,
-    private val closeOnEvents: ArrayList<String>? = null,
+    private val closeOnEvents: Set<CheckoutEvent>,
     private val closeCheckout: () -> Unit
 ) {
     /**
@@ -62,9 +62,9 @@ class CheckoutBridge(
                 }
 
                 else -> {
-                    Log.d("DeUnaBridge", "Unhandled event: $eventData")
+                    Log.d("CheckoutBridge", "Unhandled event: $eventData")
                     eventData.let {
-                        if (closeOnEvents?.contains(it.type.value) == true) {
+                        if (closeOnEvents.contains(it.type)) {
                             callbacks.onClose?.invoke()
                             closeCheckout()
                         }
@@ -72,7 +72,7 @@ class CheckoutBridge(
                 }
             }
         } catch (e: JSONException) {
-            Log.d("DeUnaBridge", "JSONException: $e")
+            Log.d("CheckoutBridge", "JSONException: $e")
         }
     }
 
