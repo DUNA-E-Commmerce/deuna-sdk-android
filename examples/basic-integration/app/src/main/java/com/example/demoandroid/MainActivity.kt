@@ -92,14 +92,6 @@ class MainActivity : AppCompatActivity() {
       }
       eventListener = { type, _ ->
         Log.d(DEBUG_TAG, "eventListener ${type.name}")
-
-        when (type) {
-          CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-            closeCheckout()
-          }
-
-          else -> {}
-        }
       }
       onClose = {
         Log.d(DEBUG_TAG, "Checkout was closed")
@@ -110,7 +102,7 @@ class MainActivity : AppCompatActivity() {
       context = this,
       orderToken = orderToken,
       callbacks = callbacks,
-      closeOnEvents = arrayOf(CheckoutEvent.linkFailed)
+      closeEvents = setOf(CheckoutEvent.linkFailed, CheckoutEvent.changeCart, CheckoutEvent.changeAddress)
     )
   }
 
