@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         }
       }
       onError = {
-        Log.e(ERROR_TAG, it?.message ?: "Unknown error")
+        Log.e(ERROR_TAG, it?.type?.message ?: "Unknown error")
         closeCheckout()
       }
       eventListener = { type, _ ->
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(DEBUG_TAG, "eventListener ${type.name}")
       }
       onError = {
-        Log.e(ERROR_TAG, it?.message ?: "Unknown error")
+        Log.e(ERROR_TAG, it?.type?.message ?: "Unknown error")
         closeElements()
       }
       onClose = {

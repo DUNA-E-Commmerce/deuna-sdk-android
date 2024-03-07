@@ -17,10 +17,10 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
-import com.deuna.maven.checkout.domain.CheckoutBridge
+import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.client.sendOrder
 import com.deuna.maven.closeCheckout
-import com.deuna.maven.shared.NetworkUtils
+import com.deuna.maven.shared.*
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import kotlinx.coroutines.CoroutineScope
@@ -73,8 +73,6 @@ class DeunaActivity : AppCompatActivity() {
           null // Ignore invalid enum constant names
         }
       }.toSet()
-
-      Log.d("✅ closeEvents ",closeEvents.size.toString())
 
       getOrderApi(
         intent.getStringExtra(BASE_URL)!!,
@@ -185,22 +183,24 @@ class DeunaActivity : AppCompatActivity() {
             launchActivity(cleanUrl(parsedUrl.toString()), closeOnEvents)
           }
         } else {
-          Toast.makeText(
-            this@DeunaActivity,
-            "Error al obtener la orden",
-            Toast.LENGTH_LONG
-          ).show()
+          handleOrderError()
         }
       }
 
       override fun onFailure(call: Call<Any>, t: Throwable) {
-        Toast.makeText(
-          this@DeunaActivity,
-          "Error al obtener la orden",
-          Toast.LENGTH_LONG
-        ).show()
+        handleOrderError()
       }
     })
+  }
+
+  private fun handleOrderError(){
+    callbacks?.onError?.invoke(
+      DeunaErrorMessage(
+        type = DeunaSDKError.ORDER_NOT_FOUND,
+        order = null,
+        user = null
+      )
+    )
   }
 
   // Load a URL if there is an active internet connection.

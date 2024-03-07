@@ -1,10 +1,11 @@
 package com.deuna.maven.element.domain
 
 import ElementsResponse
+import com.deuna.maven.shared.*
 
 data class ElementsErrorMessage(
-    var message: String,
-    var type: String,
+    var type: DeunaSDKError,
     var order: ElementsResponse.Order?,
     var user: ElementsResponse.User?
 )
+

@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.*
+import com.deuna.maven.shared.*
 import org.json.JSONObject
 
 /**
@@ -43,8 +44,6 @@ class ElementsBridge(
 
         ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> eventData.data.metadata?.let {
           handleError(
-            it.errorMessage,
-            eventData.type.name,
             eventData
           )
         }
@@ -71,11 +70,10 @@ class ElementsBridge(
     )
   }
 
-  private fun handleError(message: String, type: String, response: ElementsResponse) {
+  private fun handleError(response: ElementsResponse) {
     callbacks.onError?.invoke(
       ElementsErrorMessage(
-        message,
-        type, // Internet Connection // Checkout failed
+        DeunaSDKError.VAULT_SAVE_ERROR,
         response.data.order,
         response.data.user
       )
