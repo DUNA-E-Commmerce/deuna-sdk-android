@@ -31,7 +31,7 @@ To use the SDK you need to create one instance of `DeunaSDK`. There are 2 ways t
 1. Registing a singleton to use the same instance in any part of your code
 
     ```kotlin
-    DeunaSDK.initializeSingleton(
+    DeunaSDK.initialize(
         environment = Environment.DEVELOPMENT, // Environment.PRODUCTION , etc
         privateApiKey = "YOUR_PRIVATE_API_KEY",
         publicApiKey = "YOUR_PUBLIC_API_KEY"

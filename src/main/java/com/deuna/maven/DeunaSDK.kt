@@ -32,13 +32,13 @@ open class DeunaSDK(
         /**
          * Gets the shared instance of the Deuna SDK.
          *
-         * @throws IllegalStateException if DeunaSDK.initializeSingleton is not called before accessing this instance.
+         * @throws IllegalStateException if DeunaSDK.initialize is not called before accessing this instance.
          * @return The same instance of DeunaSDK
          */
         val shared: DeunaSDK
             get() {
                 return instance ?: throw IllegalStateException(
-                    "DeunaSDK.initializeSingleton must be called before accessing shared instance"
+                    "DeunaSDK.initialize must be called before accessing shared instance"
                 )
             }
 
@@ -49,13 +49,12 @@ open class DeunaSDK(
          * @param publicApiKey The public API key to access Deuna services.
          * @param privateApiKey The private API key to access Deuna services.
          */
-        fun initializeSingleton(
+        fun initialize(
             environment: Environment,
             publicApiKey: String,
             privateApiKey: String,
-        ): DeunaSDK {
+        ) {
             instance = DeunaSDK(environment, publicApiKey, privateApiKey)
-            return instance!!
         }
     }
 }
