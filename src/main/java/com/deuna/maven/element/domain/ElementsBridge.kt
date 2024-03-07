@@ -56,7 +56,6 @@ class ElementsBridge(
           eventData.let {
             if (closeOnEvents.contains(it.type)) {
               closeElements()
-              callbacks.onClose?.invoke()
             }
           }
         }

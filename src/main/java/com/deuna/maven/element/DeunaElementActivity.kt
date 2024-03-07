@@ -77,11 +77,6 @@ class DeunaElementActivity : AppCompatActivity() {
         }
     }
 
-    // Called when the activity is destroyed.
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(closeAllReceiver)
-    }
 
     // Setup the WebView with necessary settings and JavascriptInterface.
     private fun setupWebView(webView: WebView, closeOnEvents: Set<ElementsEvent>) {
@@ -195,6 +190,13 @@ class DeunaElementActivity : AppCompatActivity() {
 
         loader.visibility = if (show) View.VISIBLE else View.INVISIBLE
         layout.visibility = if (show) View.VISIBLE else View.INVISIBLE
+    }
+
+    // Called when the activity is destroyed.
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(closeAllReceiver)
+        callbacks?.onClose?.invoke()
     }
 }
 

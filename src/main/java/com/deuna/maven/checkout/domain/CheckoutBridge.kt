@@ -46,15 +46,7 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    handleClose()
-                }
-
-                CheckoutEvent.changeAddress -> {
-                    handleCloseActivity(eventData, eventData.type)
-                }
-
-                CheckoutEvent.changeCart -> {
-                    handleCloseActivity(eventData, eventData.type)
+                   closeCheckout()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
@@ -65,7 +57,6 @@ class CheckoutBridge(
                     Log.d("CheckoutBridge", "Unhandled event: $eventData")
                     eventData.let {
                         if (closeOnEvents.contains(it.type)) {
-                            callbacks.onClose?.invoke()
                             closeCheckout()
                         }
                     }
@@ -78,10 +69,6 @@ class CheckoutBridge(
 
     private fun handleCloseActivity(data: CheckoutResponse, type: CheckoutEvent) {
         callbacks.eventListener?.invoke(type, data)
-    }
-
-    private fun handleClose() {
-        callbacks.onClose?.invoke()
     }
 
     private fun handleError(message: String, type: String, response: CheckoutResponse) {

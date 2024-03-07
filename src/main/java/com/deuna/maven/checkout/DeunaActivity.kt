@@ -74,6 +74,8 @@ class DeunaActivity : AppCompatActivity() {
         }
       }.toSet()
 
+      Log.d("✅ closeEvents ",closeEvents.size.toString())
+
       getOrderApi(
         intent.getStringExtra(BASE_URL)!!,
         intent.getStringExtra(ORDER_TOKEN)!!,
@@ -86,12 +88,6 @@ class DeunaActivity : AppCompatActivity() {
       broadcastReceiver = closeAllReceiver,
       action = DeunaBroadcastReceiverAction.CHECKOUT,
     )
-  }
-
-  // Called when the activity is destroyed.
-  override fun onDestroy() {
-    super.onDestroy()
-    unregisterReceiver(closeAllReceiver)
   }
 
   // Render the checkout in a WebView.
@@ -311,4 +307,12 @@ class DeunaActivity : AppCompatActivity() {
     loader.visibility = if (show) View.VISIBLE else View.INVISIBLE
     layout.visibility = if (show) View.VISIBLE else View.INVISIBLE
   }
+
+  // Called when the activity is destroyed.
+  override fun onDestroy() {
+    super.onDestroy()
+    unregisterReceiver(closeAllReceiver)
+    callbacks?.onClose?.invoke()
+  }
+
 }
