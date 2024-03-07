@@ -16,13 +16,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- ImageView para la imagen de URL -->
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:scaleType="fitCenter"/>
-
             <!-- Título "Your cart" -->
             <TextView
                 android:id="@+id/cartTitle"
@@ -108,11 +101,6 @@
             android:scrollbars="vertical"
             android:focusable="true"
             android:focusableInTouchMode="true"/>
-        <!-- Botón para aplicar configuración -->
-        <Button
-            android:id="@+id/applyConfigButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/apply_config"/>
+
     </LinearLayout>
 </RelativeLayout>
