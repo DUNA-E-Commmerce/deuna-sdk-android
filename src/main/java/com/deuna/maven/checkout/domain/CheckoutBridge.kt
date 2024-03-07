@@ -57,6 +57,10 @@ class CheckoutBridge(
                     handleCloseActivity(eventData, eventData.type)
                 }
 
+                CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
+                    // No action required for these events
+                }
+
                 else -> {
                     Log.d("DeUnaBridge", "Unhandled event: $eventData")
                     eventData.let {
