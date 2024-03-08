@@ -132,10 +132,9 @@ class MyClass: AppCompatActivity() {
 
         deunaSDK.initElements(
             context = this,
-            element = ElementType.VAULT,
             orderToken = userToken,
             callbacks = callbacks,
-           closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
+            closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
         )
     }
 }

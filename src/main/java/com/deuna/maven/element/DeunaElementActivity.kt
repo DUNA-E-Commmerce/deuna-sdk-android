@@ -31,7 +31,6 @@ class DeunaElementActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_URL = "extra_url"
-        const val LOGGING_ENABLED = "logging_enabled"
         const val CLOSE_ON_EVENTS = "CLOSE_EVENTS"
         var callbacks: ElementsCallbacks? = null
         fun setCallback(callback: ElementsCallbacks?) {

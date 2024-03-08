@@ -3,14 +3,11 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import com.deuna.maven.checkout.domain.ElementType
 import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.element.domain.ElementsEvent
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import java.lang.IllegalStateException
-import java.util.Locale
 
 
 /**
@@ -26,9 +23,7 @@ import java.util.Locale
 fun DeunaSDK.initElements(
     context: Context,
     userToken: String,
-    element: ElementType,
     callbacks: ElementsCallbacks,
-    showCloseButton: Boolean = false,
     closeEvents: Set<ElementsEvent> = emptySet(),
 ) {
     require(userToken.isNotEmpty()) {
@@ -40,18 +35,16 @@ fun DeunaSDK.initElements(
 
     DeunaElementActivity.setCallback(callbacks)
 
-    val mode = if (showCloseButton) "widget" else ""
-    val elementUrl =Uri.parse("$baseUrl/{type}")
+    val elementUrl =Uri.parse("$baseUrl/vault")
         .buildUpon()
         .appendQueryParameter("userToken", userToken)
         .appendQueryParameter("publicApiKey", apiKey)
-        .appendQueryParameter("mode", mode)
-        .build().toString().replace("{type}", element.toString().lowercase(Locale.ROOT))
+        .appendQueryParameter("mode", "widget")
+        .build().toString()
 
 
     val intent = Intent(context, DeunaElementActivity::class.java).apply {
         putExtra(DeunaElementActivity.EXTRA_URL, elementUrl)
-        putExtra(DeunaElementActivity.LOGGING_ENABLED, Build.TYPE == "debug")
         putStringArrayListExtra(
             DeunaElementActivity.CLOSE_ON_EVENTS,
             ArrayList(closeEvents.map { it.name })

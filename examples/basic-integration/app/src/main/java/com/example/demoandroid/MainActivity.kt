@@ -139,8 +139,6 @@ class MainActivity : AppCompatActivity() {
       context = this,
       userToken = userToken,
       callbacks = callbacks,
-      element = ElementType.VAULT,
-      showCloseButton = true,
       closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
     )
   }

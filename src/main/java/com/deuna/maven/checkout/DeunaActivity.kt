@@ -40,7 +40,6 @@ class DeunaActivity : AppCompatActivity() {
   companion object {
     const val ORDER_TOKEN = "order_token"
     const val API_KEY = "api_key"
-    const val LOGGING_ENABLED = "logging_enabled"
     const val BASE_URL = "BASE_URL"
     const val CLOSE_ON_EVENTS = "CLOSE_EVENTS"
     var callbacks: CheckoutCallbacks? = null

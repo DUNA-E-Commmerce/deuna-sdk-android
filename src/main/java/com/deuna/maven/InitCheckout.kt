@@ -36,7 +36,6 @@ fun DeunaSDK.initCheckout(
         putExtra(DeunaActivity.ORDER_TOKEN, orderToken)
         putExtra(DeunaActivity.API_KEY, apiKey)
         putExtra(DeunaActivity.BASE_URL, baseUrl)
-        putExtra(DeunaActivity.LOGGING_ENABLED, Build.TYPE == "debug")
         putStringArrayListExtra(
             DeunaActivity.CLOSE_ON_EVENTS,
             ArrayList(closeEvents.map { it.name })
