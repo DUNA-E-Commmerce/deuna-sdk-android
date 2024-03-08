@@ -52,11 +52,11 @@ class ElementsBridge(
 
         else -> {
           Log.d("ElementsBridge", "Unhandled event: ${eventData.type}")
-          eventData.let {
-            if (closeOnEvents.contains(it.type)) {
-              closeElements()
-            }
-          }
+        }
+      }
+      eventData.let {
+        if (closeOnEvents.contains(it.type)) {
+          closeElements()
         }
       }
     } catch (e: Exception) {

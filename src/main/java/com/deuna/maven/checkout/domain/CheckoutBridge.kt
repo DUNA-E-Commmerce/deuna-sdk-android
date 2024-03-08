@@ -55,11 +55,12 @@ class CheckoutBridge(
 
         else -> {
           Log.d("CheckoutBridge", "Unhandled event: $eventData")
-          eventData.let {
-            if (closeOnEvents.contains(it.type)) {
-              closeCheckout()
-            }
-          }
+        }
+      }
+
+      eventData.let {
+        if (closeOnEvents.contains(it.type)) {
+          closeCheckout()
         }
       }
     } catch (e: JSONException) {
