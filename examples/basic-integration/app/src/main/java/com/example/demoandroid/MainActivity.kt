@@ -3,182 +3,141 @@ package com.example.demoandroid
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
-//import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
 import com.deuna.maven.DeunaSDK
-import com.deuna.maven.checkout.CheckoutCallbacks
-import com.deuna.maven.checkout.CheckoutEvent
-import com.deuna.maven.checkout.domain.ElementType
+import com.deuna.maven.checkout.domain.*
+import com.deuna.maven.closeCheckout
+import com.deuna.maven.closeElements
 import com.deuna.maven.element.domain.ElementsCallbacks
+import com.deuna.maven.element.domain.ElementsEvent
+import com.deuna.maven.initCheckout
+import com.deuna.maven.initElements
 import com.deuna.maven.shared.Environment
 
-// PASO 1: Importar librería de DEUNA
+
+val ERROR_TAG = "❌ DeunaSDK"
+val DEBUG_TAG = "👀 DeunaSDK"
 
 class MainActivity : AppCompatActivity() {
-    private var orderToken = ""
-    private var userToken = ""
-    private var apiKey = ""
-    private var environment: Environment = Environment.STAGING
+  private var apiKey = ""
+  private var environment: Environment = Environment.STAGING
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-        // Configuración inicial de la interfaz
-        setupUI()
+    val payButton: Button = findViewById(R.id.payButton)
+    val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
 
-        // Configurar listeners para botones
-        setupListeners()
+    payButton.setOnClickListener { initCheckout() }
+    savePaymentMethodButton.setOnClickListener { initElements() }
+  }
+
+  private fun applyConfig() {
+    val inputApiKeyEditText: EditText = findViewById(R.id.inputApiKey)
+    val environmentSpinner: Spinner = findViewById(R.id.environmentOption)
+
+    apiKey = inputApiKeyEditText.text.toString().trim()
+
+    environment = when (environmentSpinner.selectedItemPosition) {
+      0 -> Environment.STAGING
+      1 -> Environment.PRODUCTION
+      2 -> Environment.DEVELOPMENT
+      else -> Environment.SANDBOX
     }
+  }
 
-    private fun setupUI() {
-        val imageView: ImageView = findViewById(R.id.imageView)
-        Glide.with(this)
-            .load("https://camo.githubusercontent.com/50fa432906fc45b20062b150933db8f0bb86682ec6540624a19a72c59eb20d81/68747470733a2f2f642d756e612d6f6e652e73332e75732d656173742d322e616d617a6f6e6177732e636f6d2f67657374696f6e61646f5f706f725f642d756e612e706e67")
-            .into(imageView)
-    }
+  private fun configureForCheckout() {
+    DeunaSDK.initialize(
+      environment = environment,
+      publicApiKey = apiKey
+    )
+  }
 
-    private fun setupListeners() {
-        val payButton: Button = findViewById(R.id.payButton)
-        val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
-        val applyConfigButton: Button = findViewById(R.id.applyConfigButton)
+  private fun configureForElements() {
+    DeunaSDK.initialize(
+      environment = environment,
+      publicApiKey = apiKey
+    )
+  }
 
-        applyConfigButton.setOnClickListener { applyConfig() }
-        payButton.setOnClickListener { initCheckout() }
-        savePaymentMethodButton.setOnClickListener { initElements() }
-    }
+  private fun initCheckout() {
+    applyConfig()
+    configureForCheckout()
+    val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()
 
-    private fun applyConfig() {
-        val inputApiKeyEditText: EditText = findViewById(R.id.inputApiKey)
-        val environmentSpinner: Spinner = findViewById(R.id.environmentOption)
-
-        apiKey = inputApiKeyEditText.text.toString()
-
-        environment = when (environmentSpinner.selectedItemPosition) {
-            0 -> Environment.STAGING
-            1 -> Environment.PRODUCTION
-            2 -> Environment.DEVELOPMENT
-            else -> Environment.SANDBOX
+    val callbacks = CheckoutCallbacks().apply {
+      onSuccess = {
+        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+          startActivity(this)
         }
+      }
+      onError = {
+        Log.e(ERROR_TAG, it.type.message)
+        closeCheckout()
+      }
+      eventListener = { type, _ ->
+        Log.d(DEBUG_TAG, "eventListener ${type.name}")
+      }
+      onClose = {
+        Log.d(DEBUG_TAG, "DEUNA widget was closed")
+      }
+    }
 
-        if (apiKey.isNotEmpty() && orderToken.isNotEmpty()) {
-            configureForCheckout()
-            configureForElements()
+    DeunaSDK.shared.initCheckout(
+      context = this,
+      orderToken = orderToken,
+      callbacks = callbacks,
+      closeEvents = setOf(
+        CheckoutEvent.apmSuccess,
+        CheckoutEvent.purchase,
+        CheckoutEvent.linkFailed,
+        CheckoutEvent.changeCart,
+        CheckoutEvent.changeAddress
+      )
+    )
+  }
 
-            Toast.makeText(
-                this@MainActivity,
-                "Configuración actualizada",
-                Toast.LENGTH_LONG
-            ).show()
-        } else {
-            Toast.makeText(this, "Please enter both API Key and Token", Toast.LENGTH_SHORT).show()
+
+  private fun initElements() {
+    applyConfig()
+    configureForElements()
+    val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString().trim()
+
+    val callbacks = ElementsCallbacks().apply {
+      onSuccess = {
+        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+          startActivity(this)
         }
+      }
+      eventListener = { type, _ ->
+        Log.d(DEBUG_TAG, "eventListener ${type.name}")
+      }
+      onError = {
+        Log.e(ERROR_TAG, it.type.message)
+        closeElements()
+      }
+      onClose = {
+        Log.d(DEBUG_TAG, "DEUNA widget was closed")
+      }
     }
 
-    private fun configureForCheckout() {
-        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
-        DeunaSDK.config(
-            apiKey = apiKey,
-            environment = environment,
-            context = this@MainActivity,
-            callbacks = createCheckoutCallbacks()
-        )
-    }
+    DeunaSDK.shared.initElements(
+      context = this,
+      userToken = userToken,
+      callbacks = callbacks,
+      closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
+    )
+  }
 
-    private fun configureForElements() {
-        val apiKey: String = findViewById<EditText>(R.id.inputApiKey).text.toString()
+  private fun closeCheckout() {
+    DeunaSDK.shared.closeCheckout(this)
+  }
 
-        DeunaSDK.config(
-            apiKey = apiKey,
-            environment = environment,
-            context = this@MainActivity,
-            elementCallbacks = createElementCallbacks(),
-            closeOnEvents = arrayOf(CheckoutEvent.linkFailed),
-            showCloseButton = true
-        )
-    }
-
-    private fun createCheckoutCallbacks(): CheckoutCallbacks {
-        return CheckoutCallbacks().apply {
-            onSuccess = { response ->
-                DeunaSDK.closeCheckout()
-                if (response.type == CheckoutEvent.purchase) {
-                    Log.d("purchase", response.data.order.payment.data.status)
-                }
-                Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-                    startActivity(this)
-                }
-            }
-            onError = { error ->
-                if (error != null) {
-                    Log.d("Error ", error.toString())
-                    DeunaSDK.closeCheckout()
-                }
-            }
-            eventListener = { type, response ->
-                Log.d("👀 ${type.name}", response.data.toString())
-                if (response.type == CheckoutEvent.changeAddress) {
-                    DeunaSDK.closeCheckout()
-                }
-
-                if (response.type == CheckoutEvent.changeCart) {
-                    DeunaSDK.closeCheckout()
-                }
-
-                if (response.type == CheckoutEvent.paymentProcessing) {
-//                    Log.d("paymentProcessing", response.data.toString())
-                }
-            }
-            onClose = {
-                Log.d("DeunaSdkOnClose", "onClose")
-                DeunaSDK.closeCheckout()
-            }
-        }
-    }
-
-    private fun createElementCallbacks(): ElementsCallbacks {
-        return ElementsCallbacks().apply {
-            onSuccess = { response ->
-                Log.d("closeElements Success", response.data.toString())
-                DeunaSDK.closeElements() // No cerró, revisar
-                Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-                    startActivity(this)
-                }
-            }
-            eventListener = { response, type ->
-                Log.d("DeunaSdkEventListener", "eventListener")
-            }
-            onError = { error ->
-                if (error != null) {
-                    DeunaSDK.closeElements()
-                    Log.d("DeunaSdkOnError", error.message)
-                }
-            }
-            onClose = {
-                Log.d("DeunaSdkOnClose", "onClose")
-                DeunaSDK.closeElements()
-            }
-        }
-    }
-
-    private fun initCheckout() {
-        configureForCheckout()
-        val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString()
-        DeunaSDK.initCheckout(orderToken = orderToken)
-    }
-
-
-    private fun initElements() {
-        configureForElements()
-        val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString()
-        DeunaSDK.initElements(element = ElementType.VAULT, userToken = userToken)
-    }
+  private fun closeElements() {
+    DeunaSDK.shared.closeElements(this)
+  }
 }

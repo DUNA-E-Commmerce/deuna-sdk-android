@@ -10,15 +10,13 @@ class NetworkUtils(private val context: Context) {
 
     companion object {
         val CHECKOUT_NO_INTERNET_ERROR = DeunaErrorMessage(
-            "No internet connection",
-            "",
+            DeunaSDKError.NO_INTERNET_CONNECTION,
             null,
             null
         )
 
         val ELEMENTS_NO_INTERNET_ERROR = ElementsErrorMessage(
-            "No internet connection",
-            "",
+            DeunaSDKError.NO_INTERNET_CONNECTION,
             null,
             null
         )
