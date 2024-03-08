@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Message
-import android.util.Log
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -15,7 +14,6 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
-import com.deuna.maven.checkout.*
 import com.deuna.maven.closeElements
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*

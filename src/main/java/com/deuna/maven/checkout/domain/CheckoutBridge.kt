@@ -1,11 +1,7 @@
 package com.deuna.maven.checkout.domain
 
 import CheckoutResponse
-import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.DeunaSDK
-import com.deuna.maven.checkout.CheckoutCallbacks
-import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.shared.*
 import org.json.JSONException
 import org.json.JSONObject

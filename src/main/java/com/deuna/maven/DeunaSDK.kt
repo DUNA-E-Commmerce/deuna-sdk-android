@@ -6,31 +6,29 @@ import java.lang.IllegalStateException
 
 
 /**
- * Class representing the Deuna SDK.
+ * Class representing the DEUNA SDK.
  *
- * @property environment The Deuna environment (Environment.PRODUCTION, Environment.DEVELOPMENT, etc).
- * @property publicApiKey The public API key to access Deuna services (for elements operations).
- * @property privateApiKey The private API key to access Deuna services (for checkout operations).
+ * @property environment The DEUNA environment (Environment.PRODUCTION, Environment.SANDBOX, etc).
+ * @property publicApiKey The public API key to access DEUNA services (for checkout and elements operations).
  */
 open class DeunaSDK(
     val environment: Environment,
     val publicApiKey: String,
-    val privateApiKey: String,
 ) {
 
     init {
-        require(publicApiKey.isNotEmpty() && privateApiKey.isNotEmpty()) {
-            "Public and private API keys must not be empty"
+        require(publicApiKey.isNotEmpty()) {
+            "publicApiKey must not be empty"
         }
     }
 
 
     companion object {
-        // Unique instance of the Deuna SDK
+        // Unique instance of the DeunaSDK
         private var instance: DeunaSDK? = null
 
         /**
-         * Gets the shared instance of the Deuna SDK.
+         * Gets the shared instance of the DEUNA SDK.
          *
          * @throws IllegalStateException if DeunaSDK.initialize is not called before accessing this instance.
          * @return The same instance of DeunaSDK
@@ -45,16 +43,14 @@ open class DeunaSDK(
         /**
          * Registers an unique instance of the Deuna SDK.
          *
-         * @param environment The Deuna environment (Environment.PRODUCTION, Environment.DEVELOPMENT, etc).
+         * @param environment The Deuna environment (Environment.PRODUCTION, Environment.SANDBOX, etc).
          * @param publicApiKey The public API key to access Deuna services.
-         * @param privateApiKey The private API key to access Deuna services.
          */
         fun initialize(
             environment: Environment,
             publicApiKey: String,
-            privateApiKey: String,
         ) {
-            instance = DeunaSDK(environment, publicApiKey, privateApiKey)
+            instance = DeunaSDK(environment, publicApiKey)
         }
     }
 }
