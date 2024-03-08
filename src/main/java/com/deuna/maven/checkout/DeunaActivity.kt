@@ -208,16 +208,8 @@ class DeunaActivity : AppCompatActivity() {
     if (NetworkUtils(context).hasInternet) {
       return view.loadUrl(url)
     }
-    log("No internet connection")
+    SDKLogger.debug("No internet connection")
     callbacks?.onError?.invoke(NetworkUtils.CHECKOUT_NO_INTERNET_ERROR)
-  }
-
-  // Log a message if logging is enabled.
-  private fun log(message: String) {
-    val loggingEnabled = intent.getBooleanExtra(LOGGING_ENABLED, false)
-    if (loggingEnabled) {
-      Log.d("[DeunaSDK]: ", message)
-    }
   }
 
   // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
@@ -256,12 +248,12 @@ class DeunaActivity : AppCompatActivity() {
   // Handle a URL that should be opened in an external browser.
   val webviewCallback = object : WebViewCallback {
     override fun onExternalUrl(webView: WebView, url: String) {
-      Log.d("WebViewCallback", "External URL: $url")
+      SDKLogger.debug("WebViewCallback External URL: $url")
       openInExternalBrowser(url)
     }
 
     override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
-      Log.d("WebViewCallback", "Load URL: $url")
+      SDKLogger.debug("WebViewCallback Load URL: $url")
       webView.loadUrl(url)
 
       newWebView.webChromeClient = object : WebChromeClient() {

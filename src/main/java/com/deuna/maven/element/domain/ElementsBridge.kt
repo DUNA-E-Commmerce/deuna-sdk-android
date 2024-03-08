@@ -34,7 +34,7 @@ class ElementsBridge(
     try {
       val json = JSONObject(eventTypeString)
       val eventData = ElementsResponse.fromJson(json)
-      Log.d("ElementsBridge", "handleEvent: $json")
+
       callbacks.eventListener?.invoke(eventData.type, eventData)
       when (eventData.type) {
 
@@ -51,7 +51,7 @@ class ElementsBridge(
         ElementsEvent.vaultClosed -> closeElements()
 
         else -> {
-          Log.d("ElementsBridge", "Unhandled event: ${eventData.type}")
+          SDKLogger.debug("ElementsBridge Unhandled event: ${eventData.type}")
         }
       }
       eventData.let {
@@ -60,7 +60,7 @@ class ElementsBridge(
         }
       }
     } catch (e: Exception) {
-      Log.d("ElementsBridge", "handleEvent: $e")
+      SDKLogger.debug("ElementsBridge JSONException: $e")
     }
   }
 

@@ -18,7 +18,7 @@ import com.deuna.maven.R
 import com.deuna.maven.checkout.*
 import com.deuna.maven.closeElements
 import com.deuna.maven.element.domain.*
-import com.deuna.maven.shared.NetworkUtils
+import com.deuna.maven.shared.*
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import kotlinx.coroutines.CoroutineScope
@@ -171,16 +171,8 @@ class DeunaElementActivity : AppCompatActivity() {
         if (NetworkUtils(context).hasInternet) {
             return view.loadUrl(url)
         }
-        log("No internet connection")
+        SDKLogger.debug("No internet connection")
         callbacks?.onError?.invoke(NetworkUtils.ELEMENTS_NO_INTERNET_ERROR)
-    }
-
-    // Log a message if logging is enabled.
-    private fun log(message: String) {
-        val loggingEnabled = intent.getBooleanExtra(DeunaActivity.LOGGING_ENABLED, false)
-        if (loggingEnabled) {
-            Log.d("[DeunaSDK]: ", message)
-        }
     }
 
     // Show or Hide progress bar (loader)

@@ -7,7 +7,6 @@ import com.deuna.maven.checkout.CheckoutCallbacks
 import com.deuna.maven.checkout.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
-import java.lang.IllegalStateException
 
 
 /**
