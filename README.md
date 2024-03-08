@@ -76,13 +76,11 @@ class MyClass: AppCompatActivity() {
     fun buy(orderToken:String){
         val callbacks =  CheckoutCallbacks().apply {
             onSuccess = { response ->
-                deunaSDK.closeCheckout()
                // show the success view
             }
             onError = { error ->
-                if (error != null) {
-                    deunaSDK.closeCheckout()
-                }
+                // your logic
+               deunaSDK.closeCheckout()
             }
             eventListener = { type, response ->
                 when(type){
@@ -90,7 +88,7 @@ class MyClass: AppCompatActivity() {
                 }
             }
             onClose = {
-                // the chekout view was closed
+                // the checkout view was closed
             }
         }
 
@@ -98,7 +96,7 @@ class MyClass: AppCompatActivity() {
             context = this,
             orderToken = orderToken,
             callbacks = callbacks,
-            closeOnEvents = arrayOf(CheckoutEvent.linkFailed)
+            closeEvents = setOf(CheckoutEvent.apmSuccess, CheckoutEvent.purchase)
         )
     }
 }
@@ -116,13 +114,11 @@ class MyClass: AppCompatActivity() {
     fun saveCard(userToken:String){
         val callbacks =  ElementsCallbacks().apply {
             onSuccess = { response ->
-               deunaSDK.closeElements()
                // show the success view
             }
             onError = { error ->
-                if (error != null) {
-                    deunaSDK.closeElements()
-                }
+                // your logic
+               deunaSDK.closeElements()
             }
             eventListener = { type, response ->
                 when(type){
@@ -139,9 +135,16 @@ class MyClass: AppCompatActivity() {
             element = ElementType.VAULT,
             orderToken = userToken,
             callbacks = callbacks,
+           closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
         )
     }
 }
+```
+
+## Logging
+To enable or disable logging:
+```kotlin
+SDKLogger.isEnabled = false // or true
 ```
 
 

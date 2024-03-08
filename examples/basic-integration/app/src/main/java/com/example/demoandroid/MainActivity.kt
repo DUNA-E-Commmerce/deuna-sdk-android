@@ -81,7 +81,6 @@ class MainActivity : AppCompatActivity() {
 
     val callbacks = CheckoutCallbacks().apply {
       onSuccess = {
-        closeCheckout()
         Intent(this@MainActivity, ThankYouActivity::class.java).apply {
           startActivity(this)
         }
@@ -102,7 +101,13 @@ class MainActivity : AppCompatActivity() {
       context = this,
       orderToken = orderToken,
       callbacks = callbacks,
-      closeEvents = setOf(CheckoutEvent.linkFailed, CheckoutEvent.changeCart, CheckoutEvent.changeAddress)
+      closeEvents = setOf(
+        CheckoutEvent.apmSuccess,
+        CheckoutEvent.purchase,
+        CheckoutEvent.linkFailed,
+        CheckoutEvent.changeCart,
+        CheckoutEvent.changeAddress
+      )
     )
   }
 
@@ -114,7 +119,6 @@ class MainActivity : AppCompatActivity() {
 
     val callbacks = ElementsCallbacks().apply {
       onSuccess = {
-        closeElements()
         Intent(this@MainActivity, ThankYouActivity::class.java).apply {
           startActivity(this)
         }
@@ -136,7 +140,8 @@ class MainActivity : AppCompatActivity() {
       userToken = userToken,
       callbacks = callbacks,
       element = ElementType.VAULT,
-      showCloseButton = true
+      showCloseButton = true,
+      closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
     )
   }
 
