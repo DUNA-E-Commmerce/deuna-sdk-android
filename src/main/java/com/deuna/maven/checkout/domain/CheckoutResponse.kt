@@ -1,9 +1,9 @@
-import com.deuna.maven.checkout.CheckoutEvent
+import com.deuna.maven.checkout.domain.CheckoutEvent
 import org.json.JSONObject
 
 data class CheckoutResponse(
-    val type: CheckoutEvent,
-    val data: Data
+  val type: CheckoutEvent,
+  val data: Data
 ) {
     data class Data(
         val user: User,
