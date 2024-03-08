@@ -67,7 +67,15 @@ To use the SDK you need to create one instance of `DeunaSDK`. There are 2 ways t
 
 ### Launch the Checkout
 
-This method lauches the checkout process. It sets up the WebView, checks for internet connectivity, and loads the payment link.
+To launch the checkout process you must use the `initCheckout` function. It sets up the WebView, checks for internet connectivity, and loads the payment link.
+
+**Parameters:**
+-   **orderToken**: The token representing the order.
+-   **callbacks**: An instance of the `CheckoutCallbacks` class, which contains closures that will be called on success, error, or when the WebView is closed.
+-   **closeEvents**: A set of `CheckoutEvent` values specifying when to automatically close the checkout.
+
+    > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeCheckout` function.
+
 
 ```kotlin
 class MyClass: AppCompatActivity() {
@@ -105,7 +113,14 @@ class MyClass: AppCompatActivity() {
 
 ### Launch the VAULT WIDGET
 
-This method lauches the elements process. It sets up the WebView, checks for internet connectivity, and loads the elements link.
+To launch the vault widget you must use the `initElements` function. It sets up the WebView, checks for internet connectivity, and loads the elements link.
+
+**Parameters:**
+-   **userToken**: The token representing the user.
+-   **callbacks**: An instance of the `ElementsCallbacks` class, which contains closures that will be called on success, error, or when the WebView is closed.
+-   **closeEvents**: A set of `ElementsEvent` values specifying when to automatically close the checkout.
+
+    > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeElements` function.
 
 ```kotlin
 class MyClass: AppCompatActivity() {
@@ -145,6 +160,10 @@ To enable or disable logging:
 ```kotlin
 SDKLogger.isEnabled = false // or true
 ```
+
+
+### Network Reachability
+The SDK automatically checks for network availability before initializing the checkout process.
 
 
 ## CHANGELOG
