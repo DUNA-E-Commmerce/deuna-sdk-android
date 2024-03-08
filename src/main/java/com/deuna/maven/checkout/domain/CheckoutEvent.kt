@@ -1,4 +1,4 @@
-package com.deuna.maven.checkout
+package com.deuna.maven.checkout.domain
 
 enum class CheckoutEvent(val value: String) {
     purchaseRejected("purchaseRejected"),
