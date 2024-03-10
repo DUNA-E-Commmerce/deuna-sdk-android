@@ -32,8 +32,7 @@ To use the SDK you need to create one instance of `DeunaSDK`. There are 2 ways t
 
     ```kotlin
     DeunaSDK.initialize(
-        environment = Environment.DEVELOPMENT, // Environment.PRODUCTION , etc
-        privateApiKey = "YOUR_PRIVATE_API_KEY",
+        environment = Environment.SANDBOX, // Environment.PRODUCTION , etc
         publicApiKey = "YOUR_PUBLIC_API_KEY"
     )
     ```
@@ -51,9 +50,8 @@ To use the SDK you need to create one instance of `DeunaSDK`. There are 2 ways t
         private lateinit val deunaSDK: DeunaSDK
     
         init {
-            deunaSDK =  DeunaSDK(
-                environment = Environment.DEVELOPMENT,
-                privateApiKey = "YOUR_PRIVATE_API_KEY",
+            deunaSDK = DeunaSDK(
+                environment = Environment.SANDBOX,
                 publicApiKey = "YOUR_PUBLIC_API_KEY"
             )
         }
@@ -76,39 +74,38 @@ To launch the checkout process you must use the `initCheckout` function. It sets
 
     > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeCheckout` function.
 
+    ```kotlin
+    class MyClass: AppCompatActivity() {
+        val deunaSDK: DeunaSDK ....
 
-```kotlin
-class MyClass: AppCompatActivity() {
-    val deunaSDK: DeunaSDK ....
-
-    fun buy(orderToken:String){
-        val callbacks =  CheckoutCallbacks().apply {
-            onSuccess = { response ->
-               // show the success view
-            }
-            onError = { error ->
-                // your logic
-               deunaSDK.closeCheckout()
-            }
-            eventListener = { type, response ->
-                when(type){
-                    ...
+        fun buy(orderToken:String){
+            val callbacks =  CheckoutCallbacks().apply {
+                onSuccess = { response ->
+                   deunaSDK.closeCheckout(...)
+                   // show the success view
+                }
+                onError = { error ->
+                    // your logic
+                   deunaSDK.closeCheckout(...)
+                }
+                eventListener = { type, response ->
+                    when(type){
+                        ...
+                    }
+                }
+                onClose = {
+                    // DEUNA widget was closed
                 }
             }
-            onClose = {
-                // the checkout view was closed
-            }
-        }
 
-        deunaSDK.initCheckout(
-            context = this,
-            orderToken = orderToken,
-            callbacks = callbacks,
-            closeEvents = setOf(CheckoutEvent.apmSuccess, CheckoutEvent.purchase)
-        )
+            deunaSDK.initCheckout(
+                context = this,
+                orderToken = orderToken,
+                callbacks = callbacks
+            )
+        }
     }
-}
-```
+    ```
 
 
 ### Launch the VAULT WIDGET
@@ -122,40 +119,40 @@ To launch the vault widget you must use the `initElements` function. It sets up 
 
     > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeElements` function.
 
-```kotlin
-class MyClass: AppCompatActivity() {
-    val deunaSDK: DeunaSDK ....
+    ```kotlin
+    class MyClass: AppCompatActivity() {
+        val deunaSDK: DeunaSDK ....
 
-    fun saveCard(userToken:String){
-        val callbacks =  ElementsCallbacks().apply {
-            onSuccess = { response ->
-               // show the success view
-            }
-            onError = { error ->
-                // your logic
-               deunaSDK.closeElements()
-            }
-            eventListener = { type, response ->
-                when(type){
-                    ...
+        fun saveCard(userToken:String){
+            val callbacks =  ElementsCallbacks().apply {
+                onSuccess = { response ->
+                   deunaSDK.closeElements(...)
+                   // show the success view
+                }
+                onError = { error ->
+                    // your logic
+                   deunaSDK.closeElements(...)
+                }
+                eventListener = { type, response ->
+                    when(type){
+                        ...
+                    }
+                }
+                onClose = {
+                    // the elements view was closed
                 }
             }
-            onClose = {
-                // the elements view was closed
-            }
+
+            deunaSDK.initElements(
+                context = this,
+                orderToken = userToken,
+                callbacks = callbacks
+            )
         }
-
-        deunaSDK.initElements(
-            context = this,
-            orderToken = userToken,
-            callbacks = callbacks,
-            closeEvents = setOf(ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated)
-        )
     }
-}
-```
+    ```
 
-## Logging
+### Logging
 To enable or disable logging:
 ```kotlin
 SDKLogger.isEnabled = false // or true
@@ -164,6 +161,23 @@ SDKLogger.isEnabled = false // or true
 
 ### Network Reachability
 The SDK automatically checks for network availability before initializing the checkout process.
+
+
+
+## FAQs
+* ### How to get an **order token** ?
+    To generate an order token, refer to our API documentation on our [API Referece](https://docs.deuna.com/reference/order_token)
+
+* ### How to get an **user token** ?
+    You'll need a registered user in DEUNA. Follow the instructions for ["User Registration"](https://docs.deuna.com/reference/users-register) in our API reference.
+
+    Once you have a registered user, you can obtain an access token through a two-step process:
+
+    **Request an OTP code**: Use our API for "[Requesting an OTP Code](https://docs.deuna.com/reference/request-otp)" via email.
+
+    **Login with OTP code:** Use the retrieved code to "[Log in with OTP](https://docs.deuna.com/reference/login-with-otp)" and get an access token for your user.
+
+
 
 
 ## CHANGELOG
