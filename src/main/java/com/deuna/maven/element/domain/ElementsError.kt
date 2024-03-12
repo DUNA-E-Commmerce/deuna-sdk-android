@@ -4,7 +4,7 @@ import ElementsResponse
 import com.deuna.maven.shared.*
 
 data class ElementsError(
-  var type: ElementsErrorType,
-  var user: ElementsResponse.User?,
+    var type: ElementsErrorType,
+    var user: ElementsResponse.User?,
 )
 

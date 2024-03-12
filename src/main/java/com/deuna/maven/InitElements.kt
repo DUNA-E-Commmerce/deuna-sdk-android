@@ -39,7 +39,7 @@ fun DeunaSDK.initElements(
 
     DeunaElementActivity.setCallback(callbacks)
 
-    val elementUrl =Uri.parse("$baseUrl/vault")
+    val elementUrl = Uri.parse("$baseUrl/vault")
         .buildUpon()
         .appendQueryParameter("userToken", userToken)
         .appendQueryParameter("publicApiKey", apiKey)
