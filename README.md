@@ -88,6 +88,10 @@ To launch the checkout process you must use the `initCheckout` function. It sets
                     // your logic
                    deunaSDK.closeCheckout(...)
                 }
+                onCanceled = {
+                    // called when the payment process was canceled by user
+                    // Calling closeCheckout(...) is unnecessary here.
+                }
                 eventListener = { type, response ->
                     when(type){
                         ...
@@ -132,6 +136,10 @@ To launch the vault widget you must use the `initElements` function. It sets up 
                 onError = { error ->
                     // your logic
                    deunaSDK.closeElements(...)
+                }
+                onCanceled = {
+                    // called when the elements process was canceled by user
+                    // Calling closeElements(...) is unnecessary here.
                 }
                 eventListener = { type, response ->
                     when(type){
