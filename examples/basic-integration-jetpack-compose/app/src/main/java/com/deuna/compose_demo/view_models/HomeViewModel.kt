@@ -145,7 +145,7 @@ sealed class CheckoutResult {
    *
    * @property error The DeunaErrorMessage object detailing the error encountered.
    */
-  data class Error(val error: DeunaErrorMessage) : CheckoutResult()
+  data class Error(val error: CheckoutError) : CheckoutResult()
 
   /**
    * Indicates the checkout process was cancelled by the user.
@@ -168,7 +168,7 @@ sealed class ElementsResult {
    *
    * @property error The ElementsErrorMessage object detailing the error encountered.
    */
-  data class Error(val error: ElementsErrorMessage) : ElementsResult()
+  data class Error(val error: ElementsError) : ElementsResult()
 
   /**
    * Indicates the element saving process was cancelled by the user.

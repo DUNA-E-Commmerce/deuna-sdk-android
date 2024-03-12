@@ -32,13 +32,13 @@ class CheckoutBridge(
 
         CheckoutEvent.purchaseRejected -> {
           handleError(
-            DeunaSDKError.PAYMENT_ERROR,
+            CheckoutErrorType.PAYMENT_ERROR,
             eventData
           )
         }
 
         CheckoutEvent.linkFailed, CheckoutEvent.purchaseError -> {
-          handleError(DeunaSDKError.CHECKOUT_INITIALIZATION_FAILED, eventData)
+          handleError(CheckoutErrorType.CHECKOUT_INITIALIZATION_FAILED, eventData)
         }
 
         CheckoutEvent.linkClose -> {
@@ -68,9 +68,9 @@ class CheckoutBridge(
     callbacks.eventListener?.invoke(type, data)
   }
 
-  private fun handleError(type: DeunaSDKError, response: CheckoutResponse) {
+  private fun handleError(type: CheckoutErrorType, response: CheckoutResponse) {
     callbacks.onError?.invoke(
-      DeunaErrorMessage(
+      CheckoutError(
 
         type, // Internet Connection // Checkout failed
         response.data.order,

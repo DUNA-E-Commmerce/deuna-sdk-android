@@ -3,9 +3,10 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.element.DeunaElementActivity
-import com.deuna.maven.element.domain.ElementsCallbacks
-import com.deuna.maven.element.domain.ElementsEvent
+import com.deuna.maven.element.domain.*
+import com.deuna.maven.shared.*
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 import java.lang.IllegalStateException
 
@@ -26,8 +27,11 @@ fun DeunaSDK.initElements(
     callbacks: ElementsCallbacks,
     closeEvents: Set<ElementsEvent> = emptySet(),
 ) {
-    require(userToken.isNotEmpty()) {
-        "userToken must not be empty"
+    if (userToken.isEmpty()) {
+        callbacks.onError?.invoke(
+            ElementsError(ElementsErrorType.INVALID_USER_TOKEN, null),
+        )
+        return
     }
 
     val apiKey = this.publicApiKey

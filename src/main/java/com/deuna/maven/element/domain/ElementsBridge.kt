@@ -3,7 +3,6 @@ package com.deuna.maven.element.domain
 import ElementsResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.*
 import com.deuna.maven.shared.*
 import org.json.JSONObject
@@ -72,9 +71,8 @@ class ElementsBridge(
 
   private fun handleError(response: ElementsResponse) {
     callbacks.onError?.invoke(
-      ElementsErrorMessage(
-        DeunaSDKError.VAULT_SAVE_ERROR,
-        response.data.order,
+      ElementsError(
+        ElementsErrorType.VAULT_SAVE_ERROR,
         response.data.user
       )
     )

@@ -192,8 +192,8 @@ class DeunaActivity : AppCompatActivity() {
 
   private fun handleOrderError(){
     callbacks?.onError?.invoke(
-      DeunaErrorMessage(
-        type = DeunaSDKError.ORDER_NOT_FOUND,
+      CheckoutError(
+        type = CheckoutErrorType.ORDER_NOT_FOUND,
         order = null,
         user = null
       )
