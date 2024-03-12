@@ -1,33 +1,22 @@
 package com.deuna.maven.checkout
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.os.Message
-import android.view.View
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import androidx.appcompat.app.AppCompatActivity
+import android.content.*
+import android.net.*
+import android.os.*
+import android.view.*
+import android.webkit.*
+import android.widget.*
+import androidx.activity.*
+import androidx.appcompat.app.*
+import com.deuna.maven.*
 import com.deuna.maven.R
 import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.client.sendOrder
-import com.deuna.maven.closeCheckout
+import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.utils.BroadcastReceiverUtils
-import com.deuna.maven.utils.DeunaBroadcastReceiverAction
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.net.URL
+import com.deuna.maven.utils.*
+import kotlinx.coroutines.*
+import retrofit2.*
+import java.net.*
 
 
 // Activity for Deuna.
@@ -83,6 +72,13 @@ class DeunaActivity : AppCompatActivity() {
       broadcastReceiver = closeAllReceiver,
       action = DeunaBroadcastReceiverAction.CHECKOUT,
     )
+
+    // listen when back button is pressed
+    onBackPressedDispatcher.addCallback {
+      SDKLogger.debug("Canceled by user")
+      callbacks?.onCanceled?.invoke()
+      finish()
+    }
   }
 
   // Render the checkout in a WebView.
@@ -190,7 +186,7 @@ class DeunaActivity : AppCompatActivity() {
     })
   }
 
-  private fun handleOrderError(){
+  private fun handleOrderError() {
     callbacks?.onError?.invoke(
       CheckoutError(
         type = CheckoutErrorType.ORDER_NOT_FOUND,

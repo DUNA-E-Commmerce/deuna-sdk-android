@@ -39,61 +39,58 @@ class MainActivity : AppCompatActivity() {
   private fun startPaymentProcess() {
     val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()
 
-    deunaSdk.initCheckout(
-      context = this,
-      orderToken = orderToken,
-      callbacks = CheckoutCallbacks().apply {
-        onSuccess = {
-          deunaSdk.closeCheckout(this@MainActivity)
-          Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-            startActivity(this)
-          }
-        }
-        onError = {
-          Log.e(ERROR_TAG, it.type.message)
-          deunaSdk.closeCheckout(this@MainActivity)
-        }
-        eventListener = { type, _ ->
-          when (type) {
-            CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-              deunaSdk.closeCheckout(this@MainActivity)
-            }
-
-            else -> {}
-          }
-        }
-        onClose = {
-          Log.d(DEBUG_TAG, "DEUNA widget was closed")
+    deunaSdk.initCheckout(context = this, orderToken = orderToken, callbacks = CheckoutCallbacks().apply {
+      onSuccess = {
+        deunaSdk.closeCheckout(this@MainActivity)
+        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+          startActivity(this)
         }
       }
-    )
+      onError = {
+        Log.e(ERROR_TAG, it.type.message)
+        deunaSdk.closeCheckout(this@MainActivity)
+      }
+      onCanceled = {
+        Log.d(DEBUG_TAG, "Payment was canceled by user")
+      }
+      eventListener = { type, _ ->
+        when (type) {
+          CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
+            deunaSdk.closeCheckout(this@MainActivity)
+          }
+          else -> {}
+        }
+      }
+      onClose = {
+        Log.d(DEBUG_TAG, "DEUNA widget was closed")
+      }
+    })
   }
 
 
   private fun saveCard() {
     val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString().trim()
 
-    deunaSdk.initElements(
-      context = this,
-      userToken = userToken,
-      callbacks = ElementsCallbacks().apply {
-        deunaSdk.closeElements(this@MainActivity)
-        onSuccess = {
-          Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-            startActivity(this)
-          }
-        }
-        eventListener = { type, _ ->
-          Log.d(DEBUG_TAG, "eventListener ${type.name}")
-        }
-        onError = {
-          Log.e(ERROR_TAG, it.type.message)
-          deunaSdk.closeElements(this@MainActivity)
-        }
-        onClose = {
-          Log.d(DEBUG_TAG, "DEUNA widget was closed")
+    deunaSdk.initElements(context = this, userToken = userToken, callbacks = ElementsCallbacks().apply {
+      deunaSdk.closeElements(this@MainActivity)
+      onSuccess = {
+        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+          startActivity(this)
         }
       }
-    )
+      eventListener = { type, _ ->
+        Log.d(DEBUG_TAG, "eventListener ${type.name}")
+      }
+      onError = {
+        Log.e(ERROR_TAG, it.type.message)
+        deunaSdk.closeElements(this@MainActivity)
+      }
+      onCanceled = {
+        Log.d(DEBUG_TAG, "Saving card was canceled by user")
+      }
+      onClose = {
+        Log.d(DEBUG_TAG, "DEUNA widget was closed")
+      }
+    })
   }
 }

@@ -43,6 +43,7 @@ class CheckoutBridge(
 
         CheckoutEvent.linkClose -> {
           closeCheckout()
+          callbacks.onCanceled?.invoke()
         }
 
         CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {

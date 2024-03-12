@@ -57,14 +57,13 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
           completion(CheckoutResult.Error(error))
         }
       }
+      onCanceled = {
+        viewModelScope.launch {
+          completion(CheckoutResult.Canceled)
+        }
+      }
       eventListener = { event, _ ->
         when (event) {
-          CheckoutEvent.linkClose -> {
-            viewModelScope.launch {
-              completion(CheckoutResult.Canceled)
-            }
-          }
-
           CheckoutEvent.changeCart, CheckoutEvent.changeAddress -> {
             deunaSDK.closeCheckout(context)
             viewModelScope.launch {
@@ -113,14 +112,13 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
           completion(ElementsResult.Error(error))
         }
       }
-      eventListener = { event, _ ->
-        if (event == ElementsEvent.vaultClosed) {
-          viewModelScope.launch {
-            completion(ElementsResult.Canceled)
-          }
-        } else {
-          Log.d("DeunaSDK", "on event ${event.value}")
+      onCanceled = {
+        viewModelScope.launch {
+          completion(ElementsResult.Canceled)
         }
+      }
+      eventListener = { event, _ ->
+        Log.d("DeunaSDK", "on event ${event.value}")
       }
     }
   }

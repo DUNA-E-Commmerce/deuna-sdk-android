@@ -47,7 +47,10 @@ class ElementsBridge(
           )
         }
 
-        ElementsEvent.vaultClosed -> closeElements()
+        ElementsEvent.vaultClosed -> {
+          closeElements()
+          callbacks.onCanceled?.invoke()
+        }
 
         else -> {
           SDKLogger.debug("ElementsBridge Unhandled event: ${eventData.type}")
