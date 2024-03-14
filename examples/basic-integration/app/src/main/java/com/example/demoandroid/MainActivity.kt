@@ -21,8 +21,8 @@ val DEBUG_TAG = "👀 DeunaSDK"
 
 class MainActivity : AppCompatActivity() {
   private val deunaSdk = DeunaSDK(
-    environment = Environment.SANDBOX,
-    publicApiKey = "YOUR_API_KEY",
+    environment = Environment.STAGING,
+    publicApiKey = "e40affdfbee57e43de41d1ce1451859bbe85626c1e87adaa93e538a6fb68488d09bb578f561122c1177e66ab1238563359acb70aa0b972ac8f44a52bceb7",
   );
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(DEBUG_TAG, "Payment was canceled by user")
       }
       eventListener = { type, _ ->
+        Log.d("✅ ON EVENT", type.name)
         when (type) {
           CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
             deunaSdk.closeCheckout(this@MainActivity)
