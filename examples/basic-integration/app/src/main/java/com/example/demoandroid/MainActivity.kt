@@ -21,8 +21,8 @@ val DEBUG_TAG = "👀 DeunaSDK"
 
 class MainActivity : AppCompatActivity() {
   private val deunaSdk = DeunaSDK(
-    environment = Environment.STAGING,
-    publicApiKey = "e40affdfbee57e43de41d1ce1451859bbe85626c1e87adaa93e538a6fb68488d09bb578f561122c1177e66ab1238563359acb70aa0b972ac8f44a52bceb7",
+    environment = Environment.SANDBOX,
+    publicApiKey = "YOUR_PUBLIC_API_KEY",
   );
 
   override fun onCreate(savedInstanceState: Bundle?) {

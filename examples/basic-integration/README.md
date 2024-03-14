@@ -7,7 +7,7 @@
     ```kotlin
     private val deunaSdk = DeunaSDK(
       environment = Environment.SANDBOX, // use the appropriate environment
-      publicApiKey = "YOUR_API_KEY", // use your public API key
+      publicApiKey = "YOUR_PUBLIC_API_KEY", // use your public API key
     );
     ```
 4. Run the project.
