@@ -2,7 +2,7 @@ package com.deuna.maven.shared
 
 import android.util.Log
 
-class SDKLogger {
+class DeunaLogs {
 
   companion object {
     private const val TAG = "DeunaSDK"

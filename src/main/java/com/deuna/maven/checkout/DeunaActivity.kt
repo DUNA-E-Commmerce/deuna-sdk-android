@@ -75,7 +75,7 @@ class DeunaActivity : AppCompatActivity() {
 
         // listen when back button is pressed
         onBackPressedDispatcher.addCallback {
-            SDKLogger.debug("Canceled by user")
+            DeunaLogs.debug("Canceled by user")
             callbacks?.onCanceled?.invoke()
             finish()
         }
@@ -201,7 +201,7 @@ class DeunaActivity : AppCompatActivity() {
         if (NetworkUtils(context).hasInternet) {
             return view.loadUrl(url)
         }
-        SDKLogger.debug("No internet connection")
+        DeunaLogs.debug("No internet connection")
         callbacks?.onError?.invoke(NetworkUtils.CHECKOUT_NO_INTERNET_ERROR)
     }
 
@@ -241,12 +241,12 @@ class DeunaActivity : AppCompatActivity() {
     // Handle a URL that should be opened in an external browser.
     val webviewCallback = object : WebViewCallback {
         override fun onExternalUrl(webView: WebView, url: String) {
-            SDKLogger.debug("WebViewCallback External URL: $url")
+            DeunaLogs.debug("WebViewCallback External URL: $url")
             openInExternalBrowser(url)
         }
 
         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
-            SDKLogger.debug("WebViewCallback Load URL: $url")
+            DeunaLogs.debug("WebViewCallback Load URL: $url")
             webView.loadUrl(url)
 
             newWebView.webChromeClient = object : WebChromeClient() {

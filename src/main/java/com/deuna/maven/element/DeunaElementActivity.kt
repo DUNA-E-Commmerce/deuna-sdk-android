@@ -76,7 +76,7 @@ class DeunaElementActivity : AppCompatActivity() {
 
         // listen when back button is pressed
         onBackPressedDispatcher.addCallback {
-            SDKLogger.debug("Canceled by user")
+            DeunaLogs.debug("Canceled by user")
             callbacks?.onCanceled?.invoke()
             finish()
         }
@@ -176,7 +176,7 @@ class DeunaElementActivity : AppCompatActivity() {
         if (NetworkUtils(context).hasInternet) {
             return view.loadUrl(url)
         }
-        SDKLogger.debug("No internet connection")
+        DeunaLogs.debug("No internet connection")
         callbacks?.onError?.invoke(NetworkUtils.ELEMENTS_NO_INTERNET_ERROR)
     }
 

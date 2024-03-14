@@ -3,7 +3,6 @@ package com.deuna.maven.element.domain
 import ElementsResponse
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.deuna.maven.checkout.*
 import com.deuna.maven.shared.*
 import org.json.JSONObject
 
@@ -53,7 +52,7 @@ class ElementsBridge(
                 }
 
                 else -> {
-                    SDKLogger.debug("ElementsBridge Unhandled event: ${eventData.type}")
+                    DeunaLogs.debug("ElementsBridge Unhandled event: ${eventData.type}")
                 }
             }
             eventData.let {
@@ -62,7 +61,7 @@ class ElementsBridge(
                 }
             }
         } catch (e: Exception) {
-            SDKLogger.debug("ElementsBridge JSONException: $e")
+            DeunaLogs.debug("ElementsBridge JSONException: $e")
         }
     }
 

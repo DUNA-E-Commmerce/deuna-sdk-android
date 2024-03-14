@@ -51,7 +51,7 @@ class CheckoutBridge(
                 }
 
                 else -> {
-                    SDKLogger.debug("CheckoutBridge Unhandled event: $eventData")
+                    DeunaLogs.debug("CheckoutBridge Unhandled event: $eventData")
                 }
             }
 
@@ -61,7 +61,7 @@ class CheckoutBridge(
                 }
             }
         } catch (e: JSONException) {
-            SDKLogger.debug("CheckoutBridge JSONException: $e")
+            DeunaLogs.debug("CheckoutBridge JSONException: $e")
         }
     }
 

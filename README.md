@@ -163,7 +163,7 @@ To launch the vault widget you must use the `initElements` function. It sets up 
 ### Logging
 To enable or disable logging:
 ```kotlin
-SDKLogger.isEnabled = false // or true
+DeunaLogs.isEnabled = false // or true
 ```
 
 
