@@ -11,7 +11,7 @@ enum class ElementsEvent(val value: String) {
     changeCart("changeCart"),
     vaultSaveError("vaultSaveError"),
     vaultSaveSuccess("vaultSaveSuccess"),
-    vaulClickRedirect3DS("vaulClickRedirect3DS"),
+    vaultClickRedirect3DS("vaultClickRedirect3DS"),
     cardCreationError("cardCreationError"),
     paymentMethodsCardIdentityNumberInitiated("paymentMethodsCardIdentityNumberInitiated"),
     paymentMethodsCardIdentityNumberEntered("paymentMethodsCardIdentityNumberEntered"),
