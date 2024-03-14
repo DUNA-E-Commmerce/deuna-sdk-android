@@ -2,9 +2,9 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.Intent
-import com.deuna.maven.checkout.domain.CheckoutCallbacks
-import com.deuna.maven.checkout.domain.CheckoutEvent
 import com.deuna.maven.checkout.DeunaActivity
+import com.deuna.maven.checkout.domain.*
+import com.deuna.maven.shared.*
 import com.deuna.maven.utils.DeunaBroadcastReceiverAction
 
 
@@ -24,8 +24,12 @@ fun DeunaSDK.initCheckout(
     callbacks: CheckoutCallbacks,
     closeEvents: Set<CheckoutEvent> = emptySet(),
 ) {
-    require(orderToken.isNotEmpty()) {
-        "orderToken must not be empty"
+
+    if (orderToken.isEmpty()) {
+        callbacks.onError?.invoke(
+            CheckoutError(CheckoutErrorType.INVALID_ORDER_TOKEN, null, null),
+        )
+        return
     }
 
     val apiKey = this.publicApiKey

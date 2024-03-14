@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
+import androidx.activity.*
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.R
 import com.deuna.maven.closeElements
@@ -72,6 +73,13 @@ class DeunaElementActivity : AppCompatActivity() {
                 )
             }
         }
+
+        // listen when back button is pressed
+        onBackPressedDispatcher.addCallback {
+            DeunaLogs.debug("Canceled by user")
+            callbacks?.onCanceled?.invoke()
+            finish()
+        }
     }
 
 
@@ -113,7 +121,7 @@ class DeunaElementActivity : AppCompatActivity() {
                 view: WebView,
                 isDialog: Boolean,
                 isUserGesture: Boolean,
-                resultMsg: Message
+                resultMsg: Message,
             ): Boolean {
                 val newWebView = WebView(this@DeunaElementActivity).apply {
                     webViewClient = WebViewClient()
@@ -127,7 +135,7 @@ class DeunaElementActivity : AppCompatActivity() {
                 newWebView.webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
-                        request: WebResourceRequest?
+                        request: WebResourceRequest?,
                     ): Boolean {
                         val newUrl = request?.url.toString()
                         view?.loadUrl(newUrl)
@@ -140,7 +148,7 @@ class DeunaElementActivity : AppCompatActivity() {
                         view: WebView,
                         isDialog: Boolean,
                         isUserGesture: Boolean,
-                        resultMsg: Message
+                        resultMsg: Message,
                     ): Boolean {
                         return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
                     }
@@ -168,7 +176,7 @@ class DeunaElementActivity : AppCompatActivity() {
         if (NetworkUtils(context).hasInternet) {
             return view.loadUrl(url)
         }
-        SDKLogger.debug("No internet connection")
+        DeunaLogs.debug("No internet connection")
         callbacks?.onError?.invoke(NetworkUtils.ELEMENTS_NO_INTERNET_ERROR)
     }
 
