@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
           else -> {}
         }
       }
-      onClose = {
+      onClosed = {
         Log.d(DEBUG_TAG, "DEUNA widget was closed")
       }
     })
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
       onCanceled = {
         Log.d(DEBUG_TAG, "Saving card was canceled by user")
       }
-      onClose = {
+      onClosed = {
         Log.d(DEBUG_TAG, "DEUNA widget was closed")
       }
     })

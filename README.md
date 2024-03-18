@@ -97,7 +97,7 @@ To launch the checkout process you must use the `initCheckout` function. It sets
                         ...
                     }
                 }
-                onClose = {
+                onClosed = {
                     // DEUNA widget was closed
                 }
             }
@@ -146,7 +146,7 @@ To launch the vault widget you must use the `initElements` function. It sets up 
                         ...
                     }
                 }
-                onClose = {
+                onClosed = {
                     // the elements view was closed
                 }
             }

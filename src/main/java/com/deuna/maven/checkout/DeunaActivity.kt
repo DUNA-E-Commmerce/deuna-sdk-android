@@ -297,7 +297,7 @@ class DeunaActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(closeAllReceiver)
-        callbacks?.onClose?.invoke()
+        callbacks?.onClosed?.invoke()
     }
 
 }
