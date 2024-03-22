@@ -45,7 +45,9 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     val orderMap = responseBody?.get("order") as? Map<*, *>
                     if (orderMap != null) {
                         val parsedUrl = URL(orderMap.get("payment_link").toString())
-                        loadUrl(parsedUrl.toString())
+                        loadUrl(
+                            url = cleanUrl(parsedUrl.toString())
+                        )
                     }
                 } else {
                     orderNotFound()

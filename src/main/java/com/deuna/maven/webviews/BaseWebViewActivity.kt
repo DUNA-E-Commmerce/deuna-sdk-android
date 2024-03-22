@@ -59,7 +59,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
             onCanceledByUser()
             finish()
         }
-        loader = findViewById(R.id.loader)
+        loader = findViewById(R.id.deuna_loader)
         webView = findViewById(R.id.deuna_webview)
 
     }
