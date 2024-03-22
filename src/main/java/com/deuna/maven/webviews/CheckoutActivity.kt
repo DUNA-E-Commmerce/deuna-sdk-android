@@ -1,16 +1,12 @@
 package com.deuna.maven.webviews
 
-import CheckoutResponse
 import android.os.*
-import com.deuna.maven.*
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
-import org.json.*
 import retrofit2.*
 import java.net.*
-
 
 class CheckoutActivity() : BaseWebViewActivity() {
 
@@ -18,7 +14,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         const val EXTRA_API_KEY = "API_KEY"
         const val EXTRA_ORDER_TOKEN = "ORDER_TOKEN"
         const val EXTRA_BASE_URL = "BASE_URL"
-       private var callbacks: CheckoutCallbacks? = null
+        private var callbacks: CheckoutCallbacks? = null
 
         fun setCallbacks(callbacks: CheckoutCallbacks) {
             this.callbacks = callbacks
@@ -73,7 +69,11 @@ class CheckoutActivity() : BaseWebViewActivity() {
     }
 
     override fun getBridge(): WebViewBridge {
-        return CheckoutBridge()
+        return CheckoutBridge(
+            context = this,
+            callbacks = callbacks,
+            closeEvents = closeEvents,
+        )
     }
 
     override fun onNoInternet() {
@@ -93,62 +93,4 @@ class CheckoutActivity() : BaseWebViewActivity() {
         super.onDestroy()
     }
 
-    inner class CheckoutBridge() : WebViewBridge() {
-        override fun handleEvent(message: String) {
-
-            try {
-                val json = JSONObject(message)
-                val eventData = CheckoutResponse.fromJson(json)
-                callbacks?.eventListener?.invoke(eventData.type, eventData)
-                when (eventData.type) {
-                    CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
-                        callbacks?.onSuccess?.invoke(eventData)
-                    }
-
-                    CheckoutEvent.purchaseRejected -> {
-                        handleError(
-                            CheckoutErrorType.PAYMENT_ERROR,
-                            eventData
-                        )
-                    }
-
-                    CheckoutEvent.linkFailed, CheckoutEvent.purchaseError -> {
-                        handleError(CheckoutErrorType.CHECKOUT_INITIALIZATION_FAILED, eventData)
-                    }
-
-                    CheckoutEvent.linkClose -> {
-                        closeCheckout(this@CheckoutActivity)
-                        callbacks?.onCanceled?.invoke()
-                    }
-
-                    CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
-                        // No action required for these events
-                    }
-
-                    else -> {
-                        DeunaLogs.debug("CheckoutBridge Unhandled event: $eventData")
-                    }
-                }
-
-                eventData.let {
-                    if (closeEvents.contains(it.type)) {
-                        closeCheckout(this@CheckoutActivity)
-                    }
-                }
-            } catch (e: JSONException) {
-                DeunaLogs.debug("CheckoutBridge JSONException: $e")
-            }
-        }
-
-        private fun handleError(type: CheckoutErrorType, response: CheckoutResponse) {
-            callbacks?.onError?.invoke(
-                CheckoutError(
-                    type,
-                    response.data.order,
-                    response.data.user
-                )
-            )
-        }
-    }
 }
-
