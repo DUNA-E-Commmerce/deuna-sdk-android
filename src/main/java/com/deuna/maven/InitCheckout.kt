@@ -2,10 +2,9 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.Intent
-import com.deuna.maven.checkout.DeunaActivity
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.utils.DeunaBroadcastReceiverAction
+import com.deuna.maven.webviews.*
 
 
 /**
@@ -34,13 +33,13 @@ fun DeunaSDK.initCheckout(
 
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.checkoutBaseUrl
-    DeunaActivity.setCallback(callbacks)
-    val intent = Intent(context, DeunaActivity::class.java).apply {
-        putExtra(DeunaActivity.ORDER_TOKEN, orderToken)
-        putExtra(DeunaActivity.API_KEY, apiKey)
-        putExtra(DeunaActivity.BASE_URL, baseUrl)
+    CheckoutActivity.setCallbacks(callbacks)
+    val intent = Intent(context, CheckoutActivity::class.java).apply {
+        putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
+        putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)
+        putExtra(CheckoutActivity.EXTRA_BASE_URL, baseUrl)
         putStringArrayListExtra(
-            DeunaActivity.CLOSE_ON_EVENTS,
+            BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
         )
     }
@@ -61,6 +60,6 @@ fun DeunaSDK.closeCheckout(context: Context) {
  */
 fun closeCheckout(context: Context) {
     context.sendBroadcast(
-        Intent(DeunaBroadcastReceiverAction.CHECKOUT.value)
+        Intent(BaseWebViewActivity.CLOSE_BROADCAST_RECEIVER_ACTION)
     )
 }

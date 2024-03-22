@@ -9,11 +9,6 @@ import com.deuna.maven.element.domain.ElementsError
 class NetworkUtils(private val context: Context) {
 
     companion object {
-        val CHECKOUT_NO_INTERNET_ERROR = CheckoutError(
-            CheckoutErrorType.NO_INTERNET_CONNECTION,
-            null,
-            null
-        )
 
         val ELEMENTS_NO_INTERNET_ERROR = ElementsError(
             ElementsErrorType.NO_INTERNET_CONNECTION,
