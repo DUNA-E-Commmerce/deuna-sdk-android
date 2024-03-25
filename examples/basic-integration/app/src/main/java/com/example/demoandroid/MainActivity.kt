@@ -10,10 +10,9 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.closeCheckout
 import com.deuna.maven.closeElements
-import com.deuna.maven.element.domain.ElementsCallbacks
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
-import com.deuna.maven.shared.Environment
+import com.deuna.maven.shared.*
 
 
 val ERROR_TAG = "❌ DeunaSDK"
