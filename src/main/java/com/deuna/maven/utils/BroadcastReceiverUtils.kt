@@ -7,28 +7,24 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 
 
-enum class DeunaBroadcastReceiverAction(val value: String) {
-    CHECKOUT("com.deuna.maven.CLOSE_CHECKOUT"),
-    ELEMENTS("com.deuna.maven.CLOSE_ELEMENTS")
-}
 
 class BroadcastReceiverUtils {
     companion object {
         fun register(
             context: Context,
             broadcastReceiver: BroadcastReceiver,
-            action: DeunaBroadcastReceiverAction,
+            action: String,
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.registerReceiver(
                     broadcastReceiver,
-                    IntentFilter(action.value),
+                    IntentFilter(action),
                     AppCompatActivity.RECEIVER_NOT_EXPORTED,
                 )
             } else {
                 context.registerReceiver(
                     broadcastReceiver,
-                    IntentFilter(action.value),
+                    IntentFilter(action),
                 )
             }
         }

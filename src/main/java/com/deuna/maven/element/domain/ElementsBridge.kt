@@ -1,43 +1,26 @@
 package com.deuna.maven.element.domain
 
 import ElementsResponse
-import android.util.Log
-import android.webkit.JavascriptInterface
+import android.content.Context
+import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import org.json.JSONObject
+import org.json.*
 
-/**
- * The ElementsBridge class is used to receive messages from JavaScript code in a WebView.
- * The messages are parsed and the corresponding callbacks are called based on the event type.
- */
-class ElementsBridge(
-    private val callbacks: ElementsCallbacks,
-    private val closeOnEvents: Set<ElementsEvent>,
-    private val closeElements: () -> Unit,
-) {
-    /**
-     * The postMessage function is called when a message is received from JavaScript code in a WebView.
-     * The message is parsed and the corresponding callbacks are called based on the event type.
-     */
-    @JavascriptInterface
-    fun postMessage(message: String) {
+ class ElementsBridge(
+    private val context: Context,
+    private val callbacks: ElementsCallbacks?,
+    private val closeEvents: Set<ElementsEvent>,
+ ) : WebViewBridge() {
+    override fun handleEvent(message: String) {
         try {
-            handleEvent(message)
-        } catch (e: Exception) {
-            Log.d("ElementsBridge", "postMessage: $e")
-        }
-    }
-
-    private fun handleEvent(eventTypeString: String) {
-        try {
-            val json = JSONObject(eventTypeString)
+            val json = JSONObject(message)
             val eventData = ElementsResponse.fromJson(json)
 
-            callbacks.eventListener?.invoke(eventData.type, eventData)
+           callbacks?.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
 
                 ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated -> {
-                    handleSuccess(eventData)
+                    callbacks?.onSuccess?.invoke((eventData))
                 }
 
                 ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> eventData.data.metadata?.let {
@@ -47,8 +30,8 @@ class ElementsBridge(
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements()
-                    callbacks.onCanceled?.invoke()
+                    closeElements(context)
+                    callbacks?.onCanceled?.invoke()
                 }
 
                 else -> {
@@ -56,8 +39,8 @@ class ElementsBridge(
                 }
             }
             eventData.let {
-                if (closeOnEvents.contains(it.type)) {
-                    closeElements()
+                if (closeEvents.contains(it.type)) {
+                    closeElements(context)
                 }
             }
         } catch (e: Exception) {
@@ -65,14 +48,8 @@ class ElementsBridge(
         }
     }
 
-    private fun handleSuccess(data: ElementsResponse) {
-        callbacks.onSuccess?.invoke(
-            data
-        )
-    }
-
     private fun handleError(response: ElementsResponse) {
-        callbacks.onError?.invoke(
+        callbacks?.onError?.invoke(
             ElementsError(
                 ElementsErrorType.VAULT_SAVE_ERROR,
                 response.data.user

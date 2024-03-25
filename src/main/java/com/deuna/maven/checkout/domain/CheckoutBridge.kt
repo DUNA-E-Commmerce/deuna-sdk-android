@@ -1,33 +1,25 @@
 package com.deuna.maven.checkout.domain
 
 import CheckoutResponse
-import android.webkit.JavascriptInterface
+import android.content.Context
+import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import org.json.JSONException
-import org.json.JSONObject
+import org.json.*
 
-/**
- * The CheckoutBridge class is used to receive messages from JavaScript code in a WebView.
- * The messages are parsed and the corresponding callbacks are called based on the event type.
- */
 class CheckoutBridge(
-    private val callbacks: CheckoutCallbacks,
-    private val closeOnEvents: Set<CheckoutEvent>,
-    private val closeCheckout: () -> Unit,
-) {
-    /**
-     * Called when the activity is starting.
-     */
-    @JavascriptInterface
-    fun postMessage(message: String) {
-        val eventData: CheckoutResponse?
+    private val context: Context,
+    private val callbacks: CheckoutCallbacks?,
+    private val closeEvents: Set<CheckoutEvent>,
+) : WebViewBridge() {
+    override fun handleEvent(message: String) {
+
         try {
             val json = JSONObject(message)
-            eventData = CheckoutResponse.fromJson(json)
-            callbacks.eventListener?.invoke(eventData.type, eventData)
+            val eventData = CheckoutResponse.fromJson(json)
+            callbacks?.eventListener?.invoke(eventData.type, eventData)
             when (eventData.type) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
-                    handleSuccess(eventData)
+                    callbacks?.onSuccess?.invoke(eventData)
                 }
 
                 CheckoutEvent.purchaseRejected -> {
@@ -42,8 +34,8 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closeCheckout()
-                    callbacks.onCanceled?.invoke()
+                    closeCheckout(context)
+                    callbacks?.onCanceled?.invoke()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
@@ -56,8 +48,8 @@ class CheckoutBridge(
             }
 
             eventData.let {
-                if (closeOnEvents.contains(it.type)) {
-                    closeCheckout()
+                if (closeEvents.contains(it.type)) {
+                    closeCheckout(context)
                 }
             }
         } catch (e: JSONException) {
@@ -65,25 +57,13 @@ class CheckoutBridge(
         }
     }
 
-    private fun handleCloseActivity(data: CheckoutResponse, type: CheckoutEvent) {
-        callbacks.eventListener?.invoke(type, data)
-    }
-
     private fun handleError(type: CheckoutErrorType, response: CheckoutResponse) {
-        callbacks.onError?.invoke(
+        callbacks?.onError?.invoke(
             CheckoutError(
-
-                type, // Internet Connection // Checkout failed
+                type,
                 response.data.order,
                 response.data.user
             )
         )
     }
-
-    private fun handleSuccess(data: CheckoutResponse) {
-        callbacks.onSuccess?.invoke(
-            data
-        )
-    }
-
 }

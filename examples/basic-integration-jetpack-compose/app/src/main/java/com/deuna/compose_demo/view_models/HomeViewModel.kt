@@ -9,6 +9,7 @@ import androidx.lifecycle.*
 import com.deuna.maven.*
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.element.domain.*
+import com.deuna.maven.shared.*
 import kotlinx.coroutines.*
 
 

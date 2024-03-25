@@ -3,11 +3,9 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.element.DeunaElementActivity
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.utils.DeunaBroadcastReceiverAction
+import com.deuna.maven.web_views.*
 import java.lang.IllegalStateException
 
 
@@ -37,7 +35,7 @@ fun DeunaSDK.initElements(
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.elementsBaseUrl
 
-    DeunaElementActivity.setCallback(callbacks)
+    ElementsActivity.setCallbacks(callbacks)
 
     val elementUrl = Uri.parse("$baseUrl/vault")
         .buildUpon()
@@ -47,10 +45,10 @@ fun DeunaSDK.initElements(
         .build().toString()
 
 
-    val intent = Intent(context, DeunaElementActivity::class.java).apply {
-        putExtra(DeunaElementActivity.EXTRA_URL, elementUrl)
+    val intent = Intent(context, ElementsActivity::class.java).apply {
+        putExtra(ElementsActivity.EXTRA_URL, elementUrl)
         putStringArrayListExtra(
-            DeunaElementActivity.CLOSE_ON_EVENTS,
+           BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
         )
     }
@@ -71,5 +69,5 @@ fun DeunaSDK.closeElements(context: Context) {
  * Global function used to send a broadcast event to close the elements view
  */
 fun closeElements(context: Context) {
-    context.sendBroadcast(Intent(DeunaBroadcastReceiverAction.ELEMENTS.value))
+    context.sendBroadcast(Intent(BaseWebViewActivity.CLOSE_BROADCAST_RECEIVER_ACTION))
 }
