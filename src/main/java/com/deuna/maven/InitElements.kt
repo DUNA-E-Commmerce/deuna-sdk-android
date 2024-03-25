@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.webviews.*
+import com.deuna.maven.web_views.*
 import java.lang.IllegalStateException
 
 

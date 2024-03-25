@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".checkout.DeunaActivity">
+    tools:context=".web_views.BaseWebViewActivity">
 
     <WebView
         android:id="@+id/deuna_webview"

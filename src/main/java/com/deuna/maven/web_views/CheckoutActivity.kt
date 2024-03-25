@@ -1,4 +1,4 @@
-package com.deuna.maven.webviews
+package com.deuna.maven.web_views
 
 import android.os.*
 import com.deuna.maven.checkout.domain.*
@@ -8,6 +8,11 @@ import com.deuna.maven.shared.CheckoutCallbacks
 import retrofit2.*
 import java.net.*
 
+/**
+ * This activity handles the checkout process for Deuna. It retrieves the payment link
+ * from the server and loads it in a WebView. It also communicates with the CheckoutCallbacks
+ * interface to report success, errors, or cancellation.
+ */
 class CheckoutActivity() : BaseWebViewActivity() {
 
     companion object {
@@ -16,16 +21,21 @@ class CheckoutActivity() : BaseWebViewActivity() {
         const val EXTRA_BASE_URL = "BASE_URL"
         private var callbacks: CheckoutCallbacks? = null
 
+        /**
+         * Set the callbacks object to receive checkout events.
+         */
         fun setCallbacks(callbacks: CheckoutCallbacks) {
             this.callbacks = callbacks
         }
     }
 
+    // Set of CheckoutEvents indicating when to close the activity
     private lateinit var closeEvents: Set<CheckoutEvent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Extract data from the intent
         val baseUrl = intent.getStringExtra(EXTRA_BASE_URL)!!
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
@@ -33,10 +43,14 @@ class CheckoutActivity() : BaseWebViewActivity() {
         val closeEventAsStrings = intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
         closeEvents = parseCloseEvents<CheckoutEvent>(closeEventAsStrings)
 
+        // Initiate the checkout process by fetching the order API
         getOrderApi(baseUrl = baseUrl, orderToken = orderToken, apiKey = apiKey)
     }
 
-
+    /**
+     * Fetches the order details from the server using the provided credentials.
+     * Parses the response to extract the payment link and load it in the WebView.
+     */
     private fun getOrderApi(baseUrl: String, orderToken: String, apiKey: String) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
@@ -44,12 +58,16 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     val responseBody = response.body() as? Map<*, *>
                     val orderMap = responseBody?.get("order") as? Map<*, *>
                     if (orderMap != null) {
-                        val parsedUrl = URL(orderMap.get("payment_link").toString())
+                        val parsedUrl = URL(orderMap["payment_link"].toString())
                         loadUrl(
                             url = cleanUrl(parsedUrl.toString())
                         )
+                    } else {
+                        // Handle missing order data
+                        orderNotFound()
                     }
                 } else {
+                    // Handle missing order data
                     orderNotFound()
                 }
             }
@@ -60,6 +78,10 @@ class CheckoutActivity() : BaseWebViewActivity() {
         })
     }
 
+    /**
+     * This method is called when the order details are not found on the server.
+     * It invokes the onError callback with a CheckoutError of type ORDER_NOT_FOUND.
+     */
     private fun orderNotFound() {
         callbacks?.onError?.invoke(
             CheckoutError(

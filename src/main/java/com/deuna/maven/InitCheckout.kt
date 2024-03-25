@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.webviews.*
+import com.deuna.maven.web_views.*
 
 
 /**

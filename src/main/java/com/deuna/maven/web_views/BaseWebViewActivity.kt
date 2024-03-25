@@ -1,4 +1,4 @@
-package com.deuna.maven.webviews
+package com.deuna.maven.web_views
 
 import android.annotation.*
 import android.content.*
@@ -17,6 +17,11 @@ import com.deuna.maven.shared.*
 import com.deuna.maven.utils.*
 
 
+/**
+ * This abstract class provides a foundation for activities that display web content
+ * using a WebView. It handles common tasks like checking internet connectivity,
+ * registering broadcast receivers, handling back button presses, and loading URLs.
+ */
 abstract class BaseWebViewActivity : AppCompatActivity() {
 
     companion object {
@@ -26,7 +31,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     private val closeAllReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            finish()
+            finish() // Close the activity when the broadcast is received
         }
     }
 
@@ -35,10 +40,11 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.webview_activity)
         initialize()
     }
 
-
+    // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(this).hasInternet) {
             DeunaLogs.debug("No internet connection")
@@ -46,14 +52,14 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
             return
         }
 
-        // register a broadcast receiver to listen when to close the webView activity
+        // Register broadcast receiver to listen for close event
         BroadcastReceiverUtils.register(
             context = this,
             broadcastReceiver = closeAllReceiver,
             action = CLOSE_BROADCAST_RECEIVER_ACTION
         )
 
-        // listen when back button is pressed
+        // Handle back button press
         onBackPressedDispatcher.addCallback {
             DeunaLogs.debug("Canceled by user")
             onCanceledByUser()
@@ -64,6 +70,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     }
 
+    // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     fun loadUrl(url: String) {
         webView.settings.apply {
@@ -100,6 +107,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
     }
 
 
+    // Remove unnecessary slashes from the URL
     fun cleanUrl(url: String): String {
         val protocolEndIndex = url.indexOf("//") + 2
         val protocol = url.substring(0, protocolEndIndex)
@@ -107,34 +115,17 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
         return "$protocol$restOfUrl"
     }
 
-
+    // Abstract methods to be implemented by subclasses
     abstract fun getBridge(): WebViewBridge
 
     abstract fun onNoInternet()
 
     abstract fun onCanceledByUser()
 
+    // Unregister the broadcast receiver when the activity is destroyed
     override fun onDestroy() {
         unregisterReceiver(closeAllReceiver)
         super.onDestroy()
     }
 
-}
-
-
-abstract class WebViewBridge {
-    /**
-     * The postMessage function is called when a message is received from JavaScript code in a WebView.
-     * The message is parsed and the corresponding callbacks are called based on the event type.
-     */
-    @JavascriptInterface
-    fun postMessage(message: String) {
-        try {
-            handleEvent(message)
-        } catch (e: Exception) {
-            Log.d("ElementsBridge", "postMessage: $e")
-        }
-    }
-
-    abstract fun handleEvent(message: String)
 }
