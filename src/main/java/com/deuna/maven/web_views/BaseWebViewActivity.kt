@@ -2,6 +2,8 @@ package com.deuna.maven.web_views
 
 import android.annotation.*
 import android.content.*
+import android.graphics.*
+import android.net.*
 import android.os.*
 import android.util.*
 import android.view.*
@@ -37,6 +39,8 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     lateinit var loader: ProgressBar
     private lateinit var webView: WebView
+
+    var previousUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,9 +83,30 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
 
-        webView.addJavascriptInterface(getBridge(), "android") // Add JavascriptInterface
+        // Add JavascriptInterface
+        if ("deuna.io" in url || "deuna.com" in url) {
+            webView.addJavascriptInterface(getBridge(), "android")
+        }
 
         webView.webViewClient = object : WebViewClient() {
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+
+                // Check if this is the first load or a navigation
+                if (previousUrl == null) {
+                    // This is the first load
+                    previousUrl = url
+                    return
+                }
+                if (url == null) {
+                    return
+                }
+                DeunaLogs.info("Page refreshed or Navigating to a different URL")
+                // Page refreshed or Navigating to a different URL
+                rebuildWebView(url)
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // When the page finishes loading, the Web View is shown and the loader is hidden
@@ -89,8 +114,23 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
                 loader.visibility = View.GONE
             }
         }
-
         webView.loadUrl(url)
+    }
+
+    fun rebuildWebView(url: String) {
+        previousUrl = null
+        val layout = findViewById<RelativeLayout>(R.id.deuna_webview_container)
+        layout.removeView(webView)
+
+        webView = WebView(this@BaseWebViewActivity)
+        layout.addView(webView)
+        webView.layoutParams = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.MATCH_PARENT
+        )
+        webView.visibility = View.VISIBLE
+
+        loadUrl(url)
     }
 
 
@@ -127,5 +167,6 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
         unregisterReceiver(closeAllReceiver)
         super.onDestroy()
     }
+
 
 }
