@@ -29,7 +29,7 @@ class MainActivity() : ComponentActivity() {
               homeViewModel = HomeViewModel(
                 deunaSDK = DeunaSDK(
                   environment = Environment.STAGING,
-                  publicApiKey = "77c319962031a1762d98b5a5dff8916c0070a71b747a4104fc88e3f1269653ccfc2b49a6f224af3aa7c0677b8d9210099480d48b7f3461a95efb39117c00"
+                  publicApiKey = "7be2cfe6cbd7901a48c144296a5d939095322bd5ed4ccad3c8c16850e071c0b39ef18ffb9063bb76bd96262bcd3cc88d936b299f0c9b8ce902141a0afe44"
                 ),
               )
             )
