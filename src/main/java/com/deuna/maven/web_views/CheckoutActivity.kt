@@ -5,6 +5,7 @@ import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
+import com.deuna.maven.web_views.base.*
 import retrofit2.*
 import java.net.*
 
@@ -60,7 +61,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     if (orderMap != null) {
                         val parsedUrl = URL(orderMap["payment_link"].toString())
                         loadUrl(
-                            url = cleanUrl(parsedUrl.toString())
+                            url = parsedUrl.toString()
                         )
                     } else {
                         // Handle missing order data

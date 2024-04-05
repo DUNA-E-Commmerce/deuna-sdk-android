@@ -1,7 +1,9 @@
-package com.deuna.maven.web_views
+package com.deuna.maven.web_views.base
 
 import android.annotation.*
 import android.content.*
+import android.graphics.*
+import android.net.*
 import android.os.*
 import android.util.*
 import android.view.*
@@ -15,7 +17,6 @@ import com.deuna.maven.element.*
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.utils.*
-
 
 /**
  * This abstract class provides a foundation for activities that display web content
@@ -73,13 +74,16 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     fun loadUrl(url: String) {
+        val cleanedUrl = cleanUrl(url)
+        DeunaLogs.info(cleanedUrl)
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
 
-        webView.addJavascriptInterface(getBridge(), "android") // Add JavascriptInterface
+        // Add JavascriptInterface
+        webView.addJavascriptInterface(getBridge(), "android")
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -89,26 +93,84 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
                 loader.visibility = View.GONE
             }
         }
+        setupWebChromeClient(webView)
 
-        webView.loadUrl(url)
+        webView.loadUrl(cleanedUrl)
+    }
+
+    // Setup the WebChromeClient to handle creation of new windows.
+    private fun setupWebChromeClient(webView: WebView) {
+        webView.webChromeClient = object : WebChromeClient() {
+            @SuppressLint("SetJavaScriptEnabled")
+            override fun onCreateWindow(
+                view: WebView,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message,
+            ): Boolean {
+                val newWebView = WebView(this@BaseWebViewActivity).apply {
+                    webViewClient = WebViewClient()
+                    settings.javaScriptEnabled = true
+                }
+
+                val transport = resultMsg.obj as WebView.WebViewTransport
+                transport.webView = newWebView
+                resultMsg.sendToTarget()
+
+                // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
+                val webViewClient = CustomWebViewClient(webViewCallback, newWebView)
+                newWebView.webViewClient = webViewClient
+
+                return true
+            }
+        }
     }
 
 
-    inline fun <reified T : Enum<T>> parseCloseEvents(closeEventAsListString: List<String>): Set<T> {
-        // Use `T` as the generic type for the enum
-        return closeEventAsListString.mapNotNull { stringValue ->
-            try {
-                // Use `enumValueOf<T>` to get the enum value of type `T`
-                enumValueOf<T>(stringValue)
-            } catch (e: IllegalArgumentException) {
-                null // Ignore invalid enum constant names
+    // Handle a URL that should be opened in an external browser.
+    val webViewCallback = object : WebViewCallback {
+        override fun onExternalUrl(webView: WebView, url: String) {
+            openInExternalBrowser(url)
+        }
+
+        override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+
+            webView.loadUrl(url)
+
+            newWebView.webChromeClient = object : WebChromeClient() {
+                override fun onCreateWindow(
+                    view: WebView,
+                    isDialog: Boolean,
+                    isUserGesture: Boolean,
+                    resultMsg: Message,
+                ): Boolean {
+                    return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+                }
             }
-        }.toSet()
+
+            // The new WebView should be added and visible
+            val layout = findViewById<RelativeLayout>(R.id.deuna_webview_container)
+            layout.removeView(webView)
+            layout.addView(newWebView)
+            newWebView.layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            )
+
+            newWebView.visibility = View.VISIBLE
+        }
+    }
+
+    // Open the URL in an external browser.
+    private fun openInExternalBrowser(url: String) {
+        // Create an Intent to open the URL in an external browser
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
     }
 
 
     // Remove unnecessary slashes from the URL
-    fun cleanUrl(url: String): String {
+    private fun cleanUrl(url: String): String {
         val protocolEndIndex = url.indexOf("//") + 2
         val protocol = url.substring(0, protocolEndIndex)
         val restOfUrl = url.substring(protocolEndIndex).replace("//", "/")
@@ -127,5 +189,4 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
         unregisterReceiver(closeAllReceiver)
         super.onDestroy()
     }
-
 }

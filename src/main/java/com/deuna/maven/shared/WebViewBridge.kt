@@ -15,7 +15,7 @@ abstract class WebViewBridge {
         try {
             handleEvent(message)
         } catch (e: Exception) {
-            Log.d("ElementsBridge", "postMessage: $e")
+            Log.d("WebViewBridge", "postMessage: $e")
         }
     }
 

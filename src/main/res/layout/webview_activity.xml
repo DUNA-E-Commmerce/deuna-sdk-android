@@ -1,8 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/deuna_webview_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".web_views.BaseWebViewActivity">
+    tools:context=".web_views.base.BaseWebViewActivity">
 
     <WebView
         android:id="@+id/deuna_webview"

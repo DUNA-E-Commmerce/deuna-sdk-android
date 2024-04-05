@@ -5,6 +5,7 @@ import android.content.Intent
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.*
+import com.deuna.maven.web_views.base.*
 
 
 /**

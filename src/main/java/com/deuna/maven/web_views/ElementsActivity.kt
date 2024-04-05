@@ -3,6 +3,7 @@ package com.deuna.maven.web_views
 import android.os.*
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.web_views.base.*
 
 /**
  * This activity displays a web page loaded from a provided URL. It utilizes the ElementsBridge
