@@ -7,8 +7,8 @@ plugins {
 
 ext {
     urlMaven = System.getProperty("urlMaven", "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-    usernameMaven = System.getProperty("usernameMaven", "developersdeuna")
-    passwordMaven = System.getProperty("passwordMaven", "J>y@RT]3>[v2%jM")
+    usernameMaven = System.getProperty("usernameMaven", "")
+    passwordMaven = System.getProperty("passwordMaven", "")
 }
 
 android {
