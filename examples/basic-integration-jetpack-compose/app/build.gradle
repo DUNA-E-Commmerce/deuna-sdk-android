@@ -59,7 +59,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // DEUNA SDK
-//    implementation files('../../../build/outputs/aar/deuna-sdk-android-debug.aar')
     implementation("com.deuna.maven:deunasdk:2.0.0")
 
     // Material Design 3
