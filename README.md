@@ -7,7 +7,7 @@
 
 DeunaSDK is a Android-based SDK designed to facilitate integration with the DEUNA. This SDK provides a seamless way to initialize payments, handle success, error, and close actions, and manage configurations.
 
-Get started with our [📚 integration guides](https://docs.deuna.com/docs/integraciones-del-android-sdk) and [example projects](#examples)
+Get started with our [📚 integration guides](https://docs.deuna.com/docs/integraciones-del-android-sdk) and [example projects](https://github.com/DUNA-E-Commmerce/deuna-sdk-android/tree/master/examples/basic-integration)
 
 
 
@@ -15,77 +15,181 @@ Get started with our [📚 integration guides](https://docs.deuna.com/docs/integ
 
 ### Gradle
 
-You can install DeunaSDK using Swift Package Manager by adding the following dependency to your `build.gradle` file:
+You can install DeunaSDK using by adding the following dependency to your `build.gradle` file:
 
-    implementation("com.deuna.maven:deunasdk:0.2.6")
-
-### Examples
-
-- [Prebuilt UI](examples) (Recommended)
-    - This example demonstrates how to build a payment flow using [`PaymentWidget`](https://docs.deuna.com/docs/widget-payments-and-fraud)
+  ```
+    implementation("com.deuna.maven:deunasdk:2.0.0")
+  ```
 
 ## Usage
 
 
-### Configuration
+### Initialization
 
-Before using the SDK, you need to configure it with your API key, order token, user token, environment, element type, and close button configuration.
+To use the SDK you need to create one instance of `DeunaSDK`. There are 2 ways that you can create an instance of `DeunaSDK`:
 
-     DeUnaSdk.config(
-            apiKey = "8560b86594b9af09165e765bc6b57d9797c9535479274f5de3f83f92c5fc3c70584080fde4e875f3782c3285e4be6996c25b4f77fac99e2ae4e6992b0778",
-            orderToken = "2b754211-3eb1-4e2e-832e-56dca6419f08",
-            environment = Environment.DEVELOPMENT,
-            elementType = ElementType.EXAMPLE, // Optional
-            closeOnEvents = arrayOf(CheckoutEvents.CHANGE_ADDRESS), // Optional
-            userToken = "" // Optional
-        )
+1. Registing a singleton to use the same instance in any part of your code
 
-### Initializing Checkout
+    ```kotlin
+    DeunaSDK.initialize(
+        environment = Environment.SANDBOX, // Environment.PRODUCTION , etc
+        publicApiKey = "YOUR_PUBLIC_API_KEY"
+    )
+    ```
+    Now you can use the same instance of DeunaSDK using `DeunaSDK.shared`
 
-This method initializes the checkout process. It sets up the WebView, checks for internet connectivity, and loads the payment link.
+    ```kotlin
+    DeunaSDK.shared.initCheckout(...)
+    ```
+
+2. Instantiation
+
+    ```kotlin
+
+    class MyClass {
+        private lateinit val deunaSDK: DeunaSDK
+    
+        init {
+            deunaSDK = DeunaSDK(
+                environment = Environment.SANDBOX,
+                publicApiKey = "YOUR_PUBLIC_API_KEY"
+            )
+        }
+
+        fun buy(){
+            deunaSdk.initCheckout(...)
+        }
+    }
+
+    ```
+
+### Launch the Checkout
+
+To launch the checkout process you must use the `initCheckout` function. It sets up the WebView, checks for internet connectivity, and loads the payment link.
 
 **Parameters:**
--   **view**: The view that will contain the WebView.
-          val initPayment = DeUnaSdk.initCheckout(view)
-          initPayment.onSuccess = { order ->
-            val orderSuccessResponse: OrderSuccessResponse = order
-            val duration = Toast.LENGTH_LONG
+-   **orderToken**: The token representing the order.
+-   **callbacks**: An instance of the `CheckoutCallbacks` class, which contains closures that will be called on success, error, or when the WebView is closed.
+-   **closeEvents**: A set of `CheckoutEvent` values specifying when to automatically close the checkout.
 
-            val toast = Toast.makeText(
-                context,
-                "Success Orden id: ${orderSuccessResponse.order?.order_id}",
-                duration
+    > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeCheckout` function.
+
+    ```kotlin
+    class MyClass: AppCompatActivity() {
+        val deunaSDK: DeunaSDK ....
+
+        fun buy(orderToken:String){
+            val callbacks =  CheckoutCallbacks().apply {
+                onSuccess = { response ->
+                   deunaSDK.closeCheckout(...)
+                   // show the success view
+                }
+                onError = { error ->
+                    // your logic
+                   deunaSDK.closeCheckout(...)
+                }
+                onCanceled = {
+                    // called when the payment process was canceled by user
+                    // Calling closeCheckout(...) is unnecessary here.
+                }
+                eventListener = { type, response ->
+                    when(type){
+                        ...
+                    }
+                }
+                onClosed = {
+                    // DEUNA widget was closed
+                }
+            }
+
+            deunaSDK.initCheckout(
+                context = this,
+                orderToken = orderToken,
+                callbacks = callbacks
             )
-            toast.show()
-          }
+        }
+    }
+    ```
 
-          initPayment.onClose = {
 
-          }
+### Launch the VAULT WIDGET
 
-          initPayment.onError = { order, errorMessage ->
-            val orderErrorResponse: OrderErrorResponse? = order
-            val duration = Toast.LENGTH_LONG
+To launch the vault widget you must use the `initElements` function. It sets up the WebView, checks for internet connectivity, and loads the elements link.
 
-            val toast = Toast.makeText(
-                context,
-                "Error Orden id: ${orderErrorResponse?.order?.order_id}",
-                duration
+**Parameters:**
+-   **userToken**: The token representing the user.
+-   **callbacks**: An instance of the `ElementsCallbacks` class, which contains closures that will be called on success, error, or when the WebView is closed.
+-   **closeEvents**: A set of `ElementsEvent` values specifying when to automatically close the checkout.
+
+    > NOTE: By default, the WebView modal is only closed when the user presses the close button. You can use the `closeEvents` parameter to close the WebView without having to call the `closeElements` function.
+
+    ```kotlin
+    class MyClass: AppCompatActivity() {
+        val deunaSDK: DeunaSDK ....
+
+        fun saveCard(userToken:String){
+            val callbacks =  ElementsCallbacks().apply {
+                onSuccess = { response ->
+                   deunaSDK.closeElements(...)
+                   // show the success view
+                }
+                onError = { error ->
+                    // your logic
+                   deunaSDK.closeElements(...)
+                }
+                onCanceled = {
+                    // called when the elements process was canceled by user
+                    // Calling closeElements(...) is unnecessary here.
+                }
+                eventListener = { type, response ->
+                    when(type){
+                        ...
+                    }
+                }
+                onClosed = {
+                    // the elements view was closed
+                }
+            }
+
+            deunaSDK.initElements(
+                context = this,
+                orderToken = userToken,
+                callbacks = callbacks
             )
-            toast.show()
-          }
+        }
+    }
+    ```
+
+### Logging
+To enable or disable logging:
+```kotlin
+DeunaLogs.isEnabled = false // or true
+```
+
+
+### Network Reachability
+The SDK automatically checks for network availability before initializing the checkout process.
 
 
 
-## Classes & Enums
+## FAQs
+* ### How to get an **order token** ?
+    To generate an order token, refer to our API documentation on our [API Referece](https://docs.deuna.com/reference/order_token)
 
-### CloseButtonConfig
+* ### How to get an **user token** ?
+    You'll need a registered user in DEUNA. Follow the instructions for ["User Registration"](https://docs.deuna.com/reference/users-register) in our API reference.
 
-This class allows you to customize the appearance and position of the close button on the WebView.
+    Once you have a registered user, you can obtain an access token through a two-step process:
 
-## DeunaSDKError
+    **Request an OTP code**: Use our API for "[Requesting an OTP Code](https://docs.deuna.com/reference/request-otp)" via email.
 
-`OrderErrorResponse` is an enumeration that represents the possible errors that can occur during the SDK's operation. Each case in this enumeration provides a specific type of error, making it easier to handle and provide feedback to the user or developer.
+    **Login with OTP code:** Use the retrieved code to "[Log in with OTP](https://docs.deuna.com/reference/login-with-otp)" and get an access token for your user.
+
+
+
+
+## CHANGELOG
+Check all changes [here](https://github.com/DUNA-E-Commmerce/deuna-sdk-android/blob/master/CHANGELOG.md)
 
 ## Author
 DUENA Inc.
