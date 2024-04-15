@@ -10,7 +10,7 @@ enum class Environment(
     ),
     PRODUCTION(
         "https://api.deuna.io",
-        "https://elements.deuna.io"
+        "https://elements.deuna.com"
     ),
     STAGING(
         "https://api.stg.deuna.io",
