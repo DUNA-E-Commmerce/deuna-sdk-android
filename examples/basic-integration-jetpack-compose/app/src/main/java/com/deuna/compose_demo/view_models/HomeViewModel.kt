@@ -53,10 +53,10 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
         }
       }
       onError = { error ->
-        deunaSDK.closeCheckout(context)
-        viewModelScope.launch {
-          completion(CheckoutResult.Error(error))
-        }
+//        deunaSDK.closeCheckout(context)
+//        viewModelScope.launch {
+//          completion(CheckoutResult.Error(error))
+//        }
       }
       onCanceled = {
         viewModelScope.launch {
