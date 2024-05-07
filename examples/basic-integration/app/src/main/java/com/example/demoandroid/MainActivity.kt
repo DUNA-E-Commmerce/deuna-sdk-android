@@ -10,8 +10,11 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.closeCheckout
 import com.deuna.maven.closeElements
+import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
+import com.deuna.maven.initPaymentWidget
+import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.*
 
 
@@ -20,8 +23,8 @@ val DEBUG_TAG = "👀 DeunaSDK"
 
 class MainActivity : AppCompatActivity() {
   private val deunaSdk = DeunaSDK(
-    environment = Environment.SANDBOX,
-    publicApiKey = "YOUR_PUBLIC_API_KEY",
+    environment = Environment.STAGING,
+    publicApiKey = "7be2cfe6cbd7901a48c144296a5d939095322bd5ed4ccad3c8c16850e071c0b39ef18ffb9063bb76bd96262bcd3cc88d936b299f0c9b8ce902141a0afe44",
   );
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,11 +32,32 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     val payButton: Button = findViewById(R.id.payButton)
+    val paymentWidgetButton: Button = findViewById(R.id.paymentWidgetButton)
     val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
 
     payButton.setOnClickListener { startPaymentProcess() }
+    paymentWidgetButton.setOnClickListener { showPaymentWidget() }
     savePaymentMethodButton.setOnClickListener { saveCard() }
   }
+
+
+  private fun showPaymentWidget() {
+    val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()
+
+    deunaSdk.initPaymentWidget(context = this, orderToken = orderToken, callbacks = PaymentWidgetCallbacks().apply {
+      onPaymentSuccess = {
+        deunaSdk.closePaymentWidget(this@MainActivity)
+        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+          startActivity(this)
+        }
+      }
+      onClosed = {
+        Log.d(DEBUG_TAG, "DEUNA widget was closed")
+      }
+    })
+  }
+
+
 
   private fun startPaymentProcess() {
     val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()

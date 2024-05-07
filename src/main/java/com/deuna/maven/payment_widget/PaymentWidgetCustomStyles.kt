@@ -1,4 +1,4 @@
-package com.deuna.maven.deuna_now
+package com.deuna.maven.payment_widget
 
 import android.service.quicksettings.Tile
 
@@ -6,7 +6,7 @@ import android.service.quicksettings.Tile
  * Custom styles that can be passed to the payment widget
  * using the setCustomStyles function.
  */
-class DeunaPayCustomStyles {
+class PaymentWidgetCustomStyles {
 
     var hidePoweredBy: Boolean? = null
     var saveButton: SaveButton? = null

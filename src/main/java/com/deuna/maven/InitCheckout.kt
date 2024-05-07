@@ -16,7 +16,6 @@ import com.deuna.maven.web_views.base.*
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeEvents (Optional) A Set of CheckoutEvent values specifying when to close the checkout activity automatically.
  *
- * @throws IllegalArgumentException if the passed orderToken is not valid
  */
 fun DeunaSDK.initCheckout(
     context: Context,
