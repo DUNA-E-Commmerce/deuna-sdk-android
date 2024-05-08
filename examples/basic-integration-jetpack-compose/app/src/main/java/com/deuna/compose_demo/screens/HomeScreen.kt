@@ -33,8 +33,21 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
   val context = LocalContext.current
 
   // Function to perform payment and navigate to the success screen upon successful payment
-  fun performPayment() {
-    homeViewModel.payment(context = context, completion = { result ->
+  fun performPaymentWithPaymentWidget() {
+    homeViewModel.showPaymentWidget(context = context, completion = { result ->
+      when (result) {
+        is PaymentWidgetResult.Canceled -> Log.d("PAYMENT", "Canceled")
+        is PaymentWidgetResult.Error -> Log.d("PAYMENT ERROR","")
+        is PaymentWidgetResult.Success -> navController.navigate(
+          "/success/${Uri.encode("Payment successful!")}"
+        )
+      }
+    })
+  }
+
+  // Function to perform payment and navigate to the success screen upon successful payment
+  fun performPaymentWithCheckout() {
+    homeViewModel.showCheckout(context = context, completion = { result ->
       when (result) {
         is CheckoutResult.Canceled -> Log.d("PAYMENT", "Canceled")
         is CheckoutResult.Error -> Log.d("PAYMENT ERROR", result.error.type.message)
@@ -80,11 +93,25 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
 
       Box(modifier = Modifier.height(20.dp))
 
-      ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = { performPayment() }) {
-        Text(text = "Start Payment")
+      ElevatedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { performPaymentWithCheckout() }
+      ) {
+        Text(text = "Start Checkout")
       }
 
-      ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = { saveCard() }) {
+
+      ElevatedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { performPaymentWithPaymentWidget() }
+      ) {
+        Text(text = "Start Payment Widget")
+      }
+
+      ElevatedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { saveCard() }
+      ) {
         Text(text = "Save Card")
       }
     }

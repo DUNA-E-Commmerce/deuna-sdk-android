@@ -28,8 +28,8 @@ class MainActivity() : ComponentActivity() {
               // Initialize the view model with DeunaSDK configuration for sandbox environment
               homeViewModel = HomeViewModel(
                 deunaSDK = DeunaSDK(
-                  environment = Environment.SANDBOX,
-                  publicApiKey = "YOUR_PUBLIC_API_KEY"
+                  environment = Environment.STAGING,
+                  publicApiKey = "7be2cfe6cbd7901a48c144296a5d939095322bd5ed4ccad3c8c16850e071c0b39ef18ffb9063bb76bd96262bcd3cc88d936b299f0c9b8ce902141a0afe44"
                 ),
               )
             )
