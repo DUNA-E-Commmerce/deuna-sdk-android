@@ -29,8 +29,12 @@ class CheckoutBridge(
                     )
                 }
 
-                CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError, CheckoutEvent.purchaseError -> {
+                CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError -> {
                     handleError(CheckoutErrorType.CHECKOUT_INITIALIZATION_FAILED, eventData)
+                }
+
+                CheckoutEvent.purchaseError -> {
+                    handleError(CheckoutErrorType.PAYMENT_ERROR, eventData)
                 }
 
                 CheckoutEvent.linkClose -> {

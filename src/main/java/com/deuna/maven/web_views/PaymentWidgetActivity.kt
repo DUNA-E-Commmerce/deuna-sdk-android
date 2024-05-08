@@ -3,6 +3,7 @@ package com.deuna.maven.web_views
 import android.os.Bundle
 import com.deuna.maven.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
+import com.deuna.maven.shared.PaymentWidgetErrorType
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 
@@ -35,11 +36,11 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     override fun onNoInternet() {
-        TODO("Not yet implemented")
+        callbacks?.onError?.invoke(PaymentWidgetErrorType.NO_INTERNET_CONNECTION)
     }
 
     override fun onCanceledByUser() {
-        TODO("Not yet implemented")
+        callbacks?.onCanceled?.invoke()
     }
 
     override fun onDestroy() {

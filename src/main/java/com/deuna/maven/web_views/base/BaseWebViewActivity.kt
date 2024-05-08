@@ -76,6 +76,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
     fun loadUrl(url: String) {
         val cleanedUrl = cleanUrl(url)
         DeunaLogs.info(cleanedUrl)
+
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
@@ -120,8 +121,15 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
                 // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
                 val webViewClient = CustomWebViewClient(webViewCallback, newWebView)
                 newWebView.webViewClient = webViewClient
-
+                loader.visibility = View.VISIBLE
                 return true
+            }
+
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                if (newProgress == 100) {
+                    loader.visibility = View.GONE
+                }
+                super.onProgressChanged(view, newProgress)
             }
         }
     }
@@ -133,8 +141,9 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
             openInExternalBrowser(url)
         }
 
-        override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
 
+        override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+            loader.visibility = View.VISIBLE
             webView.loadUrl(url)
 
             newWebView.webChromeClient = object : WebChromeClient() {
@@ -145,6 +154,13 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
                     resultMsg: Message,
                 ): Boolean {
                     return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+                }
+
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    if (newProgress == 100) {
+                        loader.visibility = View.GONE
+                    }
+                    super.onProgressChanged(view, newProgress)
                 }
             }
 

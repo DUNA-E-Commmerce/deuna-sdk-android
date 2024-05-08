@@ -1,5 +1,15 @@
 package com.deuna.maven.shared
 
+
+enum class PaymentWidgetErrorType(val message: String) {
+  NO_INTERNET_CONNECTION("No internet connection available"),
+  INVALID_ORDER_TOKEN("Invalid order token"),
+  INITIALIZATION_FAILED("Failed to initialize the payment_widget"),
+  ORDER_NOT_FOUND("Order not found"),
+  PAYMENT_ERROR("An error occurred while processing payment"),
+  UNKNOWN_ERROR("An unknown error occurred"),
+}
+
 enum class CheckoutErrorType(val message: String) {
   NO_INTERNET_CONNECTION("No internet connection available"),
   INVALID_ORDER_TOKEN("Invalid order token"),
