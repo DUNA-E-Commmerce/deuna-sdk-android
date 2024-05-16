@@ -73,6 +73,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         super.onDestroy()
     }
 
+    /// send the custom styles to the DEUNA Now link
     fun sendCustomStyles(dataAsJsonString: String) {
         val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
         webView.evaluateJavascript(
