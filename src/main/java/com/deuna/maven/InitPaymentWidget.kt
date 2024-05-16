@@ -6,6 +6,7 @@ import android.net.Uri
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
+import org.json.JSONObject
 
 
 /**
@@ -36,9 +37,24 @@ fun DeunaSDK.initPaymentWidget(
 
 
     val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
-        putExtra(PaymentWidgetActivity.EXTRA_URL,paymentUrl)
+        putExtra(PaymentWidgetActivity.EXTRA_URL, paymentUrl)
     }
     context.startActivity(intent)
+}
+
+/**
+ * Set a custom styles on the payment widget.
+ * This function must be only called inside the onCardBinDetected callback
+ */
+fun DeunaSDK.setCustomStyles( context: Context,  data: Map<String, Any>) {
+   context.sendBroadcast(
+       Intent(PaymentWidgetActivity.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION).apply {
+           putExtra(
+               PaymentWidgetActivity.EXTRA_CUSTOM_STYLES,
+               JSONObject(data).toString()
+           )
+       }
+   )
 }
 
 

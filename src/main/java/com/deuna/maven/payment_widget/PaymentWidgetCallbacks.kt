@@ -2,6 +2,7 @@ package com.deuna.maven.payment_widget
 
 import CheckoutResponse
 import com.deuna.maven.shared.*
+import org.json.JSONObject
 
 typealias OnReFetchOrder = (completion: (CheckoutResponse.Data.Order?) -> Unit) -> Unit
 typealias OnSuccess = (data: CheckoutResponse.Data) -> Unit
@@ -16,7 +17,17 @@ class PaymentWidgetCallbacks {
     var onCardBinDetected: OnCardBinDetected? = null
     var onCanceled: VoidCallback? = null
 
-    data class CardBinMetadata(val cardBin: String, val cardBrand: String)
+    data class CardBinMetadata(val cardBin: String, val cardBrand: String) {
+
+        companion object {
+            fun fromJson(metadata:  JSONObject): CardBinMetadata {
+                return CardBinMetadata(
+                    cardBin = metadata.getString("cardBin"),
+                    cardBrand = metadata.getString("cardBrand")
+                )
+            }
+        }
+    }
 }
 
 

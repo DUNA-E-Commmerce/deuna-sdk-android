@@ -17,7 +17,18 @@ class PaymentWidgetBridge(
     override fun handleEvent(message: String) {
         try {
             val json = JSONObject(message)
-            Log.i("on event", json.toString(12))
+
+            val type = json.getString("type")
+
+            if (type == "onBinDetected") {
+                val metadata = json.getJSONObject("data").getJSONObject("metadata")
+                callbacks?.onCardBinDetected?.invoke(
+                    PaymentWidgetCallbacks.CardBinMetadata.fromJson(metadata),
+                    { completition -> completition(null) },
+                )
+                return
+            }
+
             val eventData = CheckoutResponse.fromJson(json)
 
             when (eventData.type) {

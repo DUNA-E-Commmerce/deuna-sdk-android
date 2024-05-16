@@ -37,7 +37,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
     }
 
     lateinit var loader: ProgressBar
-    private lateinit var webView: WebView
+    lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
