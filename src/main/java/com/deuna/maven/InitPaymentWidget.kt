@@ -43,8 +43,11 @@ fun DeunaSDK.initPaymentWidget(
 }
 
 /**
- * Set a custom styles on the payment widget.
+ * Set custom styles on the payment widget.
  * This function must be only called inside the onCardBinDetected callback
+ *
+ * @param context The application or activity context
+ * @param data The JSON data to update the payment widget UI
  */
 fun DeunaSDK.setCustomStyles( context: Context,  data: Map<String, Any>) {
    context.sendBroadcast(
