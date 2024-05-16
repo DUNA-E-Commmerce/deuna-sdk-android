@@ -21,11 +21,7 @@ class PaymentWidgetBridge(
             val type = json.getString("type")
 
             if (type == "onBinDetected") {
-                val metadata = json.getJSONObject("data").getJSONObject("metadata")
-                callbacks?.onCardBinDetected?.invoke(
-                    PaymentWidgetCallbacks.CardBinMetadata.fromJson(metadata),
-                    { completition -> completition(null) },
-                )
+                handleCardBinDetected(json)
                 return
             }
 
@@ -60,6 +56,15 @@ class PaymentWidgetBridge(
         } catch (e: JSONException) {
             DeunaLogs.debug("PaymentWidgetBridge JSONException: $e")
         }
+    }
+
+
+    private fun handleCardBinDetected(json: JSONObject) {
+        val metadata = json.getJSONObject("data").getJSONObject("metadata")
+        callbacks?.onCardBinDetected?.invoke(
+            PaymentWidgetCallbacks.CardBinMetadata.fromJson(metadata),
+            { completition -> completition(null) },
+        )
     }
 
 

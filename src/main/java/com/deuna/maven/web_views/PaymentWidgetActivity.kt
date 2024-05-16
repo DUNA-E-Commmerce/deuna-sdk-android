@@ -74,7 +74,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     fun sendCustomStyles(dataAsJsonString: String) {
-
         val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
         webView.evaluateJavascript(
             "javascript:postMessage(JSON.stringify($jsonString),'*')",
