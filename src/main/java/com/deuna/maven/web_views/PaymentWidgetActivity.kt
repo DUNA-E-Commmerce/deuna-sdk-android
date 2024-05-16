@@ -75,17 +75,9 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
     fun sendCustomStyles(dataAsJsonString: String) {
 
-        val jsonString = """
-            {
-              "type": "setCustomCSS",
-              "data": $dataAsJsonString
-            }
-        """.trimIndent()
-
-        DeunaLogs.info(jsonString)
-
+        val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
         webView.evaluateJavascript(
-            "javascript:postMessage('$jsonString')",
+            "javascript:postMessage(JSON.stringify($jsonString),'*')",
             null
         );
     }

@@ -15,6 +15,7 @@ import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
+import com.deuna.maven.setCustomStyles
 import com.deuna.maven.shared.*
 
 
@@ -55,7 +56,34 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
-                    DeunaLogs.info(cardBinMetadata.cardBin)
+
+                    val customStyles = mapOf(
+                        "upperTag" to mapOf(
+                            "description" to mapOf(
+                                "content" to listOf("text 1", "text 2"),
+                                "compact" to true,
+                                "listDivider" to "line"
+                            )
+                        )
+                    )
+
+                    /*
+                    customStyles is equivalent to the next JSON
+                    {
+                        upperTag: {
+                            description: {
+                               content: ["text 1", "text 2"],
+                               compact: true,
+                               listDivider: "line",
+                             },
+                        },
+                      }
+                     */
+                    deunaSdk.setCustomStyles(
+                        context = this@MainActivity,
+                        data = customStyles
+                    )
+
                     onRefetchOrder(
                         { order ->
 
