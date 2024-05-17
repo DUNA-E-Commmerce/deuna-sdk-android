@@ -57,38 +57,44 @@ class MainActivity : AppCompatActivity() {
                 }
                 onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
 
-                    val customStyles = mapOf(
-                        "upperTag" to mapOf(
-                            "description" to mapOf(
-                                "content" to listOf("text 1", "text 2"),
-                                "compact" to true,
-                                "listDivider" to "line"
+
+                    if (cardBinMetadata != null) {
+
+                        val customStyles = mapOf(
+                            "upperTag" to mapOf(
+                                "description" to mapOf(
+                                    "content" to listOf("text 1", "text 2"),
+                                    "compact" to true,
+                                    "listDivider" to "line"
+                                )
                             )
                         )
-                    )
 
-                    /*
-                    customStyles is equivalent to the next JSON
-                    {
-                        upperTag: {
-                            description: {
-                               content: ["text 1", "text 2"],
-                               compact: true,
-                               listDivider: "line",
-                             },
-                        },
-                      }
-                     */
-                    deunaSdk.setCustomStyles(
-                        context = this@MainActivity,
-                        data = customStyles
-                    )
+                        /*
+                        customStyles is equivalent to the next JSON
+                        {
+                            upperTag: {
+                                description: {
+                                   content: ["text 1", "text 2"],
+                                   compact: true,
+                                   listDivider: "line",
+                                 },
+                            },
+                          }
+                         */
+                        deunaSdk.setCustomStyles(
+                            context = this@MainActivity,
+                            data = customStyles
+                        )
 
-                    onRefetchOrder(
-                        { order ->
+                        onRefetchOrder(
+                            { order ->
 
-                        }
-                    )
+                            }
+                        )
+
+                    }
+
                 }
                 onClosed = {
                     Log.d(DEBUG_TAG, "DEUNA widget was closed")

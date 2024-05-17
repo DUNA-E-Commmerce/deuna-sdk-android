@@ -7,7 +7,7 @@ import org.json.JSONObject
 typealias OnReFetchOrder = (completion: (CheckoutResponse.Data.Order?) -> Unit) -> Unit
 typealias OnSuccess = (data: CheckoutResponse.Data) -> Unit
 typealias OnError = (type: PaymentWidgetErrorType) -> Unit
-typealias OnCardBinDetected = (PaymentWidgetCallbacks.CardBinMetadata, OnReFetchOrder) -> Unit
+typealias OnCardBinDetected = (PaymentWidgetCallbacks.CardBinMetadata?, OnReFetchOrder) -> Unit
 
 // Class defining the different callbacks that can be invoked by the payment widget
 class PaymentWidgetCallbacks {
@@ -17,13 +17,21 @@ class PaymentWidgetCallbacks {
     var onCardBinDetected: OnCardBinDetected? = null
     var onCanceled: VoidCallback? = null
 
-    data class CardBinMetadata(val cardBin: String, val cardBrand: String) {
+    data class CardBinMetadata(
+        val cardBin: String,
+        val cardBrand: String,
+        val installmentPlanOptionId: String?
+    ) {
 
         companion object {
-            fun fromJson(metadata:  JSONObject): CardBinMetadata {
+            fun fromJson(metadata: JSONObject): CardBinMetadata {
+                val hasInstallment = metadata.has("installmentPlanOptionId")
                 return CardBinMetadata(
                     cardBin = metadata.getString("cardBin"),
-                    cardBrand = metadata.getString("cardBrand")
+                    cardBrand = metadata.getString("cardBrand"),
+                    installmentPlanOptionId = if (hasInstallment) metadata.getString(
+                        "installmentPlanOptionId"
+                    ) else null,
                 )
             }
         }

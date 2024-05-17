@@ -60,7 +60,16 @@ class PaymentWidgetBridge(
 
 
     private fun handleCardBinDetected(json: JSONObject) {
-        val metadata = json.getJSONObject("data").getJSONObject("metadata")
+        val data   = json.getJSONObject("data")
+        if (!data.has("metadata")){
+            callbacks?.onCardBinDetected?.invoke(
+               null,
+                { completition -> completition(null) },
+            )
+            return
+        }
+
+        val metadata = data.getJSONObject("metadata")
         callbacks?.onCardBinDetected?.invoke(
             PaymentWidgetCallbacks.CardBinMetadata.fromJson(metadata),
             { completition -> completition(null) },
