@@ -1,3 +1,6 @@
+## [2.0.2]
+- Updated dependency version to `2.0.2`.
+
 ## [2.0.1]
 - Fixed bad elements URL on production.
 
