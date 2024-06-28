@@ -17,7 +17,7 @@ enum class Environment(
         "https://elements.stg.deuna.io"
     ),
     SANDBOX(
-        "https://api.sbx.deuna.io",
-        "https://elements.sbx.deuna.io"
+        "https://api.sandbox.deuna.io",
+        "https://elements.sandbox.deuna.io"
     )
 }
