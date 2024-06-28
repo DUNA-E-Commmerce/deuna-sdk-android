@@ -1,3 +1,6 @@
+## [2.0.3]
+- Fixed sandbox domains.
+
 ## [2.0.2]
 - Updated dependency version to `2.0.2`.
 

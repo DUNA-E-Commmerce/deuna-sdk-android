@@ -18,7 +18,7 @@ Get started with our [📚 integration guides](https://docs.deuna.com/docs/integ
 You can install DeunaSDK using by adding the following dependency to your `build.gradle` file:
 
   ```
-    implementation("com.deuna.maven:deunasdk:2.0.2")
+    implementation("com.deuna.maven:deunasdk:2.0.3")
   ```
 
 ## Usage
