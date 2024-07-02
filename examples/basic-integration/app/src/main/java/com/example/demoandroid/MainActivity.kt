@@ -24,8 +24,8 @@ val DEBUG_TAG = "👀 DeunaSDK"
 
 class MainActivity : AppCompatActivity() {
     private val deunaSdk = DeunaSDK(
-        environment = Environment.STAGING,
-        publicApiKey = "7be2cfe6cbd7901a48c144296a5d939095322bd5ed4ccad3c8c16850e071c0b39ef18ffb9063bb76bd96262bcd3cc88d936b299f0c9b8ce902141a0afe44",
+        environment = Environment.SANDBOX,
+        publicApiKey = "85d9c1d546e33d01fa92f4a4ead4bb4dc3c95ed4c61fedfc771c7a599acc605d6a385174b200ec25dc9a7f7ee74f11738fa62d4184ab09c0ebe40094ea32",
     );
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +55,12 @@ class MainActivity : AppCompatActivity() {
                         startActivity(this)
                     }
                 }
-                onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
 
+                onCanceled = {
+                    Log.d(DEBUG_TAG, "Payment was canceled by user")
+                }
+
+                onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
 
                     if (cardBinMetadata != null) {
 

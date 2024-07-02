@@ -31,7 +31,7 @@ fun DeunaSDK.initPaymentWidget(
 
     PaymentWidgetActivity.setCallbacks(callbacks)
 
-    val paymentUrl = Uri.parse("$baseUrl/now/$orderToken")
+    val paymentUrl = Uri.parse("$baseUrl/now/$orderToken?mode=widget")
         .buildUpon()
         .build().toString()
 

@@ -10,7 +10,7 @@ class CheckoutBridge(
     private val context: Context,
     private val callbacks: CheckoutCallbacks?,
     private val closeEvents: Set<CheckoutEvent>,
-) : WebViewBridge() {
+) : WebViewBridge(name = "android") {
     override fun handleEvent(message: String) {
 
         try {

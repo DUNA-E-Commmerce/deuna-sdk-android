@@ -10,7 +10,7 @@ import org.json.*
     private val context: Context,
     private val callbacks: ElementsCallbacks?,
     private val closeEvents: Set<ElementsEvent>,
- ) : WebViewBridge() {
+ ) : WebViewBridge(name = "android") {
     override fun handleEvent(message: String) {
         try {
             val json = JSONObject(message)

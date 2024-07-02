@@ -2,6 +2,7 @@ package com.deuna.maven.payment_widget
 
 import android.content.Context
 import android.util.Log
+import android.webkit.JavascriptInterface
 import com.deuna.maven.checkout.domain.CheckoutEvent
 import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.shared.DeunaLogs
@@ -13,10 +14,18 @@ import org.json.JSONObject
 class PaymentWidgetBridge(
     private val context: Context,
     private val callbacks: PaymentWidgetCallbacks?,
-) : WebViewBridge() {
+    ) : WebViewBridge(name = "android") {
+
+    @JavascriptInterface
+    fun consoleLog(message: String) {
+        DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
     override fun handleEvent(message: String) {
         try {
             val json = JSONObject(message)
+
+            DeunaLogs.info(message)
 
             val type = json.getString("type")
 
@@ -60,10 +69,10 @@ class PaymentWidgetBridge(
 
 
     private fun handleCardBinDetected(json: JSONObject) {
-        val data   = json.getJSONObject("data")
-        if (!data.has("metadata")){
+        val data = json.getJSONObject("data")
+        if (!data.has("metadata")) {
             callbacks?.onCardBinDetected?.invoke(
-               null,
+                null,
                 { completition -> completition(null) },
             )
             return

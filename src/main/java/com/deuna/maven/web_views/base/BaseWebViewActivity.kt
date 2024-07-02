@@ -73,7 +73,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
-    fun loadUrl(url: String) {
+    fun loadUrl(url: String, javascriptToInject: String? = null) {
         val cleanedUrl = cleanUrl(url)
         DeunaLogs.info(cleanedUrl)
 
@@ -84,18 +84,21 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
         }
 
         // Add JavascriptInterface
-        webView.addJavascriptInterface(getBridge(), "android")
+        val bridge = getBridge()
+        webView.addJavascriptInterface(bridge, bridge.name)
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                if (javascriptToInject != null) {
+                    webView.evaluateJavascript(javascriptToInject, null)
+                }
                 // When the page finishes loading, the Web View is shown and the loader is hidden
                 view?.visibility = View.VISIBLE
                 loader.visibility = View.GONE
             }
         }
         setupWebChromeClient(webView)
-
         webView.loadUrl(cleanedUrl)
     }
 

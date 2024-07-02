@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.webkit.JavascriptInterface
 import com.deuna.maven.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.DeunaLogs
@@ -30,6 +32,25 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         }
     }
 
+
+    private val javascriptToInject = """
+                    console.log = function(message) {
+                       android.consoleLog(message);
+                    };
+                    
+                    window.xprops = {
+                        onEventDispatch : function (event) {
+                            android.postMessage(JSON.stringify(event));
+                        },
+                        onCustomCssSubscribe: function (setCustomCSS)  {
+                            window.setCustomCss = setCustomCSS;
+                        },
+                        onRefetchOrderSubscribe: function (refetchOrder) {
+                            window.deunaRefetchOrder = refetchOrder;
+                        },
+                    };
+    """.trimIndent()
+
     // broadcast receiver to listen when DeunaSDK.setCustomStyles is called
     private val setCustomStylesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -50,8 +71,9 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         // Extract the URL from the intent
         val url = intent.getStringExtra(ElementsActivity.EXTRA_URL)!!
 
+
         // Load the provided URL
-        loadUrl(url)
+        loadUrl(url, javascriptToInject = javascriptToInject)
     }
 
     override fun getBridge(): WebViewBridge {
@@ -80,5 +102,12 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
             "javascript:postMessage(JSON.stringify($jsonString),'*')",
             null
         );
+    }
+}
+
+class ConsoleLogBridge() {
+    @JavascriptInterface
+    fun postMessage(message: String) {
+        DeunaLogs.info("ConsoleLogBridge: $message")
     }
 }
