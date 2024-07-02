@@ -2,27 +2,22 @@ package com.deuna.maven.shared
 
 enum class Environment(
     val checkoutBaseUrl: String,
-    val elementsBaseUrl: String,
-    val paymentWidgetBaseUrl: String,
+    val elementsBaseUrl: String
 ) {
     DEVELOPMENT(
         "https://api.dev.deuna.io",
-        "https://elements.dev.deuna.io",
-        "https://pay.dev.deuna.com"
+        "https://elements.dev.deuna.io"
     ),
     PRODUCTION(
         "https://api.deuna.io",
-        "https://elements.deuna.com",
-        "https://pay.deuna.com"
+        "https://elements.deuna.com"
     ),
     STAGING(
         "https://api.stg.deuna.io",
-        "https://elements.stg.deuna.io",
-        "https://pay.stg.deuna.com"
+        "https://elements.stg.deuna.io"
     ),
     SANDBOX(
-        "https://api.sbx.deuna.io",
-        "https://elements.sbx.deuna.io",
-        "https://pay.sbx.deuna.com"
+        "https://api.sandbox.deuna.io",
+        "https://elements.sandbox.deuna.io"
     )
 }
