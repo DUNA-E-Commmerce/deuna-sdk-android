@@ -4,16 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.webkit.JavascriptInterface
 import com.deuna.maven.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
-import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.PaymentWidgetErrorType
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.web_views.base.BaseWebViewActivity
-import org.json.JSONObject
 
 class PaymentWidgetActivity() : BaseWebViewActivity() {
     companion object {
@@ -77,7 +73,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     override fun getBridge(): WebViewBridge {
-        return PaymentWidgetBridge(context = this, callbacks = callbacks)
+        return PaymentWidgetBridge(context = this, callbacks = callbacks, webView = webView)
     }
 
     override fun onNoInternet() {
@@ -102,12 +98,5 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
             "javascript:postMessage(JSON.stringify($jsonString),'*')",
             null
         );
-    }
-}
-
-class ConsoleLogBridge() {
-    @JavascriptInterface
-    fun postMessage(message: String) {
-        DeunaLogs.info("ConsoleLogBridge: $message")
     }
 }

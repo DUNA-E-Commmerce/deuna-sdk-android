@@ -3,7 +3,10 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.deuna.maven.checkout.domain.CheckoutError
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
+import com.deuna.maven.shared.CheckoutErrorType
+import com.deuna.maven.shared.PaymentWidgetErrorType
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
@@ -23,7 +26,9 @@ fun DeunaSDK.initPaymentWidget(
 ) {
 
     if (orderToken.isEmpty()) {
-        // TODO: notify error
+        callbacks.onError?.invoke(
+            PaymentWidgetErrorType.INVALID_ORDER_TOKEN
+        )
         return
     }
 
@@ -49,7 +54,7 @@ fun DeunaSDK.initPaymentWidget(
  * @param context The application or activity context
  * @param data The JSON data to update the payment widget UI
  */
-fun DeunaSDK.setCustomStyles( context: Context,  data: Map<String, Any>) {
+fun DeunaSDK.setCustomCss( context: Context,  data: Map<String, Any>) {
    context.sendBroadcast(
        Intent(PaymentWidgetActivity.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION).apply {
            putExtra(

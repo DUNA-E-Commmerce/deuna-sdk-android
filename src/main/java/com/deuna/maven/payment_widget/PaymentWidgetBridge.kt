@@ -1,8 +1,8 @@
 package com.deuna.maven.payment_widget
 
 import android.content.Context
-import android.util.Log
 import android.webkit.JavascriptInterface
+import android.webkit.WebView
 import com.deuna.maven.checkout.domain.CheckoutEvent
 import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.shared.DeunaLogs
@@ -14,18 +14,26 @@ import org.json.JSONObject
 class PaymentWidgetBridge(
     private val context: Context,
     private val callbacks: PaymentWidgetCallbacks?,
-    ) : WebViewBridge(name = "android") {
+    private val webView: WebView
+) : WebViewBridge(name = "android") {
+
+
+    private val refetchOrderRequests = mutableMapOf<Int, (CheckoutResponse.Data.Order?) -> Unit>()
+    private var refetchOrderRequestId = 0
 
     @JavascriptInterface
     fun consoleLog(message: String) {
         DeunaLogs.info("ConsoleLogBridge: $message")
     }
 
+    @JavascriptInterface
+    fun onRefetchOrder(message: String) {
+        handleEvent(message)
+    }
+
     override fun handleEvent(message: String) {
         try {
             val json = JSONObject(message)
-
-            DeunaLogs.info(message)
 
             val type = json.getString("type")
 
@@ -33,6 +41,17 @@ class PaymentWidgetBridge(
                 handleCardBinDetected(json)
                 return
             }
+
+            if (type == "onInstallmentSelected") {
+                handleInstallmentSelected(json)
+                return
+            }
+
+            if (type == "refetchOrder") {
+                handleOnRefetchOrder(json)
+                return
+            }
+
 
             val eventData = CheckoutResponse.fromJson(json)
 
@@ -58,9 +77,7 @@ class PaymentWidgetBridge(
                     // No action required for these events
                 }
 
-                else -> {
-                    DeunaLogs.debug("PaymentWidgetBridge Unhandled event: $eventData")
-                }
+                else -> {}
             }
         } catch (e: JSONException) {
             DeunaLogs.debug("PaymentWidgetBridge JSONException: $e")
@@ -72,17 +89,43 @@ class PaymentWidgetBridge(
         val data = json.getJSONObject("data")
         if (!data.has("metadata")) {
             callbacks?.onCardBinDetected?.invoke(
-                null,
-                { completition -> completition(null) },
-            )
+                null
+            ) { callback -> refetchOrder(callback) }
             return
         }
 
         val metadata = data.getJSONObject("metadata")
         callbacks?.onCardBinDetected?.invoke(
             PaymentWidgetCallbacks.CardBinMetadata.fromJson(metadata),
-            { completition -> completition(null) },
+        ) { callback -> refetchOrder(callback) }
+    }
+
+    private fun handleInstallmentSelected(json: JSONObject) {
+        val data = json.getJSONObject("data")
+        if (!data.has("metadata")) {
+            callbacks?.onInstallmentSelected?.invoke(
+                null
+            ) { callback -> refetchOrder(callback) }
+            return
+        }
+
+        val metadata = data.getJSONObject("metadata")
+        callbacks?.onInstallmentSelected?.invoke(
+            PaymentWidgetCallbacks.InstallmentMetadata.fromJson(metadata),
+        ) { callback -> refetchOrder(callback) }
+    }
+
+    private fun handleOnRefetchOrder(json: JSONObject) {
+        val requestId = json.getInt("requestId")
+        if (!refetchOrderRequests.contains(requestId)) {
+            return
+        }
+
+        val data = json.optJSONObject("data")
+        refetchOrderRequests[requestId]?.invoke(
+            if (data != null) CheckoutResponse.fromJson(json).data.order else null
         )
+        refetchOrderRequests.remove(requestId)
     }
 
 
@@ -90,5 +133,31 @@ class PaymentWidgetBridge(
         callbacks?.onError?.invoke(
             type
         )
+    }
+
+
+    private fun refetchOrder(callback: (CheckoutResponse.Data.Order?) -> Unit) {
+        refetchOrderRequestId++
+        refetchOrderRequests[refetchOrderRequestId] = callback
+
+        webView.evaluateJavascript(
+            """
+        (function() {
+            function refetchOrder( callback) {
+                deunaRefetchOrder()
+                    .then(data => {
+                        callback({type:"refetchOrder", data: data , requestId: $refetchOrderRequestId });
+                    })
+                    .catch(error => {
+                        callback({type:"refetchOrder", data: null , requestId: $refetchOrderRequestId });
+                    });
+            }
+
+            refetchOrder(function(result) {
+                android.onRefetchOrder(JSON.stringify(result));
+            });
+        })();
+        """.trimIndent(), null
+        );
     }
 }

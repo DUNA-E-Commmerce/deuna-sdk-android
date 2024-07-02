@@ -15,7 +15,7 @@ import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
-import com.deuna.maven.setCustomStyles
+import com.deuna.maven.setCustomCss
 import com.deuna.maven.shared.*
 
 
@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
                 onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
 
+
                     if (cardBinMetadata != null) {
 
                         val customStyles = mapOf(
@@ -86,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                             },
                           }
                          */
-                        deunaSdk.setCustomStyles(
+                        deunaSdk.setCustomCss(
                             context = this@MainActivity,
                             data = customStyles
                         )
