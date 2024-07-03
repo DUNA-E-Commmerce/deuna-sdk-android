@@ -13,7 +13,7 @@ ext {
 
 android {
     namespace 'com.deuna.maven'
-    compileSdk 34
+    compileSdk 32
 
     defaultConfig {
         minSdk 24
@@ -44,7 +44,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version '2.0.3'
+            version '2.1.1'
             artifact("$buildDir/outputs/aar/deuna-sdk-android-release.aar")
             pom {
                 name = 'Android SDK DEUNA'
@@ -98,19 +98,11 @@ signing {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.webkit:webkit:1.8.0'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
     api 'com.squareup.okhttp3:okhttp:4.12.0'
     api 'com.squareup.retrofit2:retrofit:2.9.0'
     api 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     api 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation("com.google.code.gson:gson") {
         version {
             strictly("2.8.9")
