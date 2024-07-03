@@ -50,7 +50,7 @@ data class CheckoutResponse(
                 val category: String,
                 val color: String,
                 val size: String,
-                val weight: Weight,
+                val weight: Weight?,
                 val image_url: String,
                 val details_url: String,
                 val type: String,
@@ -184,7 +184,7 @@ data class CheckoutResponse(
                             it.optInt("total_discount")
                         )
                     }
-                    val weight = itemJson.optJSONObject("weight").let {
+                    val weight = itemJson.optJSONObject("weight")?.let {
                         Data.Order.Item.Weight(it.optInt("weight"), it.optString("unit"))
                     }
                     Data.Order.Item(

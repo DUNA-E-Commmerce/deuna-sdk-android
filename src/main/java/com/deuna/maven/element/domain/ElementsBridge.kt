@@ -30,7 +30,7 @@ import org.json.*
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements(context)
+                    closeElements()
                     callbacks?.onCanceled?.invoke()
                 }
 
@@ -40,7 +40,7 @@ import org.json.*
             }
             eventData.let {
                 if (closeEvents.contains(it.type)) {
-                    closeElements(context)
+                    closeElements()
                 }
             }
         } catch (e: Exception) {

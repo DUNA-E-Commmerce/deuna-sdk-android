@@ -1,20 +1,14 @@
 package com.deuna.maven.web_views.base
 
 import android.annotation.*
+import android.app.Activity
 import android.content.*
-import android.graphics.*
 import android.net.*
 import android.os.*
-import android.util.*
 import android.view.*
 import android.webkit.*
 import android.widget.*
-import androidx.activity.*
-import androidx.appcompat.app.AppCompatActivity
-import com.deuna.maven.*
 import com.deuna.maven.R
-import com.deuna.maven.element.*
-import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.utils.*
 
@@ -23,16 +17,17 @@ import com.deuna.maven.utils.*
  * using a WebView. It handles common tasks like checking internet connectivity,
  * registering broadcast receivers, handling back button presses, and loading URLs.
  */
-abstract class BaseWebViewActivity : AppCompatActivity() {
+abstract class BaseWebViewActivity : Activity() {
 
     companion object {
         const val EXTRA_CLOSE_EVENTS = "CLOSE_EVENTS"
         const val CLOSE_BROADCAST_RECEIVER_ACTION = "com.deuna.maven.CLOSE_BROADCAST_RECEIVER"
-    }
 
-    private val closeAllReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            finish() // Close the activity when the broadcast is received
+        @SuppressLint("StaticFieldLeak")
+        var activity: Activity? = null
+
+        fun closeWebView() {
+            activity?.finish()
         }
     }
 
@@ -40,6 +35,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
     private lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        activity = this
         super.onCreate(savedInstanceState)
         setContentView(R.layout.webview_activity)
         initialize()
@@ -53,22 +49,16 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
             return
         }
 
-        // Register broadcast receiver to listen for close event
-        BroadcastReceiverUtils.register(
-            context = this,
-            broadcastReceiver = closeAllReceiver,
-            action = CLOSE_BROADCAST_RECEIVER_ACTION
-        )
-
-        // Handle back button press
-        onBackPressedDispatcher.addCallback {
-            DeunaLogs.debug("Canceled by user")
-            onCanceledByUser()
-            finish()
-        }
         loader = findViewById(R.id.deuna_loader)
         webView = findViewById(R.id.deuna_webview)
 
+    }
+
+    // Handle back button press
+    override fun onBackPressed() {
+        DeunaLogs.debug("Canceled by user")
+        onCanceledByUser()
+        super.onBackPressed()
     }
 
     // Load the URL in the WebView
@@ -186,7 +176,7 @@ abstract class BaseWebViewActivity : AppCompatActivity() {
 
     // Unregister the broadcast receiver when the activity is destroyed
     override fun onDestroy() {
-        unregisterReceiver(closeAllReceiver)
+        activity = null
         super.onDestroy()
     }
 }

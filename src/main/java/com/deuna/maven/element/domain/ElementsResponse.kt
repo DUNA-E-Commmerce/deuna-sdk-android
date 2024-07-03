@@ -107,7 +107,7 @@ data class ElementsResponse(
                     it.getString("phone"),
                     it.getBoolean("is_guest"),
                     it.getString("merchant_id"),
-                    it.optString("network_id", null),
+                    it.optString("network_id"),
                     it.getString("user_role"),
                     it.getString("created_at"),
                     it.opt("not_accepted_policies")

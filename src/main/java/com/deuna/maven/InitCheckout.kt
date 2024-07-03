@@ -53,14 +53,12 @@ fun DeunaSDK.initCheckout(
  * @param context The application or activity context
  */
 fun DeunaSDK.closeCheckout(context: Context) {
-    com.deuna.maven.closeCheckout(context)
+    closeCheckout()
 }
 
 /**
  * Global function used to send a broadcast event to close the checkout view
  */
-fun closeCheckout(context: Context) {
-    context.sendBroadcast(
-        Intent(BaseWebViewActivity.CLOSE_BROADCAST_RECEIVER_ACTION)
-    )
+fun closeCheckout() {
+    BaseWebViewActivity.closeWebView()
 }
