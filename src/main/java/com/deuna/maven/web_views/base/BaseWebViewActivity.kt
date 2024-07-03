@@ -10,7 +10,6 @@ import android.webkit.*
 import android.widget.*
 import com.deuna.maven.R
 import com.deuna.maven.shared.*
-import com.deuna.maven.utils.*
 
 /**
  * This abstract class provides a foundation for activities that display web content
@@ -21,7 +20,6 @@ abstract class BaseWebViewActivity : Activity() {
 
     companion object {
         const val EXTRA_CLOSE_EVENTS = "CLOSE_EVENTS"
-        const val CLOSE_BROADCAST_RECEIVER_ACTION = "com.deuna.maven.CLOSE_BROADCAST_RECEIVER"
 
         @SuppressLint("StaticFieldLeak")
         var activity: Activity? = null
