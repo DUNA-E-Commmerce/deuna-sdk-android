@@ -1,3 +1,6 @@
+## [2.1.1]
+- Set compileSdk to 32.
+
 ## [2.0.3]
 - Fixed sandbox domains.
 

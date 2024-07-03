@@ -49,7 +49,7 @@ fun DeunaSDK.initElements(
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
         putStringArrayListExtra(
-           BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
+            BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
         )
     }
@@ -63,12 +63,12 @@ fun DeunaSDK.initElements(
  * @param context The application or activity context
  */
 fun DeunaSDK.closeElements(context: Context) {
-    com.deuna.maven.closeElements(context)
+    closeElements()
 }
 
 /**
  * Global function used to send a broadcast event to close the elements view
  */
-fun closeElements(context: Context) {
-    context.sendBroadcast(Intent(BaseWebViewActivity.CLOSE_BROADCAST_RECEIVER_ACTION))
+fun closeElements() {
+    BaseWebViewActivity.closeWebView()
 }

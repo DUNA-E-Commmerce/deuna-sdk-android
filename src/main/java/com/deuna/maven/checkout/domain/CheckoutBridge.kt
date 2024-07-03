@@ -34,7 +34,7 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closeCheckout(context)
+                    closeCheckout()
                     callbacks?.onCanceled?.invoke()
                 }
 
@@ -49,7 +49,7 @@ class CheckoutBridge(
 
             eventData.let {
                 if (closeEvents.contains(it.type)) {
-                    closeCheckout(context)
+                    closeCheckout()
                 }
             }
         } catch (e: JSONException) {

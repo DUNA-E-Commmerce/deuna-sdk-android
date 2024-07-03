@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.example.demoandroid"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -51,7 +51,7 @@ dependencies {
         }
     }
 
-    implementation("com.deuna.maven:deunasdk:2.0.3")
+    implementation("com.deuna.maven:deunasdk:2.1.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -41,7 +41,8 @@ class CheckoutActivity() : BaseWebViewActivity() {
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
 
-        val closeEventAsStrings = intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
+        val closeEventAsStrings =
+            intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
         closeEvents = parseCloseEvents<CheckoutEvent>(closeEventAsStrings)
 
         // Initiate the checkout process by fetching the order API
@@ -58,15 +59,23 @@ class CheckoutActivity() : BaseWebViewActivity() {
                 if (response.isSuccessful) {
                     val responseBody = response.body() as? Map<*, *>
                     val orderMap = responseBody?.get("order") as? Map<*, *>
-                    if (orderMap != null) {
-                        val parsedUrl = URL(orderMap["payment_link"].toString())
-                        loadUrl(
-                            url = parsedUrl.toString()
-                        )
-                    } else {
-                        // Handle missing order data
+
+                    if (orderMap == null) {
                         orderNotFound()
+                        return
                     }
+
+                    val paymentLink = orderMap["payment_link"] as String?
+
+                    if (paymentLink.isNullOrEmpty()) {
+                        DeunaLogs.error("Cannot get payment_link field from response")
+                        orderNotFound()
+                        return
+                    }
+
+                    loadUrl(
+                        url = URL(paymentLink).toString()
+                    )
                 } else {
                     // Handle missing order data
                     orderNotFound()
