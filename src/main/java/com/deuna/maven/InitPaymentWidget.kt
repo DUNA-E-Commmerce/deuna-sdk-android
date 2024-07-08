@@ -3,9 +3,7 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.deuna.maven.checkout.domain.CheckoutError
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
-import com.deuna.maven.shared.CheckoutErrorType
 import com.deuna.maven.shared.PaymentWidgetErrorType
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
@@ -72,14 +70,12 @@ fun DeunaSDK.setCustomCss( context: Context,  data: Map<String, Any>) {
  * @param context The application or activity context
  */
 fun DeunaSDK.closePaymentWidget(context: Context) {
-    com.deuna.maven.closePaymentWidget(context)
+    com.deuna.maven.closePaymentWidget()
 }
 
 /**
  * Global function used to send a broadcast event to close the payment widget view
  */
-fun closePaymentWidget(context: Context) {
-    context.sendBroadcast(
-        Intent(BaseWebViewActivity.CLOSE_BROADCAST_RECEIVER_ACTION)
-    )
+fun closePaymentWidget() {
+    BaseWebViewActivity.closeWebView()
 }

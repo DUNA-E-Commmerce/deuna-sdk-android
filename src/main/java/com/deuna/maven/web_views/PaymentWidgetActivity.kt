@@ -8,7 +8,6 @@ import com.deuna.maven.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentWidgetErrorType
 import com.deuna.maven.shared.WebViewBridge
-import com.deuna.maven.utils.BroadcastReceiverUtils
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 
 class PaymentWidgetActivity() : BaseWebViewActivity() {
@@ -57,12 +56,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        BroadcastReceiverUtils.register(
-            context = this,
-            broadcastReceiver = setCustomStylesReceiver,
-            action = SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION
-        )
 
         // Extract the URL from the intent
         val url = intent.getStringExtra(ElementsActivity.EXTRA_URL)!!

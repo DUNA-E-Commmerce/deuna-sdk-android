@@ -69,7 +69,7 @@ class PaymentWidgetBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closePaymentWidget(context)
+                    closePaymentWidget()
                     callbacks?.onCanceled?.invoke()
                 }
 
