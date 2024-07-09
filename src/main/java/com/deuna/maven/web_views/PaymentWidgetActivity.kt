@@ -14,8 +14,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     companion object {
         const val EXTRA_URL = "EXTRA_URL"
         const val EXTRA_CUSTOM_STYLES = "CUSTOM_STYLES"
-        const val SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION =
-            "com.deuna.maven.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION"
 
         private var callbacks: PaymentWidgetCallbacks? = null
 
@@ -47,11 +45,11 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     """.trimIndent()
 
     // broadcast receiver to listen when DeunaSDK.setCustomStyles is called
-    private val setCustomStylesReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            sendCustomStyles(intent.getStringExtra(EXTRA_CUSTOM_STYLES)!!)
-        }
-    }
+//    private val setCustomStylesReceiver = object : BroadcastReceiver() {
+//        override fun onReceive(context: Context, intent: Intent) {
+//            sendCustomStyles(intent.getStringExtra(EXTRA_CUSTOM_STYLES)!!)
+//        }
+//    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +76,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     override fun onDestroy() {
-        unregisterReceiver(setCustomStylesReceiver)
         // Notify callbacks about activity closure
         callbacks?.onClosed?.invoke()
         super.onDestroy()

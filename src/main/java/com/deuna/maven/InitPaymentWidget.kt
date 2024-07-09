@@ -53,14 +53,14 @@ fun DeunaSDK.initPaymentWidget(
  * @param data The JSON data to update the payment widget UI
  */
 fun DeunaSDK.setCustomCss( context: Context,  data: Map<String, Any>) {
-   context.sendBroadcast(
-       Intent(PaymentWidgetActivity.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION).apply {
-           putExtra(
-               PaymentWidgetActivity.EXTRA_CUSTOM_STYLES,
-               JSONObject(data).toString()
-           )
-       }
-   )
+//   context.sendBroadcast(
+//       Intent(PaymentWidgetActivity.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION).apply {
+//           putExtra(
+//               PaymentWidgetActivity.EXTRA_CUSTOM_STYLES,
+//               JSONObject(data).toString()
+//           )
+//       }
+//   )
 }
 
 

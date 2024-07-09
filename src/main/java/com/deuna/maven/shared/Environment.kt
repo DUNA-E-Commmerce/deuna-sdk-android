@@ -23,6 +23,6 @@ enum class Environment(
     SANDBOX(
         "https://api.sandbox.deuna.io",
         "https://elements.sandbox.deuna.io",
-        "http://192.168.0.116:3000" // https://pay.sandbox.deuna.io
+        "https://pay.sandbox.deuna.io"
     )
 }
