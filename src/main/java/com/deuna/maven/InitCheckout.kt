@@ -15,29 +15,30 @@ import com.deuna.maven.web_views.base.*
  * @param context The application or activity context
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeEvents (Optional) A Set of CheckoutEvent values specifying when to close the checkout activity automatically.
- *
+ * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
  */
 fun DeunaSDK.initCheckout(
     context: Context,
     orderToken: String,
     callbacks: CheckoutCallbacks,
     closeEvents: Set<CheckoutEvent> = emptySet(),
+    userToken: String? = null
 ) {
-
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
-            CheckoutError(CheckoutErrorType.INVALID_ORDER_TOKEN, null, null),
+            PaymentWidgetErrors.invalidOrderToken
         )
         return
     }
 
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.checkoutBaseUrl
-    CheckoutActivity.setCallbacks(callbacks)
+    CheckoutActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
     val intent = Intent(context, CheckoutActivity::class.java).apply {
         putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
         putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)
         putExtra(CheckoutActivity.EXTRA_BASE_URL, baseUrl)
+        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         putStringArrayListExtra(
             BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
@@ -48,16 +49,14 @@ fun DeunaSDK.initCheckout(
 
 /**
  * Closes the checkout activity if it's currently running.
- *
- * @param context The application or activity context
  */
-fun DeunaSDK.closeCheckout(context: Context) {
-    closeCheckout()
+fun DeunaSDK.closeCheckout() {
+    closeCheckout(sdkInstanceId = sdkInstanceId)
 }
 
 /**
  * Global function used to send a broadcast event to close the checkout view
  */
-fun closeCheckout() {
-    BaseWebViewActivity.closeWebView()
+fun closeCheckout(sdkInstanceId: Int) {
+    BaseWebViewActivity.closeWebView(sdkInstanceId)
 }

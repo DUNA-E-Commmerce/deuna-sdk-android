@@ -20,21 +20,28 @@ abstract class BaseWebViewActivity : Activity() {
 
     companion object {
         const val EXTRA_CLOSE_EVENTS = "CLOSE_EVENTS"
+        const val EXTRA_SDK_INSTANCE_ID = "SDK_INSTANCE_ID"
 
-        @SuppressLint("StaticFieldLeak")
-        var activity: Activity? = null
+        /**
+         * Due to multiples instances of DeunaSDK can be created
+         * we need to ensure that only the authorized instance can
+         * close the widgets and call the callbacks
+         */
+        var activities = mutableMapOf<Int, Activity>()
 
-        fun closeWebView() {
-            activity?.finish()
+        fun closeWebView(sdkInstanceId: Int) {
+            activities[sdkInstanceId]?.finish()
         }
     }
 
     lateinit var loader: ProgressBar
     lateinit var webView: WebView
+    var sdkInstanceId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        activity = this
         super.onCreate(savedInstanceState)
+        sdkInstanceId = intent.getIntExtra(EXTRA_SDK_INSTANCE_ID, 0)
+        activities[sdkInstanceId!!] = this
         setContentView(R.layout.webview_activity)
         initialize()
     }
@@ -42,7 +49,6 @@ abstract class BaseWebViewActivity : Activity() {
     // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(this).hasInternet) {
-            DeunaLogs.debug("No internet connection")
             onNoInternet()
             return
         }
@@ -54,7 +60,6 @@ abstract class BaseWebViewActivity : Activity() {
 
     // Handle back button press
     override fun onBackPressed() {
-        DeunaLogs.debug("Canceled by user")
         onCanceledByUser()
         super.onBackPressed()
     }
@@ -193,7 +198,7 @@ abstract class BaseWebViewActivity : Activity() {
 
     // Unregister the broadcast receiver when the activity is destroyed
     override fun onDestroy() {
-        activity = null
+        activities.remove(sdkInstanceId!!)
         super.onDestroy()
     }
 }

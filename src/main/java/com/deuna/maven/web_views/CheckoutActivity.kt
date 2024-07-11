@@ -20,22 +20,33 @@ class CheckoutActivity() : BaseWebViewActivity() {
         const val EXTRA_API_KEY = "API_KEY"
         const val EXTRA_ORDER_TOKEN = "ORDER_TOKEN"
         const val EXTRA_BASE_URL = "BASE_URL"
-        private var callbacks: CheckoutCallbacks? = null
+
+
+        /**
+         * Due to multiples instances of DeunaSDK can be created
+         * we need to ensure that only the authorized instance can
+         * call the callbacks for their widgets
+         */
+        private var callbacksMap = mutableMapOf<Int, CheckoutCallbacks>()
 
         /**
          * Set the callbacks object to receive checkout events.
          */
-        fun setCallbacks(callbacks: CheckoutCallbacks) {
-            this.callbacks = callbacks
+        fun setCallbacks(sdkInstanceId: Int, callbacks: CheckoutCallbacks) {
+            callbacksMap[sdkInstanceId] = callbacks
         }
     }
 
     // Set of CheckoutEvents indicating when to close the activity
     private lateinit var closeEvents: Set<CheckoutEvent>
 
+    val callbacks: CheckoutCallbacks?
+        get() {
+            return callbacksMap[sdkInstanceId!!]
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Extract data from the intent
         val baseUrl = intent.getStringExtra(EXTRA_BASE_URL)!!
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
@@ -61,15 +72,18 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     val orderMap = responseBody?.get("order") as? Map<*, *>
 
                     if (orderMap == null) {
-                        orderNotFound()
+                        callbacks?.onError?.invoke(
+                            PaymentWidgetErrors.linkCouldNotBeGenerated
+                        )
                         return
                     }
 
                     val paymentLink = orderMap["payment_link"] as String?
 
                     if (paymentLink.isNullOrEmpty()) {
-                        DeunaLogs.error("Cannot get payment_link field from response")
-                        orderNotFound()
+                        callbacks?.onError?.invoke(
+                            PaymentWidgetErrors.linkCouldNotBeGenerated
+                        )
                         return
                     }
 
@@ -78,12 +92,12 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     )
                 } else {
                     // Handle missing order data
-                    orderNotFound()
+                    orderCouldNotBeRetrieved()
                 }
             }
 
             override fun onFailure(call: Call<Any>, t: Throwable) {
-                orderNotFound()
+                orderCouldNotBeRetrieved()
             }
         })
     }
@@ -92,19 +106,15 @@ class CheckoutActivity() : BaseWebViewActivity() {
      * This method is called when the order details are not found on the server.
      * It invokes the onError callback with a CheckoutError of type ORDER_NOT_FOUND.
      */
-    private fun orderNotFound() {
+    private fun orderCouldNotBeRetrieved() {
         callbacks?.onError?.invoke(
-            CheckoutError(
-                type = CheckoutErrorType.ORDER_NOT_FOUND,
-                order = null,
-                user = null
-            )
+            PaymentsError(type = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED)
         )
     }
 
     override fun getBridge(): WebViewBridge {
         return CheckoutBridge(
-            context = this,
+            sdkInstanceId = sdkInstanceId!!,
             callbacks = callbacks,
             closeEvents = closeEvents,
         )
@@ -112,9 +122,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
 
     override fun onNoInternet() {
         callbacks?.onError?.invoke(
-            CheckoutError(
-                CheckoutErrorType.NO_INTERNET_CONNECTION, null, null
-            )
+            PaymentWidgetErrors.noInternetConnection
         )
     }
 

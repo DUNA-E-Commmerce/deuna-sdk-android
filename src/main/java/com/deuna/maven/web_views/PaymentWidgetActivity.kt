@@ -1,12 +1,10 @@
 package com.deuna.maven.web_views
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import com.deuna.maven.payment_widget.PaymentWidgetBridge
-import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
-import com.deuna.maven.shared.PaymentWidgetErrorType
+import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
+import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 
@@ -15,16 +13,31 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         const val EXTRA_URL = "EXTRA_URL"
         const val EXTRA_CUSTOM_STYLES = "CUSTOM_STYLES"
 
-        private var callbacks: PaymentWidgetCallbacks? = null
+        /**
+         * Due to multiples instances of DeunaSDK can be created
+         * we need to ensure that only the authorized instance can
+         * call the callbacks for their widgets
+         */
+        private var callbacksMap = mutableMapOf<Int, PaymentWidgetCallbacks>()
+
+        private var activities = mutableMapOf<Int, PaymentWidgetActivity>()
 
         /**
          * Set the callbacks object to receive element events.
          */
-        fun setCallbacks(callbacks: PaymentWidgetCallbacks) {
-            this.callbacks = callbacks
+        fun setCallbacks(sdkInstanceId: Int, callbacks: PaymentWidgetCallbacks) {
+            callbacksMap[sdkInstanceId] = callbacks
+        }
+
+        /// send the custom styles to the payment link
+        fun sendCustomCss(sdkInstanceId: Int, dataAsJsonString: String) {
+            val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
+            activities[sdkInstanceId]?.webView?.evaluateJavascript(
+                "javascript:postMessage(JSON.stringify($jsonString),'*')",
+                null
+            );
         }
     }
-
 
     private val javascriptToInject = """
                     console.log = function(message) {
@@ -44,31 +57,33 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
                     };
     """.trimIndent()
 
-    // broadcast receiver to listen when DeunaSDK.setCustomStyles is called
-//    private val setCustomStylesReceiver = object : BroadcastReceiver() {
-//        override fun onReceive(context: Context, intent: Intent) {
-//            sendCustomStyles(intent.getStringExtra(EXTRA_CUSTOM_STYLES)!!)
-//        }
-//    }
-
+    val callbacks: PaymentWidgetCallbacks?
+        get() {
+            return callbacksMap[sdkInstanceId!!]
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        activities[sdkInstanceId!!] = this
+
         // Extract the URL from the intent
         val url = intent.getStringExtra(ElementsActivity.EXTRA_URL)!!
-
 
         // Load the provided URL
         loadUrl(url, javascriptToInject = javascriptToInject)
     }
 
     override fun getBridge(): WebViewBridge {
-        return PaymentWidgetBridge(context = this, callbacks = callbacks, webView = webView)
+        return PaymentWidgetBridge(
+            sdkInstanceId = sdkInstanceId!!,
+            callbacks = callbacks,
+            webView = webView
+        )
     }
 
     override fun onNoInternet() {
-        callbacks?.onError?.invoke(PaymentWidgetErrorType.NO_INTERNET_CONNECTION)
+        callbacks?.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
     }
 
     override fun onCanceledByUser() {
@@ -78,15 +93,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     override fun onDestroy() {
         // Notify callbacks about activity closure
         callbacks?.onClosed?.invoke()
+        activities.remove(sdkInstanceId!!)
         super.onDestroy()
-    }
-
-    /// send the custom styles to the DEUNA Now link
-    fun sendCustomStyles(dataAsJsonString: String) {
-        val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
-        webView.evaluateJavascript(
-            "javascript:postMessage(JSON.stringify($jsonString),'*')",
-            null
-        );
     }
 }

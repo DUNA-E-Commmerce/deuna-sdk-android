@@ -3,12 +3,11 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
-import com.deuna.maven.shared.PaymentWidgetErrorType
+import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
-
 
 /**
  * Launch the payment widget View
@@ -16,23 +15,25 @@ import org.json.JSONObject
  * @param orderToken The order token that will be used to show the payment widget
  * @param context The application or activity context
  * @param callbacks An instance of PaymentWidgetCallbacks to receive event notifications.
+ * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
  */
 fun DeunaSDK.initPaymentWidget(
     context: Context,
     orderToken: String,
     callbacks: PaymentWidgetCallbacks,
+    userToken: String? = null
 ) {
 
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
-            PaymentWidgetErrorType.INVALID_ORDER_TOKEN
+            PaymentWidgetErrors.invalidOrderToken
         )
         return
     }
 
     val baseUrl = this.environment.paymentWidgetBaseUrl
 
-    PaymentWidgetActivity.setCallbacks(callbacks)
+    PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val paymentUrl = Uri.parse("$baseUrl/now/$orderToken?mode=widget")
         .buildUpon()
@@ -41,6 +42,7 @@ fun DeunaSDK.initPaymentWidget(
 
     val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
         putExtra(PaymentWidgetActivity.EXTRA_URL, paymentUrl)
+        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
     }
     context.startActivity(intent)
 }
@@ -49,33 +51,27 @@ fun DeunaSDK.initPaymentWidget(
  * Set custom styles on the payment widget.
  * This function must be only called inside the onCardBinDetected callback
  *
- * @param context The application or activity context
  * @param data The JSON data to update the payment widget UI
  */
-fun DeunaSDK.setCustomCss( context: Context,  data: Map<String, Any>) {
-//   context.sendBroadcast(
-//       Intent(PaymentWidgetActivity.SEND_CUSTOM_STYLES_BROADCAST_RECEIVER_ACTION).apply {
-//           putExtra(
-//               PaymentWidgetActivity.EXTRA_CUSTOM_STYLES,
-//               JSONObject(data).toString()
-//           )
-//       }
-//   )
+fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
+    PaymentWidgetActivity.sendCustomCss(
+        sdkInstanceId = sdkInstanceId,
+        dataAsJsonString = JSONObject(data).toString()
+    )
 }
 
 
 /**
  * Closes the payment widget if it's currently running.
  *
- * @param context The application or activity context
  */
-fun DeunaSDK.closePaymentWidget(context: Context) {
-    com.deuna.maven.closePaymentWidget()
+fun DeunaSDK.closePaymentWidget() {
+    com.deuna.maven.closePaymentWidget(sdkInstanceId = sdkInstanceId)
 }
 
 /**
  * Global function used to send a broadcast event to close the payment widget view
  */
-fun closePaymentWidget() {
-    BaseWebViewActivity.closeWebView()
+fun closePaymentWidget(sdkInstanceId: Int) {
+    BaseWebViewActivity.closeWebView(sdkInstanceId)
 }

@@ -22,21 +22,14 @@ import java.lang.IllegalStateException
  */
 fun DeunaSDK.initElements(
     context: Context,
-    userToken: String,
     callbacks: ElementsCallbacks,
     closeEvents: Set<ElementsEvent> = emptySet(),
+    userToken: String? = null,
 ) {
-    if (userToken.isEmpty()) {
-        callbacks.onError?.invoke(
-            ElementsError(ElementsErrorType.INVALID_USER_TOKEN, null),
-        )
-        return
-    }
-
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.elementsBaseUrl
 
-    ElementsActivity.setCallbacks(callbacks)
+    ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val elementUrl = Uri.parse("$baseUrl/vault")
         .buildUpon()
@@ -48,6 +41,7 @@ fun DeunaSDK.initElements(
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
+        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         putStringArrayListExtra(
             BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
@@ -59,16 +53,14 @@ fun DeunaSDK.initElements(
 
 /**
  * Closes the elements activity if it's currently running.
- *
- * @param context The application or activity context
  */
-fun DeunaSDK.closeElements(context: Context) {
-    closeElements()
+fun DeunaSDK.closeElements() {
+    closeElements(sdkInstanceId = sdkInstanceId)
 }
 
 /**
  * Global function used to send a broadcast event to close the elements view
  */
-fun closeElements() {
-    BaseWebViewActivity.closeWebView()
+fun closeElements(sdkInstanceId: Int) {
+    BaseWebViewActivity.closeWebView(sdkInstanceId)
 }

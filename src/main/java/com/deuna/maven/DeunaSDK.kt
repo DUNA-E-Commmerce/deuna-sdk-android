@@ -15,6 +15,9 @@ open class DeunaSDK(
     val environment: Environment,
     val publicApiKey: String,
 ) {
+    
+    val sdkInstanceId: Int
+        get() = hashCode()
 
     init {
         require(publicApiKey.isNotEmpty()) {

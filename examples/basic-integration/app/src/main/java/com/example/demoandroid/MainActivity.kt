@@ -14,10 +14,9 @@ import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
-import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
+import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.setCustomCss
 import com.deuna.maven.shared.*
-
 
 val ERROR_TAG = "❌ DeunaSDK"
 val DEBUG_TAG = "👀 DeunaSDK"
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             orderToken = orderToken,
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = {
-                    deunaSdk.closePaymentWidget(this@MainActivity)
+                    deunaSdk.closePaymentWidget()
                     Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                         startActivity(this)
                     }
@@ -62,9 +61,7 @@ class MainActivity : AppCompatActivity() {
 
                 onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
 
-
                     if (cardBinMetadata != null) {
-
                         val customStyles = mapOf(
                             "upperTag" to mapOf(
                                 "description" to mapOf(
@@ -88,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                           }
                          */
                         deunaSdk.setCustomCss(
-                            context = this@MainActivity,
                             data = customStyles
                         )
 
@@ -115,15 +111,16 @@ class MainActivity : AppCompatActivity() {
             context = this,
             orderToken = orderToken,
             callbacks = CheckoutCallbacks().apply {
-                onSuccess = {
-                    deunaSdk.closeCheckout(this@MainActivity)
+                onSuccess = { data ->
+                    Log.d(DEBUG_TAG, "Payment success $data")
+                    deunaSdk.closeCheckout()
                     Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                         startActivity(this)
                     }
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeCheckout(this@MainActivity)
+                    deunaSdk.closeCheckout()
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Payment was canceled by user")
@@ -132,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("✅ ON EVENT", type.name)
                     when (type) {
                         CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-                            deunaSdk.closeCheckout(this@MainActivity)
+                            deunaSdk.closeCheckout()
                         }
 
                         else -> {}
@@ -152,7 +149,7 @@ class MainActivity : AppCompatActivity() {
             context = this,
             userToken = userToken,
             callbacks = ElementsCallbacks().apply {
-                deunaSdk.closeElements(this@MainActivity)
+                deunaSdk.closeElements()
                 onSuccess = {
                     Intent(this@MainActivity, ThankYouActivity::class.java).apply {
                         startActivity(this)
@@ -163,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeElements(this@MainActivity)
+                    deunaSdk.closeElements()
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Saving card was canceled by user")
