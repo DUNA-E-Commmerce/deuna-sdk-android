@@ -30,11 +30,6 @@ class PaymentWidgetBridge(
         handleEvent(message)
     }
 
-    @JavascriptInterface
-    fun setCustomCss(cssJson: String) {
-        activity.webView.evaluateJavascript("setCustomCss($cssJson)", null);
-    }
-
     override fun handleEvent(message: String) {
         try {
             val json = JSONObject(message).toMap()
