@@ -114,8 +114,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
 
     override fun getBridge(): WebViewBridge {
         return CheckoutBridge(
-            sdkInstanceId = sdkInstanceId!!,
-            callbacks = callbacks,
+            activity = this,
             closeEvents = closeEvents,
         )
     }

@@ -43,15 +43,6 @@
 
 
             <Button
-                android:id="@+id/payButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:padding="8dp"
-                android:text="Mostrar Checkout"
-                android:textColor="@android:color/white" />
-
-            <Button
                 android:id="@+id/paymentWidgetButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,10 +52,21 @@
                 android:textColor="@android:color/white" />
 
             <Button
+                android:id="@+id/payButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="8dp"
+                android:text="Mostrar Checkout"
+                android:textColor="@android:color/white" />
+
+
+            <Button
                 android:id="@+id/savePaymentMethodButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
+                android:layout_marginTop="10dp"
                 android:text="Guardar método de pago"
                 android:textColor="@android:color/white" />
 

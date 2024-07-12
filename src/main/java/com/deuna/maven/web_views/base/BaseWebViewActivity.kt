@@ -36,6 +36,7 @@ abstract class BaseWebViewActivity : Activity() {
 
     lateinit var loader: ProgressBar
     lateinit var webView: WebView
+    var loadedWebView: WebView? = null
     var sdkInstanceId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,9 +70,10 @@ abstract class BaseWebViewActivity : Activity() {
     fun loadUrl(url: String, javascriptToInject: String? = null) {
         val cleanedUrl = cleanUrl(url)
         DeunaLogs.info(cleanedUrl)
+        DeunaLogs.info("base $sdkInstanceId")
 
         webView.settings.apply {
-            domStorageEnabled = true
+//            domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
         }
@@ -83,9 +85,11 @@ abstract class BaseWebViewActivity : Activity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+
                 if (javascriptToInject != null) {
                     webView.evaluateJavascript(javascriptToInject, null)
                 }
+
                 // When the page finishes loading, the Web View is shown and the loader is hidden
                 view?.visibility = View.VISIBLE
                 loader.visibility = View.GONE

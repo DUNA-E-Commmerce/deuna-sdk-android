@@ -31,9 +31,9 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
         /// send the custom styles to the payment link
         fun sendCustomCss(sdkInstanceId: Int, dataAsJsonString: String) {
-            val jsonString = """{ "type": "setCustomCSS","data": $dataAsJsonString}"""
-            activities[sdkInstanceId]?.webView?.evaluateJavascript(
-                "javascript:postMessage(JSON.stringify($jsonString),'*')",
+            DeunaLogs.info("static ${activities[sdkInstanceId]?.sdkInstanceId}, $dataAsJsonString")
+            activities[sdkInstanceId]!!.webView.evaluateJavascript(
+                "setCustomCss($dataAsJsonString);",
                 null
             );
         }
@@ -47,6 +47,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
                     window.xprops = {
                         onEventDispatch : function (event) {
                             android.postMessage(JSON.stringify(event));
+                            setCustomCss({"upperTag":{"description":{"content":["text 1","text 2"],"compact":true,"listDivider":"line"}}});
                         },
                         onCustomCssSubscribe: function (setCustomCSS)  {
                             window.setCustomCss = setCustomCSS;
@@ -64,7 +65,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         activities[sdkInstanceId!!] = this
 
         // Extract the URL from the intent
@@ -75,11 +75,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     override fun getBridge(): WebViewBridge {
-        return PaymentWidgetBridge(
-            sdkInstanceId = sdkInstanceId!!,
-            callbacks = callbacks,
-            webView = webView
-        )
+        return PaymentWidgetBridge(this)
     }
 
     override fun onNoInternet() {

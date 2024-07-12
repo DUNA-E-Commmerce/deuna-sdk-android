@@ -2,12 +2,12 @@ package com.deuna.maven.element.domain
 
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.web_views.ElementsActivity
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")
 class ElementsBridge(
-    private val sdkInstanceId: Int,
-    private val callbacks: ElementsCallbacks?,
+    private val activity: ElementsActivity,
     private val closeEvents: Set<ElementsEvent>,
 ) : WebViewBridge(name = "android") {
     override fun handleEvent(message: String) {
@@ -24,12 +24,12 @@ class ElementsBridge(
             }
 
             val event = ElementsEvent.valueOf(type)
-            callbacks?.eventListener?.invoke(event, data)
+            activity.callbacks?.eventListener?.invoke(event, data)
 
             when (event) {
 
                 ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated -> {
-                    callbacks?.onSuccess?.invoke(data)
+                    activity.callbacks?.onSuccess?.invoke(data)
                 }
 
                 ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> {
@@ -38,13 +38,13 @@ class ElementsBridge(
                         data = data
                     )
                     if (error != null) {
-                        callbacks?.onError?.invoke(error)
+                        activity.callbacks?.onError?.invoke(error)
                     }
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements(sdkInstanceId)
-                    callbacks?.onCanceled?.invoke()
+                    closeElements(activity.sdkInstanceId!!)
+                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 else -> {
@@ -53,7 +53,7 @@ class ElementsBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeElements(sdkInstanceId)
+                closeElements(activity.sdkInstanceId!!)
             }
         } catch (e: Exception) {
             DeunaLogs.debug("ElementsBridge JSONException: $e")

@@ -55,8 +55,7 @@ class ElementsActivity() : BaseWebViewActivity() {
 
     override fun getBridge(): WebViewBridge {
         return ElementsBridge(
-            sdkInstanceId = sdkInstanceId!!,
-            callbacks = callbacks,
+            activity = this,
             closeEvents = closeEvents
         )
     }

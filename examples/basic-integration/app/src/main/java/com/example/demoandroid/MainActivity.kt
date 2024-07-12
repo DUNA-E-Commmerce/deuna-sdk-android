@@ -17,6 +17,7 @@ import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.setCustomCss
 import com.deuna.maven.shared.*
+import org.json.JSONObject
 
 val ERROR_TAG = "❌ DeunaSDK"
 val DEBUG_TAG = "👀 DeunaSDK"
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
         val paymentWidgetButton: Button = findViewById(R.id.paymentWidgetButton)
         val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
 
+
+        findViewById<EditText>(R.id.inputOrderToken).editableText.append("bb3d2aad-7ffd-4089-9a2c-ab640c2817c2")
+
         payButton.setOnClickListener { startPaymentProcess() }
         paymentWidgetButton.setOnClickListener { showPaymentWidget() }
         savePaymentMethodButton.setOnClickListener { saveCard() }
@@ -48,9 +52,13 @@ class MainActivity : AppCompatActivity() {
             context = this,
             orderToken = orderToken,
             callbacks = PaymentWidgetCallbacks().apply {
-                onSuccess = {
+                onSuccess = { data ->
                     deunaSdk.closePaymentWidget()
-                    Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+                    Intent(this@MainActivity, PaymentSuccessfulActivity::class.java).apply {
+                        putExtra(
+                            PaymentSuccessfulActivity.EXTRA_JSON_ORDER,
+                            JSONObject(data["order"] as Json).toString(),
+                        )
                         startActivity(this)
                     }
                 }
@@ -59,7 +67,8 @@ class MainActivity : AppCompatActivity() {
                     Log.d(DEBUG_TAG, "Payment was canceled by user")
                 }
 
-                onCardBinDetected = { cardBinMetadata, onRefetchOrder ->
+                onCardBinDetected = { cardBinMetadata, refetchOrder ->
+                    Log.d(DEBUG_TAG, "cardBinMetadata: $cardBinMetadata")
 
                     if (cardBinMetadata != null) {
                         val customStyles = mapOf(
@@ -88,11 +97,9 @@ class MainActivity : AppCompatActivity() {
                             data = customStyles
                         )
 
-                        onRefetchOrder(
-                            { order ->
-
-                            }
-                        )
+                        refetchOrder { order ->
+                            Log.d(DEBUG_TAG, "onRefetchOrder: $order")
+                        }
 
                     }
 
@@ -114,7 +121,11 @@ class MainActivity : AppCompatActivity() {
                 onSuccess = { data ->
                     Log.d(DEBUG_TAG, "Payment success $data")
                     deunaSdk.closeCheckout()
-                    Intent(this@MainActivity, ThankYouActivity::class.java).apply {
+                    Intent(this@MainActivity, PaymentSuccessfulActivity::class.java).apply {
+                        putExtra(
+                            PaymentSuccessfulActivity.EXTRA_JSON_ORDER,
+                            JSONObject(data["order"] as Json).toString(),
+                        )
                         startActivity(this)
                     }
                 }

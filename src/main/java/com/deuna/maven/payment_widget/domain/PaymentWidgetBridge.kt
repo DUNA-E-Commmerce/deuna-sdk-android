@@ -1,21 +1,19 @@
 package com.deuna.maven.payment_widget.domain
 
 import android.webkit.JavascriptInterface
-import android.webkit.WebView
 import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.toMap
+import com.deuna.maven.web_views.PaymentWidgetActivity
 import org.json.JSONException
 import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    private val sdkInstanceId: Int,
-    private val callbacks: PaymentWidgetCallbacks?,
-    private val webView: WebView
+    private val activity: PaymentWidgetActivity
 ) : WebViewBridge(name = "android") {
 
 
@@ -30,6 +28,11 @@ class PaymentWidgetBridge(
     @JavascriptInterface
     fun onRefetchOrder(message: String) {
         handleEvent(message)
+    }
+
+    @JavascriptInterface
+    fun setCustomCss(cssJson: String) {
+        activity.webView.evaluateJavascript("setCustomCss($cssJson)",null);
     }
 
     override fun handleEvent(message: String) {
@@ -52,7 +55,7 @@ class PaymentWidgetBridge(
                         data = data
                     )
                     if (error != null) {
-                        callbacks?.onError?.invoke(error)
+                        activity.callbacks?.onError?.invoke(error)
                     }
                 }
 
@@ -68,11 +71,11 @@ class PaymentWidgetBridge(
                     handleOnRefetchOrder(json)
                 }
 
-                PaymentWidgetEvent.purchase -> callbacks?.onSuccess?.invoke(data)
+                PaymentWidgetEvent.purchase -> activity.callbacks?.onSuccess?.invoke(data)
                 PaymentWidgetEvent.paymentMethods3dsInitiated -> {}
                 PaymentWidgetEvent.linkClose -> {
-                    closePaymentWidget(sdkInstanceId)
-                    callbacks?.onCanceled?.invoke()
+                    closePaymentWidget(activity.sdkInstanceId!!)
+                    activity.callbacks?.onCanceled?.invoke()
                 }
             }
         } catch (e: JSONException) {
@@ -83,31 +86,32 @@ class PaymentWidgetBridge(
 
     private fun handleCardBinDetected(metadata: Json?) {
         if (metadata == null) {
-            callbacks?.onCardBinDetected?.invoke(
+            activity.callbacks?.onCardBinDetected?.invoke(
                 null
             ) { callback -> refetchOrder(callback) }
             return
         }
 
-        callbacks?.onCardBinDetected?.invoke(
+        activity.callbacks?.onCardBinDetected?.invoke(
             metadata,
         ) { callback -> refetchOrder(callback) }
     }
 
     private fun handleInstallmentSelected(metadata: Json?) {
         if (metadata == null) {
-            callbacks?.onInstallmentSelected?.invoke(
+            activity.callbacks?.onInstallmentSelected?.invoke(
                 null
             ) { callback -> refetchOrder(callback) }
             return
         }
 
-        callbacks?.onInstallmentSelected?.invoke(
+        activity.callbacks?.onInstallmentSelected?.invoke(
             metadata,
         ) { callback -> refetchOrder(callback) }
     }
 
     private fun handleOnRefetchOrder(json: Json) {
+        DeunaLogs.info("handleOnRefetchOrder $json")
         val requestId = json["requestId"] as? Int
         if (!refetchOrderRequests.contains(requestId)) {
             return
@@ -123,10 +127,15 @@ class PaymentWidgetBridge(
         refetchOrderRequestId++
         refetchOrderRequests[refetchOrderRequestId] = callback
 
-        webView.evaluateJavascript(
+        activity.loadedWebView?.evaluateJavascript(
             """
         (function() {
             function refetchOrder( callback) {
+            
+                if(!deunaRefetchOrder) {
+                   console.log("deunaRefetchOrder is undefined");
+                }
+            
                 deunaRefetchOrder()
                     .then(data => {
                         callback({type:"refetchOrder", data: data , requestId: $refetchOrderRequestId });
