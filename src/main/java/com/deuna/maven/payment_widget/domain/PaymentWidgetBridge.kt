@@ -32,7 +32,7 @@ class PaymentWidgetBridge(
 
     @JavascriptInterface
     fun setCustomCss(cssJson: String) {
-        activity.webView.evaluateJavascript("setCustomCss($cssJson)",null);
+        activity.webView.evaluateJavascript("setCustomCss($cssJson)", null);
     }
 
     override fun handleEvent(message: String) {
@@ -111,7 +111,6 @@ class PaymentWidgetBridge(
     }
 
     private fun handleOnRefetchOrder(json: Json) {
-        DeunaLogs.info("handleOnRefetchOrder $json")
         val requestId = json["requestId"] as? Int
         if (!refetchOrderRequests.contains(requestId)) {
             return
@@ -127,15 +126,11 @@ class PaymentWidgetBridge(
         refetchOrderRequestId++
         refetchOrderRequests[refetchOrderRequestId] = callback
 
-        activity.loadedWebView?.evaluateJavascript(
-            """
+        activity.runOnUiThread {
+            activity.webView.evaluateJavascript(
+                """
         (function() {
-            function refetchOrder( callback) {
-            
-                if(!deunaRefetchOrder) {
-                   console.log("deunaRefetchOrder is undefined");
-                }
-            
+            function refetchOrder(callback) {
                 deunaRefetchOrder()
                     .then(data => {
                         callback({type:"refetchOrder", data: data , requestId: $refetchOrderRequestId });
@@ -149,7 +144,8 @@ class PaymentWidgetBridge(
                 android.onRefetchOrder(JSON.stringify(result));
             });
         })();
-        """.trimIndent(), null
-        );
+            """.trimIndent(), null
+            )
+        }
     }
 }

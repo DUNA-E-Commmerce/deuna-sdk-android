@@ -36,9 +36,6 @@ class MainActivity : AppCompatActivity() {
         val paymentWidgetButton: Button = findViewById(R.id.paymentWidgetButton)
         val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
 
-
-        findViewById<EditText>(R.id.inputOrderToken).editableText.append("bb3d2aad-7ffd-4089-9a2c-ab640c2817c2")
-
         payButton.setOnClickListener { startPaymentProcess() }
         paymentWidgetButton.setOnClickListener { showPaymentWidget() }
         savePaymentMethodButton.setOnClickListener { saveCard() }
@@ -98,14 +95,22 @@ class MainActivity : AppCompatActivity() {
                         )
 
                         refetchOrder { order ->
-                            Log.d(DEBUG_TAG, "onRefetchOrder: $order")
+                            Log.d(DEBUG_TAG, "onCardBinDetected > refetchOrder: $order")
                         }
 
                     }
-
+                }
+                onInstallmentSelected = { metadata, refetchOrder ->
+                    Log.d(DEBUG_TAG, "installmentMetadata: $metadata")
+                    refetchOrder { order ->
+                        Log.d(DEBUG_TAG, "onInstallmentSelected > refetchOrder: $order")
+                    }
                 }
                 onClosed = {
                     Log.d(DEBUG_TAG, "DEUNA widget was closed")
+                }
+                onError = { error ->
+                    Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
                 }
             })
     }

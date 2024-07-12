@@ -22,9 +22,9 @@ import java.lang.IllegalStateException
  */
 fun DeunaSDK.initElements(
     context: Context,
+    userToken: String,
     callbacks: ElementsCallbacks,
     closeEvents: Set<ElementsEvent> = emptySet(),
-    userToken: String? = null,
 ) {
     val apiKey = this.publicApiKey
     val baseUrl = this.environment.elementsBaseUrl

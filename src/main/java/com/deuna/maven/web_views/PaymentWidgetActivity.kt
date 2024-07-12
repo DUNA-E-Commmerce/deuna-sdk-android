@@ -31,11 +31,13 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
         /// send the custom styles to the payment link
         fun sendCustomCss(sdkInstanceId: Int, dataAsJsonString: String) {
-            DeunaLogs.info("static ${activities[sdkInstanceId]?.sdkInstanceId}, $dataAsJsonString")
-            activities[sdkInstanceId]!!.webView.evaluateJavascript(
-                "setCustomCss($dataAsJsonString);",
-                null
-            );
+            val activity = activities[sdkInstanceId]!!
+            activity.runOnUiThread {
+                activity.webView.evaluateJavascript(
+                    "setCustomCss($dataAsJsonString);",
+                    null
+                );
+            }
         }
     }
 
@@ -47,7 +49,6 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
                     window.xprops = {
                         onEventDispatch : function (event) {
                             android.postMessage(JSON.stringify(event));
-                            setCustomCss({"upperTag":{"description":{"content":["text 1","text 2"],"compact":true,"listDivider":"line"}}});
                         },
                         onCustomCssSubscribe: function (setCustomCSS)  {
                             window.setCustomCss = setCustomCSS;
