@@ -2,14 +2,14 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.web_views.*
 import com.deuna.maven.web_views.base.*
 import java.lang.IllegalStateException
-
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 /**
  * Launch the Elements View
@@ -29,7 +29,6 @@ fun DeunaSDK.initElements(
     userToken: String? = null,
     userInfo: UserInfo? = null
 ) {
-    val apiKey = this.publicApiKey
     val baseUrl = this.environment.elementsBaseUrl
 
     ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
@@ -47,9 +46,15 @@ fun DeunaSDK.initElements(
             callbacks.onError?.invoke(ElementsErrors.invalidUserInfo)
             return
         }
-        queryParameters[QueryParameters.FIRST_NAME.value] = userInfo.firstName
-        queryParameters[QueryParameters.LAST_NAME.value] = userInfo.lastName
-        queryParameters[QueryParameters.EMAIL.value] = userInfo.email
+        queryParameters[QueryParameters.FIRST_NAME.value] = URLEncoder.encode(
+            userInfo.firstName, StandardCharsets.UTF_8.toString()
+        )
+        queryParameters[QueryParameters.LAST_NAME.value] = URLEncoder.encode(
+            userInfo.lastName, StandardCharsets.UTF_8.toString()
+        )
+        queryParameters[QueryParameters.EMAIL.value] = URLEncoder.encode(
+            userInfo.email, StandardCharsets.UTF_8.toString()
+        )
     } else {
         // if the user token is not passed or is empty the userInfo must be passed
         DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)

@@ -7,7 +7,6 @@ import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.*
 import com.deuna.maven.web_views.base.*
 
-
 /**
  * Launch the Checkout View
  *
