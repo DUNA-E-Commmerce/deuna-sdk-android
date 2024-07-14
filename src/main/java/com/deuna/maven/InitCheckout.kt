@@ -35,6 +35,9 @@ fun DeunaSDK.initCheckout(
     val baseUrl = this.environment.checkoutBaseUrl
     CheckoutActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
     val intent = Intent(context, CheckoutActivity::class.java).apply {
+        if (!userToken.isNullOrEmpty()) {
+            putExtra(CheckoutActivity.EXTRA_USER_TOKEN, userToken)
+        }
         putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
         putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)
         putExtra(CheckoutActivity.EXTRA_BASE_URL, baseUrl)

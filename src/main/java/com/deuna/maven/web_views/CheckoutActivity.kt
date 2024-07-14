@@ -19,6 +19,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
     companion object {
         const val EXTRA_API_KEY = "API_KEY"
         const val EXTRA_ORDER_TOKEN = "ORDER_TOKEN"
+        const val EXTRA_USER_TOKEN = "USER_TOKEN"
         const val EXTRA_BASE_URL = "BASE_URL"
 
 
@@ -51,20 +52,25 @@ class CheckoutActivity() : BaseWebViewActivity() {
         val baseUrl = intent.getStringExtra(EXTRA_BASE_URL)!!
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
+        val userToken = intent.getStringExtra(EXTRA_USER_TOKEN)
 
         val closeEventAsStrings =
             intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
         closeEvents = parseCloseEvents<CheckoutEvent>(closeEventAsStrings)
 
         // Initiate the checkout process by fetching the order API
-        getOrderApi(baseUrl = baseUrl, orderToken = orderToken, apiKey = apiKey)
+        getOrderApi(
+            baseUrl = baseUrl, orderToken = orderToken, apiKey = apiKey, userToken = userToken
+        )
     }
 
     /**
      * Fetches the order details from the server using the provided credentials.
      * Parses the response to extract the payment link and load it in the WebView.
      */
-    private fun getOrderApi(baseUrl: String, orderToken: String, apiKey: String) {
+    private fun getOrderApi(
+        baseUrl: String, orderToken: String, apiKey: String, userToken: String?
+    ) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 if (response.isSuccessful) {
@@ -87,8 +93,15 @@ class CheckoutActivity() : BaseWebViewActivity() {
                         return
                     }
 
+                    val queryParameters = mutableMapOf<String, String>()
+                    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
+
+                    if (userToken != null) {
+                        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+                    }
+                    
                     loadUrl(
-                        url = URL(paymentLink).toString()
+                        url = Utils.buildUrl(baseUrl = paymentLink, queryParams = queryParameters)
                     )
                 } else {
                     // Handle missing order data

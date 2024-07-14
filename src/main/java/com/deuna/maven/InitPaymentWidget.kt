@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentWidgetErrors
+import com.deuna.maven.shared.QueryParameters
+import com.deuna.maven.shared.Utils
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
@@ -35,9 +37,17 @@ fun DeunaSDK.initPaymentWidget(
 
     PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
-    val paymentUrl = Uri.parse("$baseUrl/now/$orderToken?mode=widget")
-        .buildUpon()
-        .build().toString()
+    val queryParameters = mutableMapOf<String, String>()
+    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
+
+    if (!userToken.isNullOrEmpty()) {
+        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+    }
+
+    val paymentUrl = Utils.buildUrl(
+        baseUrl = "$baseUrl/now/$orderToken",
+        queryParams = queryParameters,
+    )
 
 
     val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
@@ -55,8 +65,7 @@ fun DeunaSDK.initPaymentWidget(
  */
 fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
     PaymentWidgetActivity.sendCustomCss(
-        sdkInstanceId = sdkInstanceId,
-        dataAsJsonString = JSONObject(data).toString()
+        sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
     )
 }
 

@@ -13,6 +13,7 @@ data class ElementsError(
 ) {
     enum class Type(val message: String) {
         NO_INTERNET_CONNECTION("No internet connection available"),
+        INITIALIZATION_FAILED("Failed to initialize the widget"),
         INVALID_USER_TOKEN("Invalid user token"),
         UNKNOWN_ERROR("An unknown error occurred"),
         USER_ERROR("An error occurred related to the user authentication"),
