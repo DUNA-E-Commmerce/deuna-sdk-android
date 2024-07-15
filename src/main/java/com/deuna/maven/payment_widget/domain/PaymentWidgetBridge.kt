@@ -73,6 +73,7 @@ class PaymentWidgetBridge(
                     activity.callbacks?.onCanceled?.invoke()
                 }
             }
+        } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {
             DeunaLogs.debug("PaymentWidgetBridge JSONException: $e")
         }

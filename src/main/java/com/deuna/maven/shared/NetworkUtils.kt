@@ -10,22 +10,17 @@ class NetworkUtils(private val context: Context) {
     /// Checks if the device is connected to the internet.
     val hasInternet: Boolean
         get() {
-            val connectivityManager =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val cmg = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val network = connectivityManager.activeNetwork ?: return false
-                val activeNetwork =
-                    connectivityManager.getNetworkCapabilities(network) ?: return false
-                return when {
-                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                    else -> false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+
+                cmg.getNetworkCapabilities(cmg.activeNetwork)?.let { networkCapabilities ->
+                    return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                 }
             } else {
-                val networkInfo = connectivityManager.activeNetworkInfo ?: return false
-                return networkInfo.isConnected
+                return cmg.activeNetworkInfo?.isConnectedOrConnecting == true
             }
+            return false
         }
 }

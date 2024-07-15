@@ -55,6 +55,7 @@ class ElementsBridge(
             if (closeEvents.contains(event)) {
                 closeElements(activity.sdkInstanceId!!)
             }
+        } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {
             DeunaLogs.debug("ElementsBridge JSONException: $e")
         }

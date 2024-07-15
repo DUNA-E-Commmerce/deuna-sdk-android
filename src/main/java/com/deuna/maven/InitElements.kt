@@ -52,16 +52,21 @@ fun DeunaSDK.initElements(
         queryParameters[QueryParameters.LAST_NAME.value] = URLEncoder.encode(
             userInfo.lastName, StandardCharsets.UTF_8.toString()
         )
-        queryParameters[QueryParameters.EMAIL.value] = URLEncoder.encode(
-            userInfo.email, StandardCharsets.UTF_8.toString()
-        )
     } else {
         // if the user token is not passed or is empty the userInfo must be passed
         DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
         callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
     }
 
-    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
+    var elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
+
+    if (userInfo != null) {
+        elementUrl += "&${QueryParameters.EMAIL.value}=${
+            URLEncoder.encode(
+                userInfo.email, StandardCharsets.UTF_8.toString()
+            )
+        }"
+    }
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)

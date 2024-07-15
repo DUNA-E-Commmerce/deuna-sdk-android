@@ -67,6 +67,7 @@ class CheckoutBridge(
             if (closeEvents.contains(event)) {
                 closeCheckout(activity.sdkInstanceId!!)
             }
+        } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {
             DeunaLogs.debug("CheckoutBridge JSONException: $e")
         }
