@@ -121,7 +121,13 @@ class CheckoutActivity() : BaseWebViewActivity() {
      */
     private fun orderCouldNotBeRetrieved() {
         callbacks?.onError?.invoke(
-            PaymentsError(type = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED)
+            PaymentsError(
+                type = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                metadata = PaymentsError.Metadata(
+                    code = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED.name,
+                    message = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED.message,
+                )
+            )
         )
     }
 

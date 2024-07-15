@@ -1,10 +1,8 @@
 package com.deuna.compose_demo.screens
 
-import CheckoutResponse
-import ElementsResponse
-import com.deuna.maven.checkout.domain.CheckoutError
 import com.deuna.maven.element.domain.ElementsError
-
+import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.PaymentsError
 
 
 /**
@@ -16,15 +14,15 @@ sealed class PaymentWidgetResult {
     /**
      * Indicates successful completion of the payment process.
      *
-     * @property response The CheckoutResponse.Dat object containing details about the completed payment
+     * @property order The CheckoutResponse.Dat object containing details about the completed payment
      */
-    data class Success(val response: CheckoutResponse.Data) : PaymentWidgetResult()
+    data class Success(val order: Json) : PaymentWidgetResult()
 
     /**
      * Indicates an error occurred during the payment process.
      *
      */
-    data object Error : PaymentWidgetResult()
+    data class Error(val error: PaymentsError) : PaymentWidgetResult()
 
     /**
      * Indicates the payment process was cancelled by the user.
@@ -42,16 +40,16 @@ sealed class CheckoutResult {
     /**
      * Indicates successful completion of the checkout process.
      *
-     * @property response The CheckoutResponse object containing details about the completed checkout.
+     * @property order The CheckoutResponse object containing details about the completed checkout.
      */
-    data class Success(val response: CheckoutResponse) : CheckoutResult()
+    data class Success(val order: Json) : CheckoutResult()
 
     /**
      * Indicates an error occurred during the checkout process.
      *
-     * @property error The DeunaErrorMessage object detailing the error encountered.
+     * @property error The PaymentsError object detailing the error encountered.
      */
-    data class Error(val error: CheckoutError) : CheckoutResult()
+    data class Error(val error: PaymentsError) : CheckoutResult()
 
     /**
      * Indicates the checkout process was cancelled by the user.
@@ -65,9 +63,9 @@ sealed class ElementsResult {
     /**
      * Indicates successful completion of the element saving process (e.g., saving card information).
      *
-     * @property response The ElementsResponse object containing details about the saved elements.
+     * @property savedCard The elements response object containing details about the saved elements.
      */
-    data class Success(val response: ElementsResponse) : ElementsResult()
+    data class Success(val savedCard: Json) : ElementsResult()
 
     /**
      * Indicates an error occurred during the element saving process.

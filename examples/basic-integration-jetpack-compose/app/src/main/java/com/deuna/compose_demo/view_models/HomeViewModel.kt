@@ -1,7 +1,5 @@
 package com.deuna.compose_demo.view_models
 
-import CheckoutResponse
-import ElementsResponse
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.*
@@ -11,21 +9,29 @@ import com.deuna.compose_demo.screens.ElementsResult
 import com.deuna.compose_demo.screens.PaymentWidgetResult
 import com.deuna.maven.*
 import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.element.domain.*
-import com.deuna.maven.payment_widget.PaymentWidgetCallbacks
+import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.domain.UserInfo
 import kotlinx.coroutines.*
 
+val ERROR_TAG = "❌ DeunaSDK"
+val DEBUG_TAG = "👀 DeunaSDK"
 
 /**
  * ViewModel for the Home screen, responsible for handling user interactions and data manipulation.
  * @param deunaSDK The DeunaSDK instance used for payment and card saving operations.
  */
+@Suppress("UNCHECKED_CAST")
 class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
 
     // State variables for order token and user token
     val orderToken = mutableStateOf("")
     val userToken = mutableStateOf("")
+
+    val userTokenValue: String?
+        get() {
+            return userToken.value.ifEmpty { null }
+        }
 
 
     fun showPaymentWidget(
@@ -35,27 +41,38 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
         deunaSDK.initPaymentWidget(
             context = context,
             orderToken = orderToken.value.trim(),
-            callbacks = paymentWidgetsCallbacks(context, completion)
+            callbacks = paymentWidgetsCallbacks(completion),
+            userToken = userTokenValue
         )
     }
 
 
     private fun checkoutCallbacks(
-        context: Context,
         completion: (CheckoutResult) -> Unit,
     ): CheckoutCallbacks {
         return CheckoutCallbacks().apply {
-            onSuccess = { response ->
-                deunaSDK.closeCheckout(context)
+            onSuccess = { data ->
+                deunaSDK.closeCheckout()
                 viewModelScope.launch {
-                    completion(CheckoutResult.Success(response))
+                    completion(
+                        CheckoutResult.Success(
+                            data["order"] as Json
+                        )
+                    )
                 }
             }
             onError = { error ->
-//        deunaSDK.closeCheckout(context)
-//        viewModelScope.launch {
-//          completion(CheckoutResult.Error(error))
-//        }
+                Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
+                when (error.type) {
+                    PaymentsError.Type.PAYMENT_ERROR,
+                    PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                    PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                        deunaSDK.closeCheckout()
+                        completion(CheckoutResult.Error(error))
+                    }
+
+                    else -> {}
+                }
             }
             onCanceled = {
                 viewModelScope.launch {
@@ -65,13 +82,13 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             eventListener = { event, _ ->
                 when (event) {
                     CheckoutEvent.changeCart, CheckoutEvent.changeAddress -> {
-                        deunaSDK.closeCheckout(context)
+                        deunaSDK.closeCheckout()
                         viewModelScope.launch {
                             completion(CheckoutResult.Canceled)
                         }
                     }
 
-                    else -> Log.d("DeunaSDK", "on event ${event.value}")
+                    else -> Log.d(DEBUG_TAG, "on event ${event.value}")
                 }
             }
         }
@@ -89,20 +106,24 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
         deunaSDK.initCheckout(
             context = context,
             orderToken = orderToken.value.trim(),
-            callbacks = checkoutCallbacks(context, completion)
+            callbacks = checkoutCallbacks(completion),
+            userToken = userTokenValue,
         )
     }
 
 
     private fun paymentWidgetsCallbacks(
-        context: Context,
         completion: (PaymentWidgetResult) -> Unit,
     ): PaymentWidgetCallbacks {
         return PaymentWidgetCallbacks().apply {
             onSuccess = { data ->
-                deunaSDK.closePaymentWidget(context)
+                deunaSDK.closePaymentWidget()
                 viewModelScope.launch {
-                    completion(PaymentWidgetResult.Success(data))
+                    completion(
+                        PaymentWidgetResult.Success(
+                            data["order"] as Json
+                        )
+                    )
                 }
             }
             onCanceled = {
@@ -110,14 +131,15 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     completion(PaymentWidgetResult.Canceled)
                 }
             }
-            onError = { type ->
-                DeunaLogs.error(type.message)
-                when (type) {
-                    PaymentWidgetErrorType.PAYMENT_ERROR,
-                    PaymentWidgetErrorType.NO_INTERNET_CONNECTION -> {
-                        deunaSDK.closePaymentWidget(context)
-                        completion(PaymentWidgetResult.Error)
+            onError = { error ->
+                Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
+                when (error.type) {
+                    PaymentsError.Type.PAYMENT_ERROR,
+                    PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                        deunaSDK.closePaymentWidget()
+                        completion(PaymentWidgetResult.Error(error))
                     }
+
                     else -> {}
                 }
 
@@ -140,25 +162,33 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ) {
         deunaSDK.initElements(
             context = context,
-            userToken = userToken.value.trim(),
-            callbacks = elementsCallbacks(context, completion)
+            userToken = userTokenValue,
+            userInfo = if (userTokenValue == null) UserInfo(
+                firstName = "Darwin",
+                lastName = "Morocho",
+                email = "dmorocho@deuna.com"
+            ) else null,
+            callbacks = elementsCallbacks(completion)
         )
     }
 
 
     private fun elementsCallbacks(
-        context: Context,
         completion: (ElementsResult) -> Unit,
     ): ElementsCallbacks {
         return ElementsCallbacks().apply {
             onSuccess = { response ->
-                deunaSDK.closeElements(context)
+                deunaSDK.closeElements()
                 viewModelScope.launch {
-                    completion(ElementsResult.Success(response))
+                    completion(
+                        ElementsResult.Success(
+                            (response["metadata"] as Json)["createdCard"] as Json
+                        )
+                    )
                 }
             }
             onError = { error ->
-                deunaSDK.closeElements(context)
+                deunaSDK.closeElements()
                 viewModelScope.launch {
                     completion(ElementsResult.Error(error))
                 }
