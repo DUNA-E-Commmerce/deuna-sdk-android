@@ -1,5 +1,8 @@
 package com.example.demoandroid
 
+import android.R.attr.data
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +22,7 @@ import com.deuna.maven.setCustomCss
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
+
 
 val ERROR_TAG = "❌ DeunaSDK"
 val DEBUG_TAG = "👀 DeunaSDK"
@@ -62,6 +66,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showPaymentErrorAlertDialog(metadata: PaymentsError.Metadata) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(metadata.code)
+        builder.setMessage(metadata.message)
+
+        builder.setPositiveButton(
+            "Aceptar",
+            DialogInterface.OnClickListener { dialog, which -> // Code to execute when OK button is clicked
+                dialog.dismiss()
+            },
+        )
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+    }
 
     private fun showPaymentWidget() {
         deunaSdk.initPaymentWidget(
@@ -121,6 +140,18 @@ class MainActivity : AppCompatActivity() {
                 }
                 onError = { error ->
                     Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
+                    when (error.type) {
+                        PaymentsError.Type.PAYMENT_ERROR,
+                        PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                        PaymentsError.Type.INITIALIZATION_FAILED -> {
+                            deunaSdk.closeCheckout()
+                            if (error.metadata != null) {
+                                showPaymentErrorAlertDialog(error.metadata!!)
+                            }
+                        }
+
+                        else -> {}
+                    }
                 }
             },
             userToken = userToken,
@@ -138,9 +169,20 @@ class MainActivity : AppCompatActivity() {
                     deunaSdk.closeCheckout()
                     handlePaymentSuccess(data)
                 }
-                onError = {
-                    Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeCheckout()
+                onError = { error ->
+                    Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
+                    when (error.type) {
+                        PaymentsError.Type.PAYMENT_ERROR,
+                        PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                        PaymentsError.Type.INITIALIZATION_FAILED -> {
+                            deunaSdk.closeCheckout()
+                            if (error.metadata != null) {
+                                showPaymentErrorAlertDialog(error.metadata!!)
+                            }
+                        }
+
+                        else -> {}
+                    }
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Payment was canceled by user")
