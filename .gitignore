@@ -33,3 +33,5 @@ google-services.json
 *.hprof
 **/.DS_Store
 gradle.properties
+examples/basic-integration/app/libs/*
+examples/basic-integration-jetpack-compose/app/libs/*

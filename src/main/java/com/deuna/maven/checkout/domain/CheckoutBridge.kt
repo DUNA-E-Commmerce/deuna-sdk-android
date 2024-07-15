@@ -1,41 +1,58 @@
 package com.deuna.maven.checkout.domain
 
-import CheckoutResponse
-import android.content.Context
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.web_views.CheckoutActivity
 import org.json.*
 
+@Suppress("UNCHECKED_CAST")
 class CheckoutBridge(
-    private val context: Context,
-    private val callbacks: CheckoutCallbacks?,
+    private val activity: CheckoutActivity,
     private val closeEvents: Set<CheckoutEvent>,
-) : WebViewBridge() {
+) : WebViewBridge(name = "android") {
     override fun handleEvent(message: String) {
 
         try {
-            val json = JSONObject(message)
-            val eventData = CheckoutResponse.fromJson(json)
-            callbacks?.eventListener?.invoke(eventData.type, eventData)
-            when (eventData.type) {
+            val json = JSONObject(message).toMap()
+
+            val type = json["type"] as? String
+            val data = json["data"] as? Json
+
+            if (type == null || data == null) {
+                return
+            }
+
+            val event = CheckoutEvent.valueOf(type)
+            activity.callbacks?.eventListener?.invoke(event, data)
+
+            when (event) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
-                    callbacks?.onSuccess?.invoke(eventData)
+                    activity.callbacks?.onSuccess?.invoke(data)
                 }
 
-                CheckoutEvent.purchaseRejected -> {
-                    handleError(
-                        CheckoutErrorType.PAYMENT_ERROR,
-                        eventData
+                CheckoutEvent.purchaseRejected, CheckoutEvent.purchaseError -> {
+                    val error = PaymentsError.fromJson(
+                        type = PaymentsError.Type.PAYMENT_ERROR,
+                        data = data
                     )
+                    if (error != null) {
+                        activity.callbacks?.onError?.invoke(error)
+                    }
                 }
 
-                CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError, CheckoutEvent.purchaseError -> {
-                    handleError(CheckoutErrorType.CHECKOUT_INITIALIZATION_FAILED, eventData)
+                CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError -> {
+                    val error = PaymentsError.fromJson(
+                        type = PaymentsError.Type.INITIALIZATION_FAILED,
+                        data = data
+                    )
+                    if (error != null) {
+                        activity.callbacks?.onError?.invoke(error)
+                    }
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closeCheckout()
-                    callbacks?.onCanceled?.invoke()
+                    closeCheckout(activity.sdkInstanceId!!)
+                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
@@ -43,27 +60,16 @@ class CheckoutBridge(
                 }
 
                 else -> {
-                    DeunaLogs.debug("CheckoutBridge Unhandled event: $eventData")
+                    DeunaLogs.debug("CheckoutBridge Unhandled event: $event")
                 }
             }
 
-            eventData.let {
-                if (closeEvents.contains(it.type)) {
-                    closeCheckout()
-                }
+            if (closeEvents.contains(event)) {
+                closeCheckout(activity.sdkInstanceId!!)
             }
+        } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {
             DeunaLogs.debug("CheckoutBridge JSONException: $e")
         }
-    }
-
-    private fun handleError(type: CheckoutErrorType, response: CheckoutResponse) {
-        callbacks?.onError?.invoke(
-            CheckoutError(
-                type,
-                response.data.order,
-                response.data.user
-            )
-        )
     }
 }

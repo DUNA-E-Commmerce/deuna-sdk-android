@@ -1,59 +1,63 @@
 package com.deuna.maven.element.domain
 
-import ElementsResponse
-import android.content.Context
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.web_views.ElementsActivity
 import org.json.*
 
- class ElementsBridge(
-    private val context: Context,
-    private val callbacks: ElementsCallbacks?,
+@Suppress("UNCHECKED_CAST")
+class ElementsBridge(
+    private val activity: ElementsActivity,
     private val closeEvents: Set<ElementsEvent>,
- ) : WebViewBridge() {
+) : WebViewBridge(name = "android") {
     override fun handleEvent(message: String) {
         try {
-            val json = JSONObject(message)
-            val eventData = ElementsResponse.fromJson(json)
 
-           callbacks?.eventListener?.invoke(eventData.type, eventData)
-            when (eventData.type) {
+
+            val json = JSONObject(message).toMap()
+
+            val type = json["type"] as? String
+            val data = json["data"] as? Json
+
+            if (type == null || data == null) {
+                return
+            }
+
+            val event = ElementsEvent.valueOf(type)
+            activity.callbacks?.eventListener?.invoke(event, data)
+
+            when (event) {
 
                 ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated -> {
-                    callbacks?.onSuccess?.invoke((eventData))
+                    activity.callbacks?.onSuccess?.invoke(data)
                 }
 
-                ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> eventData.data.metadata?.let {
-                    handleError(
-                        eventData
+                ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> {
+                    val error = ElementsError.fromJson(
+                        type = ElementsError.Type.VAULT_SAVE_ERROR,
+                        data = data
                     )
+                    if (error != null) {
+                        activity.callbacks?.onError?.invoke(error)
+                    }
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements()
-                    callbacks?.onCanceled?.invoke()
+                    closeElements(activity.sdkInstanceId!!)
+                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 else -> {
-                    DeunaLogs.debug("ElementsBridge Unhandled event: ${eventData.type}")
+                    DeunaLogs.debug("ElementsBridge Unhandled event: $event")
                 }
             }
-            eventData.let {
-                if (closeEvents.contains(it.type)) {
-                    closeElements()
-                }
+
+            if (closeEvents.contains(event)) {
+                closeElements(activity.sdkInstanceId!!)
             }
+        } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {
             DeunaLogs.debug("ElementsBridge JSONException: $e")
         }
-    }
-
-    private fun handleError(response: ElementsResponse) {
-        callbacks?.onError?.invoke(
-            ElementsError(
-                ElementsErrorType.VAULT_SAVE_ERROR,
-                response.data.user
-            )
-        )
     }
 }

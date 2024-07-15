@@ -20,21 +20,28 @@ abstract class BaseWebViewActivity : Activity() {
 
     companion object {
         const val EXTRA_CLOSE_EVENTS = "CLOSE_EVENTS"
+        const val EXTRA_SDK_INSTANCE_ID = "SDK_INSTANCE_ID"
 
-        @SuppressLint("StaticFieldLeak")
-        var activity: Activity? = null
+        /**
+         * Due to multiples instances of DeunaSDK can be created
+         * we need to ensure that only the authorized instance can
+         * close the widgets and call the callbacks
+         */
+        var activities = mutableMapOf<Int, Activity>()
 
-        fun closeWebView() {
-            activity?.finish()
+        fun closeWebView(sdkInstanceId: Int) {
+            activities[sdkInstanceId]?.finish()
         }
     }
 
     lateinit var loader: ProgressBar
-    private lateinit var webView: WebView
+    lateinit var webView: WebView
+    var sdkInstanceId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        activity = this
         super.onCreate(savedInstanceState)
+        sdkInstanceId = intent.getIntExtra(EXTRA_SDK_INSTANCE_ID, 0)
+        activities[sdkInstanceId!!] = this
         setContentView(R.layout.webview_activity)
         initialize()
     }
@@ -42,7 +49,6 @@ abstract class BaseWebViewActivity : Activity() {
     // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(this).hasInternet) {
-            DeunaLogs.debug("No internet connection")
             onNoInternet()
             return
         }
@@ -54,16 +60,16 @@ abstract class BaseWebViewActivity : Activity() {
 
     // Handle back button press
     override fun onBackPressed() {
-        DeunaLogs.debug("Canceled by user")
         onCanceledByUser()
         super.onBackPressed()
     }
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
-    fun loadUrl(url: String) {
+    fun loadUrl(url: String, javascriptToInject: String? = null) {
         val cleanedUrl = cleanUrl(url)
         DeunaLogs.info(cleanedUrl)
+
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
@@ -71,18 +77,23 @@ abstract class BaseWebViewActivity : Activity() {
         }
 
         // Add JavascriptInterface
-        webView.addJavascriptInterface(getBridge(), "android")
+        val bridge = getBridge()
+        webView.addJavascriptInterface(bridge, bridge.name)
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+
+                if (javascriptToInject != null) {
+                    webView.evaluateJavascript(javascriptToInject, null)
+                }
+
                 // When the page finishes loading, the Web View is shown and the loader is hidden
                 view?.visibility = View.VISIBLE
                 loader.visibility = View.GONE
             }
         }
         setupWebChromeClient(webView)
-
         webView.loadUrl(cleanedUrl)
     }
 
@@ -108,8 +119,15 @@ abstract class BaseWebViewActivity : Activity() {
                 // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
                 val webViewClient = CustomWebViewClient(webViewCallback, newWebView)
                 newWebView.webViewClient = webViewClient
-
+                loader.visibility = View.VISIBLE
                 return true
+            }
+
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                if (newProgress == 100) {
+                    loader.visibility = View.GONE
+                }
+                super.onProgressChanged(view, newProgress)
             }
         }
     }
@@ -121,8 +139,9 @@ abstract class BaseWebViewActivity : Activity() {
             openInExternalBrowser(url)
         }
 
-        override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
 
+        override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+            loader.visibility = View.VISIBLE
             webView.loadUrl(url)
 
             newWebView.webChromeClient = object : WebChromeClient() {
@@ -133,6 +152,13 @@ abstract class BaseWebViewActivity : Activity() {
                     resultMsg: Message,
                 ): Boolean {
                     return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+                }
+
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    if (newProgress == 100) {
+                        loader.visibility = View.GONE
+                    }
+                    super.onProgressChanged(view, newProgress)
                 }
             }
 
@@ -174,7 +200,7 @@ abstract class BaseWebViewActivity : Activity() {
 
     // Unregister the broadcast receiver when the activity is destroyed
     override fun onDestroy() {
-        activity = null
+        activities.remove(sdkInstanceId!!)
         super.onDestroy()
     }
 }

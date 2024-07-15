@@ -16,7 +16,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        minSdk 24
+        minSdk 22
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -44,7 +44,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version '2.1.1'
+            version '2.4.0-beta.1'
             artifact("$buildDir/outputs/aar/deuna-sdk-android-release.aar")
             pom {
                 name = 'Android SDK DEUNA'
