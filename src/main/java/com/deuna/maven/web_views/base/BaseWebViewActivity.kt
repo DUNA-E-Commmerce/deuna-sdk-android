@@ -22,6 +22,8 @@ abstract class BaseWebViewActivity : Activity() {
         const val EXTRA_CLOSE_EVENTS = "CLOSE_EVENTS"
         const val EXTRA_SDK_INSTANCE_ID = "SDK_INSTANCE_ID"
 
+        const val LEGAL_URL_HOST = "https://legal.deuna"
+
         /**
          * Due to multiples instances of DeunaSDK can be created
          * we need to ensure that only the authorized instance can
@@ -81,6 +83,7 @@ abstract class BaseWebViewActivity : Activity() {
         webView.addJavascriptInterface(bridge, bridge.name)
 
         webView.webViewClient = object : WebViewClient() {
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
 
@@ -141,6 +144,14 @@ abstract class BaseWebViewActivity : Activity() {
 
 
         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+            // handle legal urls
+            if (url.startsWith(LEGAL_URL_HOST)) {
+                DeunaLogs.info("open in external url $url")
+                openInExternalBrowser(url)
+                loader.visibility = View.GONE
+                return
+            }
+
             loader.visibility = View.VISIBLE
             webView.loadUrl(url)
 
