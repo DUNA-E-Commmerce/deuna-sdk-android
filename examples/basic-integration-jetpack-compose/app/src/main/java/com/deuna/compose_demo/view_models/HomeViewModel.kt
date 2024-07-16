@@ -14,8 +14,8 @@ import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import kotlinx.coroutines.*
 
-val ERROR_TAG = "❌ DeunaSDK"
-val DEBUG_TAG = "👀 DeunaSDK"
+const val ERROR_TAG = "❌ DeunaSDK"
+const val DEBUG_TAG = "👀 DeunaSDK"
 
 /**
  * ViewModel for the Home screen, responsible for handling user interactions and data manipulation.

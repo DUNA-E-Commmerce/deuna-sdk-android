@@ -1,6 +1,5 @@
 package com.example.demoandroid
 
-import android.R.attr.data
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
@@ -24,8 +23,8 @@ import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
 
 
-val ERROR_TAG = "❌ DeunaSDK"
-val DEBUG_TAG = "👀 DeunaSDK"
+const val ERROR_TAG = "❌ DeunaSDK"
+const val DEBUG_TAG = "👀 DeunaSDK"
 
 @Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
