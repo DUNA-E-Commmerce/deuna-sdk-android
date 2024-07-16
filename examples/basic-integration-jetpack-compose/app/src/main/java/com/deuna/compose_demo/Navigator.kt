@@ -6,7 +6,8 @@ import androidx.navigation.compose.*
 
 sealed class Screens(val route: String) {
   data object Home : Screens(route = "/home")
-  data object Success : Screens(route = "/success/{message}")
+  data object PaymentSuccessful : Screens(route = "/payment-success/{jsonOrder}")
+  data object SavedCardSuccessful : Screens(route = "/vault-success/{jsonCard}")
 }
 
 val LocalNavController = compositionLocalOf<NavHostController> {

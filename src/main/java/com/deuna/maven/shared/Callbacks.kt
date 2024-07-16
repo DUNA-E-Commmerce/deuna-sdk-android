@@ -1,7 +1,5 @@
 package com.deuna.maven.shared
 
-import CheckoutResponse
-import ElementsResponse
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.element.domain.*
 
@@ -18,6 +16,6 @@ open class BaseCallbacks<SuccessData, EventData, Error>{
     var eventListener: EventListener<SuccessData, EventData>? = null
 }
 
-class CheckoutCallbacks : BaseCallbacks<CheckoutResponse, CheckoutEvent, CheckoutError>() {}
+class CheckoutCallbacks : BaseCallbacks<Json, CheckoutEvent, PaymentsError>() {}
 
-class ElementsCallbacks : BaseCallbacks<ElementsResponse, ElementsEvent, ElementsError>() {}
+class ElementsCallbacks : BaseCallbacks<Json, ElementsEvent, ElementsError>() {}

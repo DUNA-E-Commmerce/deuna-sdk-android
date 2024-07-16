@@ -1,3 +1,11 @@
+## [2.4.0-beta.1]
+- Added support for the new payment widget. Check the implementation [here](https://docs.deuna.com/docs/integracion-payment-widget-android).
+
+* **BREAKING CHANGES:**
+* `OrderResponse` was replaced by `Map<String,Any>`.
+* `ElementsResponse` was replaced by `Map<String,Any>`].
+* `CheckoutError` was replaced by `PaymentsError`.
+
 ## [2.1.1]
 - Set compileSdk to 32.
 

@@ -1,32 +1,30 @@
-package com.deuna.maven.element.domain
-
-import com.deuna.maven.shared.DeunaLogs
-import com.deuna.maven.shared.ErrorCodes
-import com.deuna.maven.shared.ErrorMessages
-import com.deuna.maven.shared.Json
+package com.deuna.maven.shared
 
 @Suppress("UNCHECKED_CAST")
-data class ElementsError(
+data class PaymentsError(
     val type: Type,
     val metadata: Metadata? = null,
-    val user: Json? = null
+    val order: Json? = null
 ) {
-    enum class Type(val message: String) {
-        NO_INTERNET_CONNECTION("No internet connection available"),
-        INITIALIZATION_FAILED("Failed to initialize the widget"),
-        INVALID_USER_TOKEN("Invalid user token"),
-        UNKNOWN_ERROR("An unknown error occurred"),
-        USER_ERROR("An error occurred related to the user authentication"),
-        VAULT_SAVE_ERROR("Vault save error")
-    }
 
     data class Metadata(val code: String, val message: String)
 
+    enum class Type(val message: String) {
+        NO_INTERNET_CONNECTION("No internet connection available"),
+        INVALID_ORDER_TOKEN("Invalid order token"),
+        INITIALIZATION_FAILED("Failed to initialize the widget"),
+        ORDER_COULD_NOT_BE_RETRIEVED("Order could not be retrieved"),
+        ORDER_NOT_FOUND("Order not found"),
+        PAYMENT_ERROR("An error occurred while processing payment"),
+        UNKNOWN_ERROR("An unknown error occurred"),
+    }
+
+
     companion object {
-        fun fromJson(type: Type, data: Json): ElementsError? {
+        fun fromJson(type: Type, data: Json): PaymentsError? {
             val metadata = data["metadata"] as? Json
-            val user: Json? = data["user"] as? Json
-            if (metadata == null) {
+            val order: Json? = data["order"] as? Json
+            if (metadata == null || order == null) {
                 return null
             }
 
@@ -39,13 +37,13 @@ data class ElementsError(
                 DeunaLogs.warning("$metadata")
             }
 
-            return ElementsError(
+            return PaymentsError(
                 type = type,
                 metadata = Metadata(
                     code = errorCode ?: ErrorCodes.UNKNOWN_ERROR.name,
                     message = errorMessage ?: ErrorMessages.UNKNOWN.message
                 ),
-                user = user
+                order = order
             )
         }
     }

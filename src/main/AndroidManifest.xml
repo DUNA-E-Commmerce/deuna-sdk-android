@@ -10,6 +10,9 @@
         <activity
             android:name=".web_views.ElementsActivity"
             android:exported="false" />
+        <activity
+            android:name=".web_views.PaymentWidgetActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

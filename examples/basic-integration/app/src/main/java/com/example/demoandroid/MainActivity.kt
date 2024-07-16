@@ -1,5 +1,7 @@
 package com.example.demoandroid
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,87 +12,234 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.closeCheckout
 import com.deuna.maven.closeElements
+import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
+import com.deuna.maven.initPaymentWidget
+import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.setCustomCss
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.domain.UserInfo
+import org.json.JSONObject
 
 
-val ERROR_TAG = "❌ DeunaSDK"
-val DEBUG_TAG = "👀 DeunaSDK"
+const val ERROR_TAG = "❌ DeunaSDK"
+const val DEBUG_TAG = "👀 DeunaSDK"
 
+@Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
-  private val deunaSdk = DeunaSDK(
-    environment = Environment.SANDBOX,
-    publicApiKey = "YOUR_PUBLIC_API_KEY",
-  );
+    private val deunaSdk = DeunaSDK(
+        environment = Environment.SANDBOX,
+        publicApiKey = "YOUR_PUBLIC_API_KEY",
+    )
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    private val orderToken: String
+        get() = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()
 
-    val payButton: Button = findViewById(R.id.payButton)
-    val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
-
-    payButton.setOnClickListener { startPaymentProcess() }
-    savePaymentMethodButton.setOnClickListener { saveCard() }
-  }
-
-  private fun startPaymentProcess() {
-    val orderToken: String = findViewById<EditText>(R.id.inputOrderToken).text.toString().trim()
-
-    deunaSdk.initCheckout(context = this, orderToken = orderToken, callbacks = CheckoutCallbacks().apply {
-      onSuccess = {
-        deunaSdk.closeCheckout(this@MainActivity)
-        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-          startActivity(this)
+    private val userToken: String?
+        get() {
+            val text = findViewById<EditText>(R.id.inputUserToken).text.toString().trim()
+            return text.ifEmpty { null }
         }
-      }
-      onError = {
-        Log.e(ERROR_TAG, it.type.message)
-        deunaSdk.closeCheckout(this@MainActivity)
-      }
-      onCanceled = {
-        Log.d(DEBUG_TAG, "Payment was canceled by user")
-      }
-      eventListener = { type, _ ->
-        Log.d("✅ ON EVENT", type.name)
-        when (type) {
-          CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-            deunaSdk.closeCheckout(this@MainActivity)
-          }
-          else -> {}
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val payButton: Button = findViewById(R.id.payButton)
+        val paymentWidgetButton: Button = findViewById(R.id.paymentWidgetButton)
+        val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
+
+        payButton.setOnClickListener { startPaymentProcess() }
+        paymentWidgetButton.setOnClickListener { showPaymentWidget() }
+        savePaymentMethodButton.setOnClickListener { saveCard() }
+    }
+
+    private fun handlePaymentSuccess(data: Json) {
+        Intent(this@MainActivity, PaymentSuccessfulActivity::class.java).apply {
+            putExtra(
+                PaymentSuccessfulActivity.EXTRA_JSON_ORDER,
+                JSONObject(data["order"] as Json).toString()
+            )
+            startActivity(this)
         }
-      }
-      onClosed = {
-        Log.d(DEBUG_TAG, "DEUNA widget was closed")
-      }
-    })
-  }
+    }
+
+    private fun showPaymentErrorAlertDialog(metadata: PaymentsError.Metadata) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(metadata.code)
+        builder.setMessage(metadata.message)
+
+        builder.setPositiveButton(
+            "Aceptar",
+            DialogInterface.OnClickListener { dialog, which -> // Code to execute when OK button is clicked
+                dialog.dismiss()
+            },
+        )
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun showPaymentWidget() {
+        deunaSdk.initPaymentWidget(
+            context = this,
+            orderToken = orderToken,
+            callbacks = PaymentWidgetCallbacks().apply {
+                onSuccess = { data ->
+                    deunaSdk.closePaymentWidget()
+                    handlePaymentSuccess(data)
+                }
+                onCanceled = {
+                    Log.d(DEBUG_TAG, "Payment was canceled by user")
+                }
+                onCardBinDetected = { cardBinMetadata, refetchOrder ->
+                    Log.d(DEBUG_TAG, "cardBinMetadata: $cardBinMetadata")
+                    if (cardBinMetadata != null) {
+                        val customStyles = mapOf(
+                            "upperTag" to mapOf(
+                                "description" to mapOf(
+                                    "content" to listOf("text 1", "text 2"),
+                                    "compact" to true,
+                                    "listDivider" to "line"
+                                )
+                            )
+                        )
+
+                        /*
+                        customStyles is equivalent to the next JSON
+                        {
+                            upperTag: {
+                                description: {
+                                   content: ["text 1", "text 2"],
+                                   compact: true,
+                                   listDivider: "line",
+                                 },
+                            },
+                          }
+                         */
+                        deunaSdk.setCustomCss(
+                            data = customStyles
+                        )
+
+                        refetchOrder { order ->
+                            Log.d(DEBUG_TAG, "onCardBinDetected > refetchOrder: $order")
+                        }
+
+                    }
+                }
+                onInstallmentSelected = { metadata, refetchOrder ->
+                    Log.d(DEBUG_TAG, "installmentMetadata: $metadata")
+                    refetchOrder { order ->
+                        Log.d(DEBUG_TAG, "onInstallmentSelected > refetchOrder: $order")
+                    }
+                }
+                onClosed = {
+                    Log.d(DEBUG_TAG, "Widget was closed")
+                }
+                onError = { error ->
+                    Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
+                    when (error.type) {
+                        PaymentsError.Type.PAYMENT_ERROR,
+                        PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                        PaymentsError.Type.INITIALIZATION_FAILED -> {
+                            deunaSdk.closeCheckout()
+                            if (error.metadata != null) {
+                                showPaymentErrorAlertDialog(error.metadata!!)
+                            }
+                        }
+
+                        else -> {}
+                    }
+                }
+            },
+            userToken = userToken,
+        )
+    }
 
 
-  private fun saveCard() {
-    val userToken: String = findViewById<EditText>(R.id.inputUserToken).text.toString().trim()
+    private fun startPaymentProcess() {
+        deunaSdk.initCheckout(
+            context = this,
+            orderToken = orderToken,
+            callbacks = CheckoutCallbacks().apply {
+                onSuccess = { data ->
+                    Log.d(DEBUG_TAG, "Payment success $data")
+                    deunaSdk.closeCheckout()
+                    handlePaymentSuccess(data)
+                }
+                onError = { error ->
+                    Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
+                    when (error.type) {
+                        PaymentsError.Type.PAYMENT_ERROR,
+                        PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
+                        PaymentsError.Type.INITIALIZATION_FAILED -> {
+                            deunaSdk.closeCheckout()
+                            if (error.metadata != null) {
+                                showPaymentErrorAlertDialog(error.metadata!!)
+                            }
+                        }
 
-    deunaSdk.initElements(context = this, userToken = userToken, callbacks = ElementsCallbacks().apply {
-      deunaSdk.closeElements(this@MainActivity)
-      onSuccess = {
-        Intent(this@MainActivity, ThankYouActivity::class.java).apply {
-          startActivity(this)
-        }
-      }
-      eventListener = { type, _ ->
-        Log.d(DEBUG_TAG, "eventListener ${type.name}")
-      }
-      onError = {
-        Log.e(ERROR_TAG, it.type.message)
-        deunaSdk.closeElements(this@MainActivity)
-      }
-      onCanceled = {
-        Log.d(DEBUG_TAG, "Saving card was canceled by user")
-      }
-      onClosed = {
-        Log.d(DEBUG_TAG, "DEUNA widget was closed")
-      }
-    })
-  }
+                        else -> {}
+                    }
+                }
+                onCanceled = {
+                    Log.d(DEBUG_TAG, "Payment was canceled by user")
+                }
+                eventListener = { type, _ ->
+                    Log.d("✅ ON EVENT", type.name)
+                    when (type) {
+                        CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
+                            deunaSdk.closeCheckout()
+                        }
+
+                        else -> {}
+                    }
+                }
+                onClosed = {
+                    Log.d(DEBUG_TAG, "Widget was closed")
+                }
+            },
+            userToken = userToken,
+        )
+    }
+
+
+    private fun saveCard() {
+        deunaSdk.initElements(
+            context = this,
+            userToken = userToken,
+            userInfo = if (userToken == null) UserInfo(
+                firstName = "Darwin",
+                lastName = "Morocho",
+                email = "domorocho+1@deuna.com",
+            ) else null,
+            callbacks = ElementsCallbacks().apply {
+                onSuccess = { data ->
+                    val metadata = (data["metadata"] as Json)["createdCard"] as Json
+                    deunaSdk.closeElements()
+                    Intent(this@MainActivity, SaveCardSuccessfulActivity::class.java).apply {
+                        putExtra(
+                            SaveCardSuccessfulActivity.EXTRA_CREATED_CARD,
+                            JSONObject(metadata).toString()
+                        )
+                        startActivity(this)
+                    }
+                }
+                eventListener = { type, _ ->
+                    Log.d(DEBUG_TAG, "eventListener ${type.name}")
+                }
+                onError = {
+                    Log.e(ERROR_TAG, it.type.message)
+                    deunaSdk.closeElements()
+                }
+                onCanceled = {
+                    Log.d(DEBUG_TAG, "Saving card was canceled by user")
+                }
+                onClosed = {
+                    Log.d(DEBUG_TAG, "Widget was closed")
+                }
+            },
+        )
+    }
 }

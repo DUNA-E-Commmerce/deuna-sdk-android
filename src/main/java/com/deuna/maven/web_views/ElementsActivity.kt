@@ -14,18 +14,29 @@ class ElementsActivity() : BaseWebViewActivity() {
 
     companion object {
         const val EXTRA_URL = "EXTRA_URL"
-        private var callbacks: ElementsCallbacks? = null
+
+        /**
+         * Due to multiples instances of DeunaSDK can be created
+         * we need to ensure that only the authorized instance can
+         * call the callbacks for their widgets
+         */
+        private var callbacksMap = mutableMapOf<Int, ElementsCallbacks>()
 
         /**
          * Set the callbacks object to receive element events.
          */
-        fun setCallbacks(callbacks: ElementsCallbacks) {
-            this.callbacks = callbacks
+        fun setCallbacks(sdkInstanceId: Int, callbacks: ElementsCallbacks) {
+            callbacksMap[sdkInstanceId] = callbacks
         }
     }
 
     // Set of ElementsEvents indicating when to close the activity
     private lateinit var closeEvents: Set<ElementsEvent>
+
+    val callbacks: ElementsCallbacks?
+        get() {
+            return callbacksMap[sdkInstanceId!!]
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +45,8 @@ class ElementsActivity() : BaseWebViewActivity() {
         val url = intent.getStringExtra(EXTRA_URL)!!
 
         // Parse close events from intent (if any)
-        val closeEventAsStrings = intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
+        val closeEventAsStrings =
+            intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
         closeEvents = parseCloseEvents<ElementsEvent>(closeEventAsStrings)
 
         // Load the provided URL
@@ -43,8 +55,7 @@ class ElementsActivity() : BaseWebViewActivity() {
 
     override fun getBridge(): WebViewBridge {
         return ElementsBridge(
-            context = this,
-            callbacks = callbacks,
+            activity = this,
             closeEvents = closeEvents
         )
     }
@@ -53,9 +64,7 @@ class ElementsActivity() : BaseWebViewActivity() {
     // Notify callbacks about no internet connection
     override fun onNoInternet() {
         callbacks?.onError?.invoke(
-            ElementsError(
-                ElementsErrorType.NO_INTERNET_CONNECTION, null
-            )
+            ElementsErrors.noInternetConnection
         )
     }
 
