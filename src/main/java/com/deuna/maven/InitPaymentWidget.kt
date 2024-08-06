@@ -2,7 +2,6 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
@@ -18,12 +17,14 @@ import org.json.JSONObject
  * @param context The application or activity context
  * @param callbacks An instance of PaymentWidgetCallbacks to receive event notifications.
  * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
+ * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
  */
 fun DeunaSDK.initPaymentWidget(
     context: Context,
     orderToken: String,
     callbacks: PaymentWidgetCallbacks,
-    userToken: String? = null
+    userToken: String? = null,
+    cssFile: String? = null
 ) {
 
     if (orderToken.isEmpty()) {
@@ -44,11 +45,14 @@ fun DeunaSDK.initPaymentWidget(
         queryParameters[QueryParameters.USER_TOKEN.value] = userToken
     }
 
+    if (!cssFile.isNullOrEmpty()) {
+        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+    }
+
     val paymentUrl = Utils.buildUrl(
         baseUrl = "$baseUrl/now/$orderToken",
         queryParams = queryParameters,
     )
-
 
     val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
         putExtra(PaymentWidgetActivity.EXTRA_URL, paymentUrl)
@@ -58,13 +62,29 @@ fun DeunaSDK.initPaymentWidget(
 }
 
 /**
- * Set custom styles on the payment widget.
+ * Set custom css on the payment widget.
  * This function must be only called inside the onCardBinDetected callback
  *
  * @param data The JSON data to update the payment widget UI
  */
+@Deprecated(
+    message = "This function will be removed in the future. Use setCustomStyle instead",
+    replaceWith = ReplaceWith("setCustomStyle(data)")
+)
 fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
     PaymentWidgetActivity.sendCustomCss(
+        sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
+    )
+}
+
+/**
+ * Set custom style on the payment widget.
+ * This function must be only called inside the next callbacks onCardBinDetected or onInstallmentSelected.
+ *
+ * @param data The JSON data to update the payment widget UI
+ */
+fun DeunaSDK.setCustomStyle(data: Map<String, Any>) {
+    PaymentWidgetActivity.sendCustomStyle(
         sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
     )
 }

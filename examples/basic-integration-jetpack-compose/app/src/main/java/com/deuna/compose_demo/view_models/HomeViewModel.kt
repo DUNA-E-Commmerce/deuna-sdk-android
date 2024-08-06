@@ -13,6 +13,7 @@ import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import kotlinx.coroutines.*
+import org.json.JSONObject
 
 const val ERROR_TAG = "❌ DeunaSDK"
 const val DEBUG_TAG = "👀 DeunaSDK"
@@ -42,7 +43,8 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             context = context,
             orderToken = orderToken.value.trim(),
             callbacks = paymentWidgetsCallbacks(completion),
-            userToken = userTokenValue
+            userToken = userTokenValue,
+            cssFile = "YOUR_THEME_UUID", // optional
         )
     }
 
@@ -134,7 +136,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             onError = { error ->
                 Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
                 when (error.type) {
-                    PaymentsError.Type.PAYMENT_ERROR,
+                    PaymentsError.Type.INITIALIZATION_FAILED,
                     PaymentsError.Type.NO_INTERNET_CONNECTION -> {
                         deunaSDK.closePaymentWidget()
                         completion(PaymentWidgetResult.Error(error))
@@ -146,6 +148,36 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             }
             onClosed = {
 
+            }
+            onCardBinDetected = { cardBinMetadata, refetchOrder ->
+                deunaSDK.setCustomStyle(
+                    data = JSONObject(
+                        """
+                        {
+                          "theme": {
+                            "colors": {
+                              "primaryTextColor": "#023047",
+                              "backgroundSecondary": "#8ECAE6",
+                              "backgroundPrimary": "#F2F2F2",
+                              "buttonPrimaryFill": "#FFB703",
+                              "buttonPrimaryHover": "#FFB703",
+                              "buttonPrimaryText": "#000000",
+                              "buttonPrimaryActive": "#FFB703"
+                            }
+                          },
+                          "HeaderPattern": {
+                            "overrides": {
+                              "Logo": {
+                                "props": {
+                                  "url": "https://images-staging.getduna.com/ema/fc78ef09-ffc7-4d04-aec3-4c2a2023b336/test2.png"
+                                }
+                              }
+                            }
+                          }
+                        }
+                        """
+                    ).toMap()
+                )
             }
         }
     }
