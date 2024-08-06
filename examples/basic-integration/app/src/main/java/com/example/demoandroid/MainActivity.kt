@@ -17,7 +17,7 @@ import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.setCustomCss
+import com.deuna.maven.setCustomStyle
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         deunaSdk.initPaymentWidget(
             context = this,
             orderToken = orderToken,
+            cssFile = "YOUR_THEME_UUID", // optional
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = { data ->
                     deunaSdk.closePaymentWidget()
@@ -96,30 +97,34 @@ class MainActivity : AppCompatActivity() {
                 onCardBinDetected = { cardBinMetadata, refetchOrder ->
                     Log.d(DEBUG_TAG, "cardBinMetadata: $cardBinMetadata")
                     if (cardBinMetadata != null) {
-                        val customStyles = mapOf(
-                            "upperTag" to mapOf(
-                                "description" to mapOf(
-                                    "content" to listOf("text 1", "text 2"),
-                                    "compact" to true,
-                                    "listDivider" to "line"
-                                )
-                            )
-                        )
 
-                        /*
-                        customStyles is equivalent to the next JSON
+                        deunaSdk.setCustomStyle(
+                            data = JSONObject(
+                                """
                         {
-                            upperTag: {
-                                description: {
-                                   content: ["text 1", "text 2"],
-                                   compact: true,
-                                   listDivider: "line",
-                                 },
-                            },
+                          "theme": {
+                            "colors": {
+                              "primaryTextColor": "#023047",
+                              "backgroundSecondary": "#8ECAE6",
+                              "backgroundPrimary": "#F2F2F2",
+                              "buttonPrimaryFill": "#FFB703",
+                              "buttonPrimaryHover": "#FFB703",
+                              "buttonPrimaryText": "#000000",
+                              "buttonPrimaryActive": "#FFB703"
+                            }
+                          },
+                          "HeaderPattern": {
+                            "overrides": {
+                              "Logo": {
+                                "props": {
+                                  "url": "https://images-staging.getduna.com/ema/fc78ef09-ffc7-4d04-aec3-4c2a2023b336/test2.png"
+                                }
+                              }
+                            }
                           }
-                         */
-                        deunaSdk.setCustomCss(
-                            data = customStyles
+                        }
+                        """
+                            ).toMap()
                         )
 
                         refetchOrder { order ->
@@ -140,9 +145,8 @@ class MainActivity : AppCompatActivity() {
                 onError = { error ->
                     Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
                     when (error.type) {
-                        PaymentsError.Type.PAYMENT_ERROR,
-                        PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
-                        PaymentsError.Type.INITIALIZATION_FAILED -> {
+                        PaymentsError.Type.INITIALIZATION_FAILED,
+                        PaymentsError.Type.NO_INTERNET_CONNECTION -> {
                             deunaSdk.closeCheckout()
                             if (error.metadata != null) {
                                 showPaymentErrorAlertDialog(error.metadata!!)

@@ -3,7 +3,6 @@ package com.deuna.maven.web_views
 import android.os.Bundle
 import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.web_views.base.BaseWebViewActivity
@@ -11,7 +10,6 @@ import com.deuna.maven.web_views.base.BaseWebViewActivity
 class PaymentWidgetActivity() : BaseWebViewActivity() {
     companion object {
         const val EXTRA_URL = "EXTRA_URL"
-        const val EXTRA_CUSTOM_STYLES = "CUSTOM_STYLES"
 
         /**
          * Due to multiples instances of DeunaSDK can be created
@@ -29,12 +27,23 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
             callbacksMap[sdkInstanceId] = callbacks
         }
 
-        /// send the custom styles to the payment link
+        /// send the custom css to the payment link
         fun sendCustomCss(sdkInstanceId: Int, dataAsJsonString: String) {
             val activity = activities[sdkInstanceId]!!
             activity.runOnUiThread {
                 activity.webView.evaluateJavascript(
                     "setCustomCss($dataAsJsonString);",
+                    null
+                );
+            }
+        }
+
+        /// send the custom style to the payment link
+        fun sendCustomStyle(sdkInstanceId: Int, dataAsJsonString: String) {
+            val activity = activities[sdkInstanceId]!!
+            activity.runOnUiThread {
+                activity.webView.evaluateJavascript(
+                    "setCustomStyle($dataAsJsonString);",
                     null
                 );
             }
@@ -52,6 +61,9 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
                         },
                         onCustomCssSubscribe: function (setCustomCSS)  {
                             window.setCustomCss = setCustomCSS;
+                        },
+                        onCustomStyleSubscribe: function (setCustomStyle)  {
+                            window.setCustomStyle = setCustomStyle;
                         },
                         onRefetchOrderSubscribe: function (refetchOrder) {
                             window.deunaRefetchOrder = refetchOrder;

@@ -44,7 +44,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.deuna.maven'
             artifactId 'deunasdk'
-            version '2.4.0'
+            version '2.5.0'
             artifact("$buildDir/outputs/aar/deuna-sdk-android-release.aar")
             pom {
                 name = 'Android SDK DEUNA'
