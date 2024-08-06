@@ -29,7 +29,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
         /// send the custom css to the payment link
         fun sendCustomCss(sdkInstanceId: Int, dataAsJsonString: String) {
-            val activity = activities[sdkInstanceId]!!
+            val activity = activities[sdkInstanceId] ?: return
             activity.runOnUiThread {
                 activity.webView.evaluateJavascript(
                     "setCustomCss($dataAsJsonString);",
@@ -40,7 +40,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
 
         /// send the custom style to the payment link
         fun sendCustomStyle(sdkInstanceId: Int, dataAsJsonString: String) {
-            val activity = activities[sdkInstanceId]!!
+            val activity = activities[sdkInstanceId] ?: return
             activity.runOnUiThread {
                 activity.webView.evaluateJavascript(
                     "setCustomStyle($dataAsJsonString);",
