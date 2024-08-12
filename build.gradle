@@ -5,11 +5,7 @@ plugins {
     id 'signing'
 }
 
-ext {
-    urlMaven = System.getProperty("urlMaven", "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-    usernameMaven = System.getProperty("usernameMaven", "")
-    passwordMaven = System.getProperty("passwordMaven", "")
-}
+group = 'com.github.deuna-developers'
 
 android {
     namespace 'com.deuna.maven'
@@ -39,62 +35,8 @@ android {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId 'com.deuna.maven'
-            artifactId 'deunasdk'
-            version '2.5.0'
-            artifact("$buildDir/outputs/aar/deuna-sdk-android-release.aar")
-            pom {
-                name = 'Android SDK DEUNA'
-                description = 'SDK for use in external merchants DEUNA'
-                url = 'https://github.com/deuna-developers/deuna-sdk-android'
-                developers {
-                    developer {
-                        id = 'deunadevelopers'
-                        name = 'DEUNA Developers'
-                        email = 'developers@deuna.com'
-                    }
-                }
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/deuna-developers/deuna-sdk-android.git'
-                    developerConnection = 'scm:git:ssh://github.com/deuna-developers/deuna-sdk-android.git'
-                    url = 'https://github.com/deuna-developers/deuna-sdk-android'
-                }
-            }
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each { dependency ->
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', dependency.group)
-                    dependencyNode.appendNode('artifactId', dependency.name)
-                    dependencyNode.appendNode('version', dependency.version)
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            url urlMaven
-            credentials {
-                username = usernameMaven
-                password = passwordMaven
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications
+tasks.withType(Sign).configureEach {
+    enabled = false
 }
 
 dependencies {
@@ -106,6 +48,20 @@ dependencies {
     implementation("com.google.code.gson:gson") {
         version {
             strictly("2.8.9")
+        }
+    }
+}
+
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId 'com.github.deuna-developers'
+                artifactId 'deunasdk'
+                version '2.5.0'
+            }
         }
     }
 }
