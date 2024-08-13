@@ -29,10 +29,21 @@ abstract class BaseWebViewActivity : Activity() {
          * we need to ensure that only the authorized instance can
          * close the widgets and call the callbacks
          */
-        var activities = mutableMapOf<Int, Activity>()
+        var activities = mutableMapOf<Int, BaseWebViewActivity>()
 
         fun closeWebView(sdkInstanceId: Int) {
             activities[sdkInstanceId]?.finish()
+        }
+
+        /// send the custom style to the payment link
+        fun sendCustomStyle(sdkInstanceId: Int, dataAsJsonString: String) {
+            val activity = activities[sdkInstanceId] ?: return
+            activity.runOnUiThread {
+                activity.webView.evaluateJavascript(
+                    "setCustomStyle($dataAsJsonString);",
+                    null
+                );
+            }
         }
     }
 
@@ -86,6 +97,29 @@ abstract class BaseWebViewActivity : Activity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+
+                webView.evaluateJavascript(
+                    """
+                        console.log = function(message) {
+                           android.consoleLog(message);
+                        };
+                        
+                        window.xprops = {
+                            onEventDispatch : function (event) {
+                                android.postMessage(JSON.stringify(event));
+                            },
+                            onCustomCssSubscribe: function (setCustomCSS)  {
+                                window.setCustomCss = setCustomCSS;
+                            },
+                            onCustomStyleSubscribe: function (setCustomStyle)  {
+                                window.setCustomStyle = setCustomStyle;
+                            },
+                            onRefetchOrderSubscribe: function (refetchOrder) {
+                                window.deunaRefetchOrder = refetchOrder;
+                            },
+                        };
+                """.trimIndent(), null
+                )
 
                 if (javascriptToInject != null) {
                     webView.evaluateJavascript(javascriptToInject, null)

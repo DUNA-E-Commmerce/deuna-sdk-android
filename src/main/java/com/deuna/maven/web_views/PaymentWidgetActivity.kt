@@ -37,39 +37,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
                 );
             }
         }
-
-        /// send the custom style to the payment link
-        fun sendCustomStyle(sdkInstanceId: Int, dataAsJsonString: String) {
-            val activity = activities[sdkInstanceId] ?: return
-            activity.runOnUiThread {
-                activity.webView.evaluateJavascript(
-                    "setCustomStyle($dataAsJsonString);",
-                    null
-                );
-            }
-        }
     }
-
-    private val javascriptToInject = """
-                    console.log = function(message) {
-                       android.consoleLog(message);
-                    };
-                    
-                    window.xprops = {
-                        onEventDispatch : function (event) {
-                            android.postMessage(JSON.stringify(event));
-                        },
-                        onCustomCssSubscribe: function (setCustomCSS)  {
-                            window.setCustomCss = setCustomCSS;
-                        },
-                        onCustomStyleSubscribe: function (setCustomStyle)  {
-                            window.setCustomStyle = setCustomStyle;
-                        },
-                        onRefetchOrderSubscribe: function (refetchOrder) {
-                            window.deunaRefetchOrder = refetchOrder;
-                        },
-                    };
-    """.trimIndent()
 
     val callbacks: PaymentWidgetCallbacks?
         get() {
@@ -84,7 +52,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         val url = intent.getStringExtra(ElementsActivity.EXTRA_URL)!!
 
         // Load the provided URL
-        loadUrl(url, javascriptToInject = javascriptToInject)
+        loadUrl(url)
     }
 
     override fun getBridge(): WebViewBridge {

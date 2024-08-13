@@ -20,6 +20,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         const val EXTRA_API_KEY = "API_KEY"
         const val EXTRA_ORDER_TOKEN = "ORDER_TOKEN"
         const val EXTRA_USER_TOKEN = "USER_TOKEN"
+        const val EXTRA_CSS_FILE = "CSS_FILE"
         const val EXTRA_BASE_URL = "BASE_URL"
 
 
@@ -53,6 +54,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
         val userToken = intent.getStringExtra(EXTRA_USER_TOKEN)
+        val cssFile = intent.getStringExtra(EXTRA_CSS_FILE)
 
         val closeEventAsStrings =
             intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
@@ -60,7 +62,11 @@ class CheckoutActivity() : BaseWebViewActivity() {
 
         // Initiate the checkout process by fetching the order API
         getOrderApi(
-            baseUrl = baseUrl, orderToken = orderToken, apiKey = apiKey, userToken = userToken
+            baseUrl = baseUrl,
+            orderToken = orderToken,
+            apiKey = apiKey,
+            userToken = userToken,
+            cssFile = cssFile
         )
     }
 
@@ -69,7 +75,11 @@ class CheckoutActivity() : BaseWebViewActivity() {
      * Parses the response to extract the payment link and load it in the WebView.
      */
     private fun getOrderApi(
-        baseUrl: String, orderToken: String, apiKey: String, userToken: String?
+        baseUrl: String,
+        orderToken: String,
+        apiKey: String,
+        userToken: String?,
+        cssFile: String?
     ) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
@@ -99,7 +109,11 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     if (userToken != null) {
                         queryParameters[QueryParameters.USER_TOKEN.value] = userToken
                     }
-                    
+
+                    if (cssFile != null) {
+                        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+                    }
+
                     loadUrl(
                         url = Utils.buildUrl(baseUrl = paymentLink, queryParams = queryParameters)
                     )

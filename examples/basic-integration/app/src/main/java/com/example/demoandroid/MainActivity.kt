@@ -17,7 +17,6 @@ import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.setCustomStyle
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
