@@ -56,6 +56,10 @@ class PaymentWidgetErrors {
                 message = PaymentsErrorMessages.PAYMENT_LINK_COULD_NOT_BE_GENERATED.message
             )
         )
+
+        val initializationFailed = PaymentsError(
+            type = PaymentsError.Type.INITIALIZATION_FAILED,
+        )
     }
 }
 
@@ -80,6 +84,10 @@ class ElementsErrors {
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
                 message = ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message
             )
+        )
+
+        val initializationFailed = ElementsError(
+            type = ElementsError.Type.INITIALIZATION_FAILED
         )
     }
 }

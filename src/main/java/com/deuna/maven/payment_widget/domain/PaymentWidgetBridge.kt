@@ -45,9 +45,9 @@ class PaymentWidgetBridge(
 
             when (event) {
                 PaymentWidgetEvent.purchaseError -> {
+                    activity.updateCloseEnabled(true)
                     val error = PaymentsError.fromJson(
-                        type = PaymentsError.Type.PAYMENT_ERROR,
-                        data = data
+                        type = PaymentsError.Type.PAYMENT_ERROR, data = data
                     )
                     if (error != null) {
                         activity.callbacks?.onError?.invoke(error)
@@ -64,6 +64,11 @@ class PaymentWidgetBridge(
 
                 PaymentWidgetEvent.refetchOrder -> {
                     handleOnRefetchOrder(json)
+                }
+
+                PaymentWidgetEvent.paymentProcessing -> {
+                    activity.updateCloseEnabled(false)
+                    activity.callbacks?.onPaymentProcessing?.invoke()
                 }
 
                 PaymentWidgetEvent.purchase -> activity.callbacks?.onSuccess?.invoke(data)

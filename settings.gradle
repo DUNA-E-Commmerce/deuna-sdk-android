@@ -13,3 +13,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
+include ':deuna-sdk-android'
