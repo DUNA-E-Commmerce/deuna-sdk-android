@@ -60,7 +60,6 @@ dependencies {
 
     // DEUNA SDK
     implementation 'com.github.deuna-developers:deunasdk:2.5.2'
-//    implementation(files("../../../build/outputs/aar/deuna-sdk-android-debug.aar"))
 
     // Material Design 3
     implementation 'androidx.compose.material3:material3'
