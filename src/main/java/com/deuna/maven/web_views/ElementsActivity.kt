@@ -68,6 +68,12 @@ class ElementsActivity() : BaseWebViewActivity() {
         )
     }
 
+    override fun onError() {
+        callbacks?.onError?.invoke(
+            ElementsErrors.initializationFailed
+        )
+    }
+
     override fun onCanceledByUser() {
         callbacks?.onCanceled?.invoke()
     }

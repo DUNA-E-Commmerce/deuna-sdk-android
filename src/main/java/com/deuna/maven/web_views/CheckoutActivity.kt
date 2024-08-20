@@ -7,7 +7,6 @@ import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.web_views.base.*
 import retrofit2.*
-import java.net.*
 
 /**
  * This activity handles the checkout process for Deuna. It retrieves the payment link
@@ -141,6 +140,12 @@ class CheckoutActivity() : BaseWebViewActivity() {
     override fun onNoInternet() {
         callbacks?.onError?.invoke(
             PaymentWidgetErrors.noInternetConnection
+        )
+    }
+
+    override fun onError() {
+        callbacks?.onError?.invoke(
+            PaymentWidgetErrors.initializationFailed
         )
     }
 

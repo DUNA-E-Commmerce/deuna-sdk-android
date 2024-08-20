@@ -59,7 +59,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // DEUNA SDK
-    implementation 'com.github.deuna-developers:deunasdk:v2.5.0'
+    implementation 'com.github.deuna-developers:deunasdk:2.5.2'
 
     // Material Design 3
     implementation 'androidx.compose.material3:material3'

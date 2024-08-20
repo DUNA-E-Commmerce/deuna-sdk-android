@@ -18,4 +18,5 @@ class PaymentWidgetCallbacks {
     var onCardBinDetected: OnCardBinDetected? = null
     var onInstallmentSelected: OnInstallmentSelected? = null
     var onCanceled: VoidCallback? = null
+    var onPaymentProcessing: VoidCallback? = null
 }

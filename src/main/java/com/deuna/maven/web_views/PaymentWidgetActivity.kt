@@ -95,6 +95,10 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         callbacks?.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
     }
 
+    override fun onError() {
+        callbacks?.onError?.invoke(PaymentWidgetErrors.initializationFailed)
+    }
+
     override fun onCanceledByUser() {
         callbacks?.onCanceled?.invoke()
     }

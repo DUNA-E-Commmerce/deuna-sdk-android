@@ -40,6 +40,9 @@ abstract class BaseWebViewActivity : Activity() {
     lateinit var webView: WebView
     var sdkInstanceId: Int? = null
 
+    /// When this var is false the close feature is disabled
+    var closeEnabled = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sdkInstanceId = intent.getIntExtra(EXTRA_SDK_INSTANCE_ID, 0)
@@ -62,6 +65,10 @@ abstract class BaseWebViewActivity : Activity() {
 
     // Handle back button press
     override fun onBackPressed() {
+        // Disable the back button when a payment is processing
+        if (!closeEnabled) {
+            return
+        }
         onCanceledByUser()
         super.onBackPressed()
     }
@@ -94,6 +101,18 @@ abstract class BaseWebViewActivity : Activity() {
                 // When the page finishes loading, the Web View is shown and the loader is hidden
                 view?.visibility = View.VISIBLE
                 loader.visibility = View.GONE
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+
+                if (error != null) {
+                    onError()
+                }
             }
         }
         setupWebChromeClient(webView)
@@ -207,7 +226,16 @@ abstract class BaseWebViewActivity : Activity() {
 
     abstract fun onNoInternet()
 
+    abstract fun onError()
+
     abstract fun onCanceledByUser()
+
+    /**
+     * Configures whether the widget close action is enabled or disabled
+     */
+    fun updateCloseEnabled(enabled: Boolean) {
+        closeEnabled = enabled
+    }
 
     // Unregister the broadcast receiver when the activity is destroyed
     override fun onDestroy() {

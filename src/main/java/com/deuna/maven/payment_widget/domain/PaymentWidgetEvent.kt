@@ -8,4 +8,5 @@ enum class PaymentWidgetEvent(val value: String) {
     purchaseError("purchaseError"),
     paymentMethods3dsInitiated("paymentMethods3dsInitiated"),
     linkClose("linkClose"),
+    paymentProcessing("paymentProcessing"),
 }
