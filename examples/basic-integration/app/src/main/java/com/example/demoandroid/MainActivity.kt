@@ -152,6 +152,9 @@ class MainActivity : AppCompatActivity() {
                         else -> {}
                     }
                 }
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
+                }
             },
             userToken = userToken,
         )
@@ -186,8 +189,8 @@ class MainActivity : AppCompatActivity() {
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Payment was canceled by user")
                 }
-                eventListener = { type, _ ->
-                    Log.d("✅ ON EVENT", type.name)
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
                     when (type) {
                         CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
                             deunaSdk.close()
@@ -226,8 +229,8 @@ class MainActivity : AppCompatActivity() {
                         startActivity(this)
                     }
                 }
-                eventListener = { type, _ ->
-                    Log.d(DEBUG_TAG, "eventListener ${type.name}")
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)

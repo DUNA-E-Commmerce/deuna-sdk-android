@@ -81,7 +81,8 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     completion(CheckoutResult.Canceled)
                 }
             }
-            eventListener = { event, _ ->
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
                 when (event) {
                     CheckoutEvent.changeCart, CheckoutEvent.changeAddress -> {
                         deunaSDK.close()
@@ -179,6 +180,12 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     ).toMap()
                 )
             }
+            onPaymentProcessing = {
+                Log.d(DEBUG_TAG, "onPaymentProcessing")
+            }
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
+            }
         }
     }
 
@@ -230,8 +237,8 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     completion(ElementsResult.Canceled)
                 }
             }
-            eventListener = { event, _ ->
-                Log.d("DeunaSDK", "on event ${event.value}")
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
         }
     }

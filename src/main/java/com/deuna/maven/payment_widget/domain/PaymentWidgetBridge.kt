@@ -1,6 +1,7 @@
 package com.deuna.maven.payment_widget.domain
 
 import android.webkit.JavascriptInterface
+import com.deuna.maven.checkout.domain.CheckoutEvent
 import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.closeWebView
 import com.deuna.maven.shared.DeunaLogs
@@ -40,6 +41,12 @@ class PaymentWidgetBridge(
 
             if (type == null || data == null) {
                 return
+            }
+
+            try {
+                val checkoutEvent = CheckoutEvent.valueOf(type)
+                activity.callbacks?.onEventDispatch?.invoke(checkoutEvent, data)
+            } catch (_: Exception) {
             }
 
             val event = PaymentWidgetEvent.valueOf(type)

@@ -31,6 +31,7 @@ class CheckoutBridge(
 
             val event = CheckoutEvent.valueOf(type)
             activity.callbacks?.eventListener?.invoke(event, data)
+            activity.callbacks?.onEventDispatch?.invoke(event, data)
 
             when (event) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {

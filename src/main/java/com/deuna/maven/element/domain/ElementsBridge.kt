@@ -30,6 +30,7 @@ class ElementsBridge(
 
             val event = ElementsEvent.valueOf(type)
             activity.callbacks?.eventListener?.invoke(event, data)
+            activity.callbacks?.onEventDispatch?.invoke(event, data)
 
             when (event) {
 
