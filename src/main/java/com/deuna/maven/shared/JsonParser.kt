@@ -33,3 +33,32 @@ fun JSONArray.toList(): List<Any> {
     }
     return list
 }
+
+fun List<Json>.toBase64(): String {
+    val jsonArray = JSONArray(this)
+    val jsonString = jsonArray.toString()
+    return encodeBase64(jsonString.toByteArray(Charsets.UTF_8))
+}
+
+private fun encodeBase64(bytes: ByteArray): String {
+    val base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    // Base64 characters table
+    val result = StringBuilder()
+
+    var padding = 0
+    var i = 0
+    while (i < bytes.size) {
+        val byteChunk = (bytes[i].toInt() and 0xff) shl 16 or
+                (if (i + 1 < bytes.size) (bytes[i + 1].toInt() and 0xff) shl 8 else 0) or
+                (if (i + 2 < bytes.size) (bytes[i + 2].toInt() and 0xff) else 0)
+
+        result.append(base64Chars[(byteChunk shr 18) and 0x3f])
+        result.append(base64Chars[(byteChunk shr 12) and 0x3f])
+        result.append(if (i + 1 < bytes.size) base64Chars[(byteChunk shr 6) and 0x3f] else '=')
+        result.append(if (i + 2 < bytes.size) base64Chars[byteChunk and 0x3f] else '=')
+
+        i += 3
+    }
+
+    return result.toString()
+}

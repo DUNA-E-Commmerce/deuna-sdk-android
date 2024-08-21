@@ -3,12 +3,16 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
+import com.deuna.maven.shared.toBase64
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
+import java.net.URLEncoder
 
 /**
  * Launch the payment widget View
@@ -18,13 +22,15 @@ import org.json.JSONObject
  * @param callbacks An instance of PaymentWidgetCallbacks to receive event notifications.
  * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
  * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param paymentMethods (Optional) A list of allowed payment methods. This parameter determines what type of widget should be rendered.
  */
 fun DeunaSDK.initPaymentWidget(
     context: Context,
     orderToken: String,
     callbacks: PaymentWidgetCallbacks,
     userToken: String? = null,
-    cssFile: String? = null
+    cssFile: String? = null,
+    paymentMethods: List<Json> = emptyList()
 ) {
 
     if (orderToken.isEmpty()) {
@@ -47,6 +53,12 @@ fun DeunaSDK.initPaymentWidget(
 
     if (!cssFile.isNullOrEmpty()) {
         queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+    }
+
+    if (paymentMethods.isNotEmpty()) {
+        queryParameters[QueryParameters.PAYMENT_METHODS.value] = URLEncoder.encode(
+            paymentMethods.toBase64(), "utf-8"
+        )
     }
 
     val paymentUrl = Utils.buildUrl(

@@ -45,6 +45,16 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             callbacks = paymentWidgetsCallbacks(completion),
             userToken = userTokenValue,
             cssFile = "YOUR_THEME_UUID", // optional
+            paymentMethods = listOf(
+                mapOf(
+                    "payment_method" to "voucher",
+                    "processors" to listOf("daviplata", "nequi_push_voucher")
+                ),
+                mapOf(
+                    "payment_method" to "paypal",
+                    "processors" to listOf("paypal")
+                )
+            )
         )
     }
 

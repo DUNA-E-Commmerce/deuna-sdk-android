@@ -17,6 +17,7 @@ enum class QueryParameters(val value: String) {
     PUBLIC_API_KEY("publicApiKey"),
     USER_TOKEN("userToken"),
     CSS_FILE("cssFile"),
+    PAYMENT_METHODS("paymentMethods"),
     FIRST_NAME("firstName"),
     LAST_NAME("lastName"),
     EMAIL("email")
