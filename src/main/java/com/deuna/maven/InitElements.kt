@@ -12,48 +12,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 /**
- * Launch the Vault View
- *
- * @param userToken The user token
- * @param context The application or activity context
- * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
- * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
- * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
- * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
- * @throws IllegalStateException if the passed userToken is not valid
- */
-@Deprecated(
-    message = "This function will be removed in the future. Use initVault instead",
-    replaceWith = ReplaceWith("""
-    initVault(
-        context = context,
-        callbacks = callbacks,
-        closeEvents = closeEvents,
-        userToken = userToken,
-        userInfo = userInfo,
-        cssFile = cssFile,
-    )
-    """)
-)
-fun DeunaSDK.initElements(
-    context: Context,
-    callbacks: ElementsCallbacks,
-    closeEvents: Set<ElementsEvent> = emptySet(),
-    userToken: String? = null,
-    userInfo: UserInfo? = null,
-    cssFile: String? = null,
-) {
-    initVault(
-        context = context,
-        callbacks = callbacks,
-        closeEvents = closeEvents,
-        userToken = userToken,
-        userInfo = userInfo,
-        cssFile = cssFile,
-    )
-}
-
-/**
  * Launch the Elements View
  *
  * @param userToken The user token
@@ -64,7 +22,7 @@ fun DeunaSDK.initElements(
  * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
  * @throws IllegalStateException if the passed userToken is not valid
  */
-fun DeunaSDK.initVault(
+fun DeunaSDK.initElements(
     context: Context,
     callbacks: ElementsCallbacks,
     closeEvents: Set<ElementsEvent> = emptySet(),
@@ -131,23 +89,9 @@ fun DeunaSDK.initVault(
  * Closes the elements activity if it's currently running.
  */
 @Deprecated(
-    message = "This function will be removed in the future. Use closeVault instead",
-    replaceWith = ReplaceWith("closeVault()")
+    message = "This function will be removed in the future. Use close instead",
+    replaceWith = ReplaceWith("close()")
 )
 fun DeunaSDK.closeElements() {
-    closeVault()
-}
-
-/**
- * Closes the vault widget if it's currently running.
- */
-fun DeunaSDK.closeVault() {
-    closeElements(sdkInstanceId = sdkInstanceId)
-}
-
-/**
- * Global function used to send a broadcast event to close the elements view
- */
-fun closeElements(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    close()
 }

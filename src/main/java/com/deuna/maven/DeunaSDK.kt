@@ -70,4 +70,18 @@ open class DeunaSDK(
             sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
         )
     }
+
+    /**
+     * Close the active DEUNA widget
+     */
+    fun close() {
+        closeWebView(sdkInstanceId)
+    }
+}
+
+/**
+ * Global function used to send a broadcast event to close the elements view
+ */
+fun closeWebView(sdkInstanceId: Int) {
+    BaseWebViewActivity.closeWebView(sdkInstanceId)
 }

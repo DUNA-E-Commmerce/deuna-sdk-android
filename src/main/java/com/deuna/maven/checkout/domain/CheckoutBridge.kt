@@ -58,7 +58,7 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closeCheckout(activity.sdkInstanceId!!)
+                    closeWebView(activity.sdkInstanceId!!)
                     activity.callbacks?.onCanceled?.invoke()
                 }
 
@@ -72,7 +72,7 @@ class CheckoutBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeCheckout(activity.sdkInstanceId!!)
+                closeWebView(activity.sdkInstanceId!!)
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {

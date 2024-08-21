@@ -2,6 +2,7 @@ package com.deuna.maven.payment_widget.domain
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.closePaymentWidget
+import com.deuna.maven.closeWebView
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
@@ -74,7 +75,7 @@ class PaymentWidgetBridge(
                 PaymentWidgetEvent.purchase -> activity.callbacks?.onSuccess?.invoke(data)
                 PaymentWidgetEvent.paymentMethods3dsInitiated -> {}
                 PaymentWidgetEvent.linkClose -> {
-                    closePaymentWidget(activity.sdkInstanceId!!)
+                    closeWebView(activity.sdkInstanceId!!)
                     activity.callbacks?.onCanceled?.invoke()
                 }
             }

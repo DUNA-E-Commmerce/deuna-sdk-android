@@ -54,7 +54,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): CheckoutCallbacks {
         return CheckoutCallbacks().apply {
             onSuccess = { data ->
-                deunaSDK.closeCheckout()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         CheckoutResult.Success(
@@ -69,7 +69,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     PaymentsError.Type.PAYMENT_ERROR,
                     PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
                     PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                        deunaSDK.closeCheckout()
+                        deunaSDK.close()
                         completion(CheckoutResult.Error(error))
                     }
 
@@ -84,7 +84,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             eventListener = { event, _ ->
                 when (event) {
                     CheckoutEvent.changeCart, CheckoutEvent.changeAddress -> {
-                        deunaSDK.closeCheckout()
+                        deunaSDK.close()
                         viewModelScope.launch {
                             completion(CheckoutResult.Canceled)
                         }
@@ -119,7 +119,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): PaymentWidgetCallbacks {
         return PaymentWidgetCallbacks().apply {
             onSuccess = { data ->
-                deunaSDK.closePaymentWidget()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         PaymentWidgetResult.Success(
@@ -138,7 +138,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                 when (error.type) {
                     PaymentsError.Type.INITIALIZATION_FAILED,
                     PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                        deunaSDK.closePaymentWidget()
+                        deunaSDK.close()
                         completion(PaymentWidgetResult.Error(error))
                     }
 
@@ -210,7 +210,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): ElementsCallbacks {
         return ElementsCallbacks().apply {
             onSuccess = { response ->
-                deunaSDK.closeElements()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         ElementsResult.Success(
@@ -220,7 +220,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                 }
             }
             onError = { error ->
-                deunaSDK.closeElements()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(ElementsResult.Error(error))
                 }

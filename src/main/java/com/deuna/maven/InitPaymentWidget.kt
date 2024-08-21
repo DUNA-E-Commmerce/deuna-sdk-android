@@ -82,13 +82,10 @@ fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
  * Closes the payment widget if it's currently running.
  *
  */
+@Deprecated(
+    message = "This function will be removed in the future. Use close instead",
+    replaceWith = ReplaceWith("close()")
+)
 fun DeunaSDK.closePaymentWidget() {
-    com.deuna.maven.closePaymentWidget(sdkInstanceId = sdkInstanceId)
-}
-
-/**
- * Global function used to send a broadcast event to close the payment widget view
- */
-fun closePaymentWidget(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    close()
 }

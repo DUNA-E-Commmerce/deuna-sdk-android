@@ -57,13 +57,10 @@ fun DeunaSDK.initCheckout(
 /**
  * Closes the checkout activity if it's currently running.
  */
+@Deprecated(
+    message = "This function will be removed in the future. Use close instead",
+    replaceWith = ReplaceWith("close()")
+)
 fun DeunaSDK.closeCheckout() {
-    closeCheckout(sdkInstanceId = sdkInstanceId)
-}
-
-/**
- * Global function used to send a broadcast event to close the checkout view
- */
-fun closeCheckout(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    close()
 }

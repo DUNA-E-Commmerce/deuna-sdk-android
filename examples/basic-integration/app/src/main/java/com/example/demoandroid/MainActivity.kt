@@ -10,12 +10,9 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.closeCheckout
-import com.deuna.maven.closePaymentWidget
-import com.deuna.maven.closeVault
 import com.deuna.maven.initCheckout
+import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
-import com.deuna.maven.initVault
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
@@ -87,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             cssFile = "YOUR_THEME_UUID", // optional
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = { data ->
-                    deunaSdk.closePaymentWidget()
+                    deunaSdk.close()
                     handlePaymentSuccess(data)
                 }
                 onCanceled = {
@@ -146,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                     when (error.type) {
                         PaymentsError.Type.INITIALIZATION_FAILED,
                         PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                             if (error.metadata != null) {
                                 showPaymentErrorAlertDialog(error.metadata!!)
                             }
@@ -168,7 +165,7 @@ class MainActivity : AppCompatActivity() {
             callbacks = CheckoutCallbacks().apply {
                 onSuccess = { data ->
                     Log.d(DEBUG_TAG, "Payment success $data")
-                    deunaSdk.closeCheckout()
+                    deunaSdk.close()
                     handlePaymentSuccess(data)
                 }
                 onError = { error ->
@@ -177,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                         PaymentsError.Type.PAYMENT_ERROR,
                         PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
                         PaymentsError.Type.INITIALIZATION_FAILED -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                             if (error.metadata != null) {
                                 showPaymentErrorAlertDialog(error.metadata!!)
                             }
@@ -193,7 +190,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("✅ ON EVENT", type.name)
                     when (type) {
                         CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                         }
 
                         else -> {}
@@ -209,7 +206,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun saveCard() {
-        deunaSdk.initVault(
+        deunaSdk.initElements(
             context = this,
             userToken = userToken,
             userInfo = if (userToken == null) UserInfo(
@@ -220,7 +217,7 @@ class MainActivity : AppCompatActivity() {
             callbacks = ElementsCallbacks().apply {
                 onSuccess = { data ->
                     val metadata = (data["metadata"] as Json)["createdCard"] as Json
-                    deunaSdk.closeVault()
+                    deunaSdk.close()
                     Intent(this@MainActivity, SaveCardSuccessfulActivity::class.java).apply {
                         putExtra(
                             SaveCardSuccessfulActivity.EXTRA_CREATED_CARD,
@@ -234,7 +231,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeVault()
+                    deunaSdk.close()
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Saving card was canceled by user")

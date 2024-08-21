@@ -48,7 +48,7 @@ class ElementsBridge(
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements(activity.sdkInstanceId!!)
+                    closeWebView(activity.sdkInstanceId!!)
                     activity.callbacks?.onCanceled?.invoke()
                 }
 
@@ -58,7 +58,7 @@ class ElementsBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeElements(activity.sdkInstanceId!!)
+                closeWebView(activity.sdkInstanceId!!)
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {
