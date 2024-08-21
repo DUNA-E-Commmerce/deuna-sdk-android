@@ -1,5 +1,6 @@
 package com.deuna.maven.checkout.domain
 
+import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.CheckoutActivity
@@ -10,6 +11,12 @@ class CheckoutBridge(
     private val activity: CheckoutActivity,
     private val closeEvents: Set<CheckoutEvent>,
 ) : WebViewBridge(name = "android") {
+
+    @JavascriptInterface
+    fun consoleLog(message: String) {
+        DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
     override fun handleEvent(message: String) {
 
         try {

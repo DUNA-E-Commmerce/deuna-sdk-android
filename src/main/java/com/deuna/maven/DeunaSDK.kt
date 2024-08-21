@@ -2,6 +2,8 @@ package com.deuna.maven
 
 
 import com.deuna.maven.shared.Environment
+import com.deuna.maven.web_views.base.BaseWebViewActivity
+import org.json.JSONObject
 import java.lang.IllegalStateException
 
 
@@ -55,5 +57,17 @@ open class DeunaSDK(
         ) {
             instance = DeunaSDK(environment, publicApiKey)
         }
+    }
+
+    /**
+     * Set custom style on the payment widget.
+     * This function must be only called inside the next callbacks onCardBinDetected or onInstallmentSelected.
+     *
+     * @param data The JSON data to update the payment widget UI
+     */
+    fun setCustomStyle(data: Map<String, Any>) {
+        BaseWebViewActivity.sendCustomStyle(
+            sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
+        )
     }
 }

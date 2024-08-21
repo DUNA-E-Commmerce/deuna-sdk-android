@@ -11,13 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.closeCheckout
-import com.deuna.maven.closeElements
 import com.deuna.maven.closePaymentWidget
+import com.deuna.maven.closeVault
 import com.deuna.maven.initCheckout
-import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
+import com.deuna.maven.initVault
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.setCustomStyle
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
@@ -210,7 +209,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun saveCard() {
-        deunaSdk.initElements(
+        deunaSdk.initVault(
             context = this,
             userToken = userToken,
             userInfo = if (userToken == null) UserInfo(
@@ -221,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             callbacks = ElementsCallbacks().apply {
                 onSuccess = { data ->
                     val metadata = (data["metadata"] as Json)["createdCard"] as Json
-                    deunaSdk.closeElements()
+                    deunaSdk.closeVault()
                     Intent(this@MainActivity, SaveCardSuccessfulActivity::class.java).apply {
                         putExtra(
                             SaveCardSuccessfulActivity.EXTRA_CREATED_CARD,
@@ -235,7 +234,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeElements()
+                    deunaSdk.closeVault()
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Saving card was canceled by user")
