@@ -18,6 +18,7 @@ enum class QueryParameters(val value: String) {
     USER_TOKEN("userToken"),
     CSS_FILE("cssFile"),
     PAYMENT_METHODS("paymentMethods"),
+    CHECKOUT_MODULES("checkoutModules"),
     FIRST_NAME("firstName"),
     LAST_NAME("lastName"),
     EMAIL("email")

@@ -50,8 +50,7 @@ dependencies {
             strictly("2.8.9")
         }
     }
-//    implementation("com.github.deuna-developers:deunasdk:2.5.2")
-    implementation(files("../../../build/outputs/aar/deuna-sdk-android-debug.aar"))
+    implementation("com.github.deuna-developers:deuna-sdk-android:2.6.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
