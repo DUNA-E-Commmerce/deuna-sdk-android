@@ -6,6 +6,9 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
+/**
+ * Convert a JSONObject to a Map<String, Any>
+ */
 @Throws(JSONException::class)
 fun JSONObject.toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>()
@@ -22,6 +25,9 @@ fun JSONObject.toMap(): Map<String, Any> {
     return map
 }
 
+/**
+ * Convert a JSONArray to a List<JSON>
+ */
 @Throws(JSONException::class)
 fun JSONArray.toList(): List<Any> {
     val list = mutableListOf<Any>()
@@ -36,12 +42,18 @@ fun JSONArray.toList(): List<Any> {
     return list
 }
 
+/**
+ * Convert a List<Json> to a base64 string
+ */
 fun List<Json>.toBase64(): String {
     val jsonArray = JSONArray(this)
     val jsonString = jsonArray.toString()
     return encodeBase64(jsonString.toByteArray(Charsets.UTF_8))
 }
 
+/**
+ * Convert a Map<String,Any> to a JSONObject instance
+ */
 fun Json.toJSONObject(): JSONObject {
     val jsonObject = JSONObject()
     for ((key, value) in this) {
@@ -54,12 +66,18 @@ fun Json.toJSONObject(): JSONObject {
     return jsonObject
 }
 
+/**
+ * Convert a Map<String,Any> to a base64 string
+ */
 fun Json.toBase64(): String {
     val json = this.toJSONObject()
     val jsonString = json.toString()
     return encodeBase64(jsonString.toByteArray(Charsets.UTF_8))
 }
 
+/**
+ * Convert a byteArray to a base64 string
+ */
 private fun encodeBase64(bytes: ByteArray): String {
     val base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     // Base64 characters table
