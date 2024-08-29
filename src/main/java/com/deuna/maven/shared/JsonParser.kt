@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.deuna.maven.shared
 
 import org.json.JSONArray
@@ -40,12 +42,28 @@ fun List<Json>.toBase64(): String {
     return encodeBase64(jsonString.toByteArray(Charsets.UTF_8))
 }
 
+fun Json.toJSONObject(): JSONObject {
+    val jsonObject = JSONObject()
+    for ((key, value) in this) {
+        when (value) {
+            is Map<*, *> -> jsonObject.put(key, (value as Map<String, Any>).toJSONObject())
+            is List<*> -> jsonObject.put(key, JSONArray(value))
+            else -> jsonObject.put(key, value)
+        }
+    }
+    return jsonObject
+}
+
+fun Json.toBase64(): String {
+    val json = this.toJSONObject()
+    val jsonString = json.toString()
+    return encodeBase64(jsonString.toByteArray(Charsets.UTF_8))
+}
+
 private fun encodeBase64(bytes: ByteArray): String {
     val base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     // Base64 characters table
     val result = StringBuilder()
-
-    var padding = 0
     var i = 0
     while (i < bytes.size) {
         val byteChunk = (bytes[i].toInt() and 0xff) shl 16 or

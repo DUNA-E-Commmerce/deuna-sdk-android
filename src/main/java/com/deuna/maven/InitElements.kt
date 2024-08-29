@@ -8,8 +8,6 @@ import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.web_views.*
 import com.deuna.maven.web_views.base.*
 import java.lang.IllegalStateException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 /**
  * Launch the Elements View
@@ -47,31 +45,20 @@ fun DeunaSDK.initElements(
             callbacks.onError?.invoke(ElementsErrors.invalidUserInfo)
             return
         }
-        queryParameters[QueryParameters.FIRST_NAME.value] = URLEncoder.encode(
-            userInfo.firstName, StandardCharsets.UTF_8.toString()
-        )
-        queryParameters[QueryParameters.LAST_NAME.value] = URLEncoder.encode(
-            userInfo.lastName, StandardCharsets.UTF_8.toString()
-        )
+        queryParameters[QueryParameters.FIRST_NAME.value] = userInfo.firstName
+        queryParameters[QueryParameters.LAST_NAME.value] = userInfo.lastName
+        queryParameters[QueryParameters.EMAIL.value] = userInfo.email
     } else {
         // if the user token is not passed or is empty the userInfo must be passed
         DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
         callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
     }
 
-    if(!cssFile.isNullOrEmpty()){
+    if (!cssFile.isNullOrEmpty()) {
         queryParameters[QueryParameters.CSS_FILE.value] = cssFile
     }
 
-    var elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
-
-    if (userInfo != null) {
-        elementUrl += "&${QueryParameters.EMAIL.value}=${
-            URLEncoder.encode(
-                userInfo.email, StandardCharsets.UTF_8.toString()
-            )
-        }"
-    }
+    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)

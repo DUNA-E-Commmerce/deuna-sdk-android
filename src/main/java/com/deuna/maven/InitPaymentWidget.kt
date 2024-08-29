@@ -11,7 +11,6 @@ import com.deuna.maven.shared.toBase64
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
-import java.net.URLEncoder
 
 /**
  * Launch the payment widget View
@@ -56,17 +55,19 @@ fun DeunaSDK.initPaymentWidget(
         queryParameters[QueryParameters.CSS_FILE.value] = cssFile
     }
 
+    val xpropsB64 = mutableMapOf<String, Any>()
+    xpropsB64[QueryParameters.PUBLIC_API_KEY.value] = publicApiKey
+
+
     if (paymentMethods.isNotEmpty()) {
-        queryParameters[QueryParameters.PAYMENT_METHODS.value] = URLEncoder.encode(
-            paymentMethods.toBase64(), "utf-8"
-        )
+        xpropsB64[QueryParameters.PAYMENT_METHODS.value] = paymentMethods
     }
 
     if (checkoutModules.isNotEmpty()) {
-        queryParameters[QueryParameters.CHECKOUT_MODULES.value] = URLEncoder.encode(
-            checkoutModules.toBase64(), "utf-8"
-        )
+        xpropsB64[QueryParameters.CHECKOUT_MODULES.value] = checkoutModules
     }
+
+    queryParameters[QueryParameters.XPROPS_B64.value] = xpropsB64.toBase64()
 
     val paymentUrl = Utils.buildUrl(
         baseUrl = "$baseUrl/now/$orderToken",
