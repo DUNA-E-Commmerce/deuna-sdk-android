@@ -11,6 +11,15 @@ enum class ErrorMessages(val message: String) {
     UNKNOWN("Unknown error")
 }
 
+enum class ElementsTypeKey(val value: String) {
+    NAME("name"),
+}
+
+enum class ElementsTypeName(val value: String) {
+    VAULT("/vault"),
+    CLICK_TO_PAY("/click_to_pay"),
+}
+
 enum class QueryParameters(val value: String) {
     MODE("mode"),
     WIDGET("widget"),
@@ -35,6 +44,7 @@ enum class PaymentsErrorMessages(val message: String) {
 enum class ElementsErrorMessages(val message: String) {
     PAYMENT_LINK_COULD_NOT_BE_GENERATED("Vault link could not be generated."),
     INVALID_USER_INFO("Invalid instance of UserInfo: check the firstName, lastName and email fields."),
+    MISSING_USER_INFO("userInfo must be passed when the types parameter contains click_to_pay."),
     MISSING_USER_TOKEN_OR_USER_INFO("userToken or userInfo must be passed.")
 }
 
@@ -78,6 +88,14 @@ class ElementsErrors {
             metadata = ElementsError.Metadata(
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
                 message = ElementsErrorMessages.INVALID_USER_INFO.message
+            )
+        )
+
+        val missginUserInfo = ElementsError(
+            type = ElementsError.Type.INITIALIZATION_FAILED,
+            metadata = ElementsError.Metadata(
+                code = ErrorCodes.INITIALIZATION_ERROR.name,
+                message = ElementsErrorMessages.MISSING_USER_INFO.message
             )
         )
 

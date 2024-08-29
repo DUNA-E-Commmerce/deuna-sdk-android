@@ -26,7 +26,8 @@ fun DeunaSDK.initElements(
     closeEvents: Set<ElementsEvent> = emptySet(),
     userToken: String? = null,
     userInfo: UserInfo? = null,
-    cssFile: String? = null
+    cssFile: String? = null,
+    types: List<Json> = emptyList(),
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
@@ -58,7 +59,17 @@ fun DeunaSDK.initElements(
         queryParameters[QueryParameters.CSS_FILE.value] = cssFile
     }
 
-    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
+    var path = ElementsTypeName.VAULT.value
+
+    if (types.isNotEmpty()) {
+        val typeName = types.first()[ElementsTypeKey.NAME.value]
+        if (typeName is String && typeName.isNotEmpty()) {
+            path = "/$typeName"
+        }
+    }
+
+    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl$path", queryParams = queryParameters)
+
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
