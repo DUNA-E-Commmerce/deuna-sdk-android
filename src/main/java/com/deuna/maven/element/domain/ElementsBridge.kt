@@ -1,5 +1,6 @@
 package com.deuna.maven.element.domain
 
+import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.ElementsActivity
@@ -10,10 +11,14 @@ class ElementsBridge(
     private val activity: ElementsActivity,
     private val closeEvents: Set<ElementsEvent>,
 ) : WebViewBridge(name = "android") {
+
+    @JavascriptInterface
+    fun consoleLog(message: String) {
+        DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
     override fun handleEvent(message: String) {
         try {
-
-
             val json = JSONObject(message).toMap()
 
             val type = json["type"] as? String
@@ -25,6 +30,7 @@ class ElementsBridge(
 
             val event = ElementsEvent.valueOf(type)
             activity.callbacks?.eventListener?.invoke(event, data)
+            activity.callbacks?.onEventDispatch?.invoke(event, data)
 
             when (event) {
 
@@ -43,7 +49,7 @@ class ElementsBridge(
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    closeElements(activity.sdkInstanceId!!)
+                    closeWebView(activity.sdkInstanceId!!)
                     activity.callbacks?.onCanceled?.invoke()
                 }
 
@@ -53,7 +59,7 @@ class ElementsBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeElements(activity.sdkInstanceId!!)
+                closeWebView(activity.sdkInstanceId!!)
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {

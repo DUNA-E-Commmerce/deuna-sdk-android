@@ -5,7 +5,8 @@ import android.net.Uri
 class Utils {
     companion object {
         /**
-         * Build an URL with a set of query parameters
+         * Build an URL with a set of query parameters, automatically use URLEncoder (encodeURIComponent on JS) for all
+         * query parameters
          */
         fun buildUrl(baseUrl: String, queryParams: Map<String, String>): String {
             val uriBuilder = Uri.parse(baseUrl).buildUpon()

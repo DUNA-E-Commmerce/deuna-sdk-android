@@ -10,14 +10,10 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.closeCheckout
-import com.deuna.maven.closeElements
-import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.setCustomStyle
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import org.json.JSONObject
@@ -88,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             cssFile = "YOUR_THEME_UUID", // optional
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = { data ->
-                    deunaSdk.closePaymentWidget()
+                    deunaSdk.close()
                     handlePaymentSuccess(data)
                 }
                 onCanceled = {
@@ -147,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                     when (error.type) {
                         PaymentsError.Type.INITIALIZATION_FAILED,
                         PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                             if (error.metadata != null) {
                                 showPaymentErrorAlertDialog(error.metadata!!)
                             }
@@ -156,8 +152,24 @@ class MainActivity : AppCompatActivity() {
                         else -> {}
                     }
                 }
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
+                }
             },
             userToken = userToken,
+            paymentMethods = listOf(
+                mapOf(
+                    "payment_method" to "voucher",
+                    "processors" to listOf("daviplata", "nequi_push_voucher")
+                ),
+                mapOf(
+                    "payment_method" to "paypal",
+                    "processors" to listOf("paypal")
+                )
+            ),
+            checkoutModules = listOf(
+                mapOf("name" to "module_name")
+            )
         )
     }
 
@@ -169,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             callbacks = CheckoutCallbacks().apply {
                 onSuccess = { data ->
                     Log.d(DEBUG_TAG, "Payment success $data")
-                    deunaSdk.closeCheckout()
+                    deunaSdk.close()
                     handlePaymentSuccess(data)
                 }
                 onError = { error ->
@@ -178,7 +190,7 @@ class MainActivity : AppCompatActivity() {
                         PaymentsError.Type.PAYMENT_ERROR,
                         PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
                         PaymentsError.Type.INITIALIZATION_FAILED -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                             if (error.metadata != null) {
                                 showPaymentErrorAlertDialog(error.metadata!!)
                             }
@@ -190,11 +202,11 @@ class MainActivity : AppCompatActivity() {
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Payment was canceled by user")
                 }
-                eventListener = { type, _ ->
-                    Log.d("✅ ON EVENT", type.name)
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
                     when (type) {
                         CheckoutEvent.changeAddress, CheckoutEvent.changeCart -> {
-                            deunaSdk.closeCheckout()
+                            deunaSdk.close()
                         }
 
                         else -> {}
@@ -221,7 +233,7 @@ class MainActivity : AppCompatActivity() {
             callbacks = ElementsCallbacks().apply {
                 onSuccess = { data ->
                     val metadata = (data["metadata"] as Json)["createdCard"] as Json
-                    deunaSdk.closeElements()
+                    deunaSdk.close()
                     Intent(this@MainActivity, SaveCardSuccessfulActivity::class.java).apply {
                         putExtra(
                             SaveCardSuccessfulActivity.EXTRA_CREATED_CARD,
@@ -230,12 +242,12 @@ class MainActivity : AppCompatActivity() {
                         startActivity(this)
                     }
                 }
-                eventListener = { type, _ ->
-                    Log.d(DEBUG_TAG, "eventListener ${type.name}")
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
                 }
                 onError = {
                     Log.e(ERROR_TAG, it.type.message)
-                    deunaSdk.closeElements()
+                    deunaSdk.close()
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Saving card was canceled by user")

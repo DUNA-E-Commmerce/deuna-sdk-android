@@ -45,6 +45,16 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             callbacks = paymentWidgetsCallbacks(completion),
             userToken = userTokenValue,
             cssFile = "YOUR_THEME_UUID", // optional
+            paymentMethods = listOf(
+                mapOf(
+                    "payment_method" to "voucher",
+                    "processors" to listOf("daviplata", "nequi_push_voucher")
+                ),
+                mapOf(
+                    "payment_method" to "paypal",
+                    "processors" to listOf("paypal")
+                )
+            )
         )
     }
 
@@ -54,7 +64,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): CheckoutCallbacks {
         return CheckoutCallbacks().apply {
             onSuccess = { data ->
-                deunaSDK.closeCheckout()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         CheckoutResult.Success(
@@ -69,7 +79,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     PaymentsError.Type.PAYMENT_ERROR,
                     PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
                     PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                        deunaSDK.closeCheckout()
+                        deunaSDK.close()
                         completion(CheckoutResult.Error(error))
                     }
 
@@ -81,10 +91,11 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     completion(CheckoutResult.Canceled)
                 }
             }
-            eventListener = { event, _ ->
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
                 when (event) {
                     CheckoutEvent.changeCart, CheckoutEvent.changeAddress -> {
-                        deunaSDK.closeCheckout()
+                        deunaSDK.close()
                         viewModelScope.launch {
                             completion(CheckoutResult.Canceled)
                         }
@@ -119,7 +130,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): PaymentWidgetCallbacks {
         return PaymentWidgetCallbacks().apply {
             onSuccess = { data ->
-                deunaSDK.closePaymentWidget()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         PaymentWidgetResult.Success(
@@ -138,7 +149,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                 when (error.type) {
                     PaymentsError.Type.INITIALIZATION_FAILED,
                     PaymentsError.Type.NO_INTERNET_CONNECTION -> {
-                        deunaSDK.closePaymentWidget()
+                        deunaSDK.close()
                         completion(PaymentWidgetResult.Error(error))
                     }
 
@@ -179,6 +190,12 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     ).toMap()
                 )
             }
+            onPaymentProcessing = {
+                Log.d(DEBUG_TAG, "onPaymentProcessing")
+            }
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
+            }
         }
     }
 
@@ -210,7 +227,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     ): ElementsCallbacks {
         return ElementsCallbacks().apply {
             onSuccess = { response ->
-                deunaSDK.closeElements()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         ElementsResult.Success(
@@ -220,7 +237,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                 }
             }
             onError = { error ->
-                deunaSDK.closeElements()
+                deunaSDK.close()
                 viewModelScope.launch {
                     completion(ElementsResult.Error(error))
                 }
@@ -230,8 +247,8 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                     completion(ElementsResult.Canceled)
                 }
             }
-            eventListener = { event, _ ->
-                Log.d("DeunaSDK", "on event ${event.value}")
+            onEventDispatch = { event, data ->
+                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
         }
     }

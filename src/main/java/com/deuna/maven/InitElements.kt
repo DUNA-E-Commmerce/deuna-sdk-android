@@ -8,8 +8,6 @@ import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.web_views.*
 import com.deuna.maven.web_views.base.*
 import java.lang.IllegalStateException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 /**
  * Launch the Elements View
@@ -19,7 +17,7 @@ import java.nio.charset.StandardCharsets
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
- *
+ * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(
@@ -27,7 +25,8 @@ fun DeunaSDK.initElements(
     callbacks: ElementsCallbacks,
     closeEvents: Set<ElementsEvent> = emptySet(),
     userToken: String? = null,
-    userInfo: UserInfo? = null
+    userInfo: UserInfo? = null,
+    cssFile: String? = null
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
@@ -46,27 +45,20 @@ fun DeunaSDK.initElements(
             callbacks.onError?.invoke(ElementsErrors.invalidUserInfo)
             return
         }
-        queryParameters[QueryParameters.FIRST_NAME.value] = URLEncoder.encode(
-            userInfo.firstName, StandardCharsets.UTF_8.toString()
-        )
-        queryParameters[QueryParameters.LAST_NAME.value] = URLEncoder.encode(
-            userInfo.lastName, StandardCharsets.UTF_8.toString()
-        )
+        queryParameters[QueryParameters.FIRST_NAME.value] = userInfo.firstName
+        queryParameters[QueryParameters.LAST_NAME.value] = userInfo.lastName
+        queryParameters[QueryParameters.EMAIL.value] = userInfo.email
     } else {
         // if the user token is not passed or is empty the userInfo must be passed
         DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
         callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
     }
 
-    var elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
-
-    if (userInfo != null) {
-        elementUrl += "&${QueryParameters.EMAIL.value}=${
-            URLEncoder.encode(
-                userInfo.email, StandardCharsets.UTF_8.toString()
-            )
-        }"
+    if (!cssFile.isNullOrEmpty()) {
+        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
     }
+
+    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
@@ -83,13 +75,10 @@ fun DeunaSDK.initElements(
 /**
  * Closes the elements activity if it's currently running.
  */
+@Deprecated(
+    message = "This function will be removed in the future. Use close instead",
+    replaceWith = ReplaceWith("close()")
+)
 fun DeunaSDK.closeElements() {
-    closeElements(sdkInstanceId = sdkInstanceId)
-}
-
-/**
- * Global function used to send a broadcast event to close the elements view
- */
-fun closeElements(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    close()
 }

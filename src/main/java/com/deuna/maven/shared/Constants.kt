@@ -14,9 +14,12 @@ enum class ErrorMessages(val message: String) {
 enum class QueryParameters(val value: String) {
     MODE("mode"),
     WIDGET("widget"),
+    XPROPS_B64("xpropsB64"),
     PUBLIC_API_KEY("publicApiKey"),
     USER_TOKEN("userToken"),
     CSS_FILE("cssFile"),
+    PAYMENT_METHODS("paymentMethods"),
+    CHECKOUT_MODULES("checkoutModules"),
     FIRST_NAME("firstName"),
     LAST_NAME("lastName"),
     EMAIL("email")

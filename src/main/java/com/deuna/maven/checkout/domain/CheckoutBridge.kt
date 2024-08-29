@@ -1,5 +1,6 @@
 package com.deuna.maven.checkout.domain
 
+import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.CheckoutActivity
@@ -10,6 +11,12 @@ class CheckoutBridge(
     private val activity: CheckoutActivity,
     private val closeEvents: Set<CheckoutEvent>,
 ) : WebViewBridge(name = "android") {
+
+    @JavascriptInterface
+    fun consoleLog(message: String) {
+        DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
     override fun handleEvent(message: String) {
 
         try {
@@ -24,6 +31,7 @@ class CheckoutBridge(
 
             val event = CheckoutEvent.valueOf(type)
             activity.callbacks?.eventListener?.invoke(event, data)
+            activity.callbacks?.onEventDispatch?.invoke(event, data)
 
             when (event) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
@@ -51,7 +59,7 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
-                    closeCheckout(activity.sdkInstanceId!!)
+                    closeWebView(activity.sdkInstanceId!!)
                     activity.callbacks?.onCanceled?.invoke()
                 }
 
@@ -65,7 +73,7 @@ class CheckoutBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeCheckout(activity.sdkInstanceId!!)
+                closeWebView(activity.sdkInstanceId!!)
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {

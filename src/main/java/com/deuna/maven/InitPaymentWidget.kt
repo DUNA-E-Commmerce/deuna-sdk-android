@@ -3,9 +3,11 @@ package com.deuna.maven
 import android.content.Context
 import android.content.Intent
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
+import com.deuna.maven.shared.toBase64
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
@@ -18,13 +20,17 @@ import org.json.JSONObject
  * @param callbacks An instance of PaymentWidgetCallbacks to receive event notifications.
  * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
  * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param paymentMethods (Optional) A list of allowed payment methods. This parameter determines what type of widget should be rendered.
+ * @param checkoutModules (Optional) A list  display the payment widget with new patterns or with different functionalities
  */
 fun DeunaSDK.initPaymentWidget(
     context: Context,
     orderToken: String,
     callbacks: PaymentWidgetCallbacks,
     userToken: String? = null,
-    cssFile: String? = null
+    cssFile: String? = null,
+    paymentMethods: List<Json> = emptyList(),
+    checkoutModules: List<Json> = emptyList(),
 ) {
 
     if (orderToken.isEmpty()) {
@@ -48,6 +54,20 @@ fun DeunaSDK.initPaymentWidget(
     if (!cssFile.isNullOrEmpty()) {
         queryParameters[QueryParameters.CSS_FILE.value] = cssFile
     }
+
+    val xpropsB64 = mutableMapOf<String, Any>()
+    xpropsB64[QueryParameters.PUBLIC_API_KEY.value] = publicApiKey
+
+
+    if (paymentMethods.isNotEmpty()) {
+        xpropsB64[QueryParameters.PAYMENT_METHODS.value] = paymentMethods
+    }
+
+    if (checkoutModules.isNotEmpty()) {
+        xpropsB64[QueryParameters.CHECKOUT_MODULES.value] = checkoutModules
+    }
+
+    queryParameters[QueryParameters.XPROPS_B64.value] = xpropsB64.toBase64()
 
     val paymentUrl = Utils.buildUrl(
         baseUrl = "$baseUrl/now/$orderToken",
@@ -77,30 +97,15 @@ fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
     )
 }
 
-/**
- * Set custom style on the payment widget.
- * This function must be only called inside the next callbacks onCardBinDetected or onInstallmentSelected.
- *
- * @param data The JSON data to update the payment widget UI
- */
-fun DeunaSDK.setCustomStyle(data: Map<String, Any>) {
-    PaymentWidgetActivity.sendCustomStyle(
-        sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
-    )
-}
-
 
 /**
  * Closes the payment widget if it's currently running.
  *
  */
+@Deprecated(
+    message = "This function will be removed in the future. Use close instead",
+    replaceWith = ReplaceWith("close()")
+)
 fun DeunaSDK.closePaymentWidget() {
-    com.deuna.maven.closePaymentWidget(sdkInstanceId = sdkInstanceId)
-}
-
-/**
- * Global function used to send a broadcast event to close the payment widget view
- */
-fun closePaymentWidget(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    close()
 }
