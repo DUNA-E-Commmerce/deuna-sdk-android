@@ -18,6 +18,13 @@ import java.lang.IllegalStateException
  * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
  * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param types (Optional) A list of the widgets to be rendered.
+ * Example:
+ * ```
+ * types = listOf(
+ *    mapOf( "name" to "click_to_pay")
+ * )
+ * ```
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(
@@ -33,43 +40,37 @@ fun DeunaSDK.initElements(
 
     ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
-    val queryParameters = mutableMapOf<String, String>()
-    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
-    queryParameters[QueryParameters.PUBLIC_API_KEY.value] = publicApiKey
+    val queryParameters = mutableMapOf(
+        QueryParameters.MODE.value to QueryParameters.WIDGET.value,
+        QueryParameters.PUBLIC_API_KEY.value to publicApiKey
+    )
 
-    if (!userToken.isNullOrEmpty()) {
-        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
-    } else if (userInfo != null) {
-        if (!userInfo.isValid()) {
-            // if the user token is not passed or is empty the userInfo must be passed
-            DeunaLogs.error(ElementsErrorMessages.INVALID_USER_INFO.message)
-            callbacks.onError?.invoke(ElementsErrors.invalidUserInfo)
+    when {
+        !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+        userInfo != null && userInfo.isValid() -> {
+            queryParameters.apply {
+                put(QueryParameters.FIRST_NAME.value, userInfo.firstName)
+                put(QueryParameters.LAST_NAME.value, userInfo.lastName)
+                put(QueryParameters.EMAIL.value, userInfo.email)
+            }
+        }
+
+        else -> {
+            DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
+            callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
             return
         }
-        queryParameters[QueryParameters.FIRST_NAME.value] = userInfo.firstName
-        queryParameters[QueryParameters.LAST_NAME.value] = userInfo.lastName
-        queryParameters[QueryParameters.EMAIL.value] = userInfo.email
-    } else {
-        // if the user token is not passed or is empty the userInfo must be passed
-        DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
-        callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
     }
 
-    if (!cssFile.isNullOrEmpty()) {
-        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+    cssFile?.let {
+        queryParameters[QueryParameters.CSS_FILE.value] = it
     }
 
-    var path = ElementsTypeName.VAULT.value
-
-    if (types.isNotEmpty()) {
-        val typeName = types.first()[ElementsTypeKey.NAME.value]
-        if (typeName is String && typeName.isNotEmpty()) {
-            path = "/$typeName"
-        }
-    }
+    val path = types.firstOrNull()?.get(ElementsTypeKey.NAME.value)
+        ?.takeIf { it is String && it.isNotEmpty() }
+        ?.let { "/$it" } ?: ElementsTypeName.VAULT.value
 
     val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl$path", queryParams = queryParameters)
-
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)

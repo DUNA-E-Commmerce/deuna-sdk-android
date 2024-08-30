@@ -9,6 +9,7 @@ import com.deuna.compose_demo.screens.ElementsResult
 import com.deuna.compose_demo.screens.PaymentWidgetResult
 import com.deuna.maven.*
 import com.deuna.maven.checkout.domain.*
+import com.deuna.maven.element.domain.ElementsError
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
@@ -49,10 +50,8 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
                 mapOf(
                     "payment_method" to "voucher",
                     "processors" to listOf("daviplata", "nequi_push_voucher")
-                ),
-                mapOf(
-                    "payment_method" to "paypal",
-                    "processors" to listOf("paypal")
+                ), mapOf(
+                    "payment_method" to "paypal", "processors" to listOf("paypal")
                 )
             )
         )
@@ -76,9 +75,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             onError = { error ->
                 Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
                 when (error.type) {
-                    PaymentsError.Type.PAYMENT_ERROR,
-                    PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
-                    PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                    PaymentsError.Type.PAYMENT_ERROR, PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED, PaymentsError.Type.NO_INTERNET_CONNECTION -> {
                         deunaSDK.close()
                         completion(CheckoutResult.Error(error))
                     }
@@ -147,8 +144,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             onError = { error ->
                 Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
                 when (error.type) {
-                    PaymentsError.Type.INITIALIZATION_FAILED,
-                    PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                    PaymentsError.Type.INITIALIZATION_FAILED, PaymentsError.Type.NO_INTERNET_CONNECTION -> {
                         deunaSDK.close()
                         completion(PaymentWidgetResult.Error(error))
                     }
@@ -200,6 +196,42 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     }
 
 
+    fun clickToPay(
+        context: Context,
+        completion: (ElementsResult) -> Unit,
+    ) {
+        deunaSDK.initElements(
+            context = context,
+            userInfo = UserInfo(
+                firstName = "Darwin", lastName = "Morocho", email = "dmorocho+10@deuna.com"
+            ),
+            types = listOf(
+                mapOf(
+                    "name" to "click_to_pay"
+                )
+            ),
+            callbacks = ElementsCallbacks().apply {
+                onSuccess = {
+                    deunaSDK.close()
+                    viewModelScope.launch {
+                        completion(ElementsResult.Success(it["metadata"] as Json))
+                    }
+                }
+                onError = {
+                    if (it.type == ElementsError.Type.INITIALIZATION_FAILED) {
+                        deunaSDK.close()
+                        viewModelScope.launch {
+                            completion(ElementsResult.Error(it))
+                        }
+                    }
+                }
+                onEventDispatch = { event, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
+                }
+            },
+        )
+    }
+
     /**
      * Initiates the process of saving the card information.
      * @param context The activity context.
@@ -213,9 +245,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             context = context,
             userToken = userTokenValue,
             userInfo = if (userTokenValue == null) UserInfo(
-                firstName = "Darwin",
-                lastName = "Morocho",
-                email = "dmorocho@deuna.com"
+                firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
             ) else null,
             callbacks = elementsCallbacks(completion)
         )

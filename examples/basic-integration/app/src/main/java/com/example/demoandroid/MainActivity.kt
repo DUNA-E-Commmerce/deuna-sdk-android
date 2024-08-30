@@ -10,6 +10,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.checkout.domain.*
+import com.deuna.maven.element.domain.ElementsError
 import com.deuna.maven.initCheckout
 import com.deuna.maven.initElements
 import com.deuna.maven.initPaymentWidget
@@ -42,13 +43,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val payButton: Button = findViewById(R.id.payButton)
-        val paymentWidgetButton: Button = findViewById(R.id.paymentWidgetButton)
-        val savePaymentMethodButton: Button = findViewById(R.id.savePaymentMethodButton)
+        findViewById<Button>(R.id.payButton).setOnClickListener {
+            startPaymentProcess()
+        }
 
-        payButton.setOnClickListener { startPaymentProcess() }
-        paymentWidgetButton.setOnClickListener { showPaymentWidget() }
-        savePaymentMethodButton.setOnClickListener { saveCard() }
+        findViewById<Button>(R.id.paymentWidgetButton).setOnClickListener {
+            showPaymentWidget()
+        }
+
+        findViewById<Button>(R.id.savePaymentMethodButton).setOnClickListener {
+            saveCard()
+        }
+
+        findViewById<Button>(R.id.clickToPayButton).setOnClickListener {
+            clickToPay()
+        }
     }
 
     private fun handlePaymentSuccess(data: Json) {
@@ -228,7 +237,7 @@ class MainActivity : AppCompatActivity() {
             userInfo = if (userToken == null) UserInfo(
                 firstName = "Darwin",
                 lastName = "Morocho",
-                email = "domorocho+1@deuna.com",
+                email = "dmorocho@deuna.com",
             ) else null,
             callbacks = ElementsCallbacks().apply {
                 onSuccess = { data ->
@@ -251,6 +260,47 @@ class MainActivity : AppCompatActivity() {
                 }
                 onCanceled = {
                     Log.d(DEBUG_TAG, "Saving card was canceled by user")
+                }
+                onClosed = {
+                    Log.d(DEBUG_TAG, "Widget was closed")
+                }
+            },
+        )
+    }
+
+
+    private fun clickToPay() {
+        deunaSdk.initElements(
+            context = this,
+            userInfo = UserInfo(
+                // required for click_to_pay
+                firstName = "Darwin",
+                lastName = "Morocho",
+                email = "dmorocho@deuna.com",
+            ),
+            types = listOf(
+                mapOf(
+                    "name" to "click_to_pay"
+                )
+            ),
+            callbacks = ElementsCallbacks().apply {
+                onSuccess = {
+                    deunaSdk.close()
+                    Intent(this@MainActivity, ClickToPaySuccessfulActivity::class.java).apply {
+                        startActivity(this)
+                    }
+                }
+                onEventDispatch = { type, data ->
+                    Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
+                }
+                onError = { error ->
+                    Log.e(ERROR_TAG, error.type.message)
+                    Log.e(ERROR_TAG, error.metadata?.code ?: "")
+                    Log.e(ERROR_TAG, error.metadata?.message ?: "")
+
+                    if (error.type == ElementsError.Type.INITIALIZATION_FAILED) {
+                        deunaSdk.close()
+                    }
                 }
                 onClosed = {
                     Log.d(DEBUG_TAG, "Widget was closed")

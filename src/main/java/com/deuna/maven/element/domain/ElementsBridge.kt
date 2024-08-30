@@ -53,9 +53,7 @@ class ElementsBridge(
                     activity.callbacks?.onCanceled?.invoke()
                 }
 
-                else -> {
-                    DeunaLogs.debug("ElementsBridge Unhandled event: $event")
-                }
+                else -> {}
             }
 
             if (closeEvents.contains(event)) {

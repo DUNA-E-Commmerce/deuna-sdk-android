@@ -44,8 +44,11 @@ class MainActivity() : ComponentActivity() {
                     }
                     composable(Screens.SavedCardSuccessful.route) {
                         VaultSuccessfulScreen(
-                            card = JSONObject( it.arguments?.getString("jsonCard")!!).toMap()
+                            card = JSONObject(it.arguments?.getString("jsonCard")!!).toMap()
                         )
+                    }
+                    composable(Screens.ClickToPaySuccessful.route) {
+                        ClickToPaySuccessfulScreen()
                     }
                 }
             }

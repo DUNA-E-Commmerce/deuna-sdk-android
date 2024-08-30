@@ -61,6 +61,18 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
         })
     }
 
+    fun clickToPay() {
+        homeViewModel.clickToPay(context = context, completion = { result ->
+            when (result) {
+                is ElementsResult.Canceled -> Log.d("Click To Pay", "Canceled")
+                is ElementsResult.Error -> Log.d("Click To Pay ERROR", result.error.type.message)
+                is ElementsResult.Success -> navController.navigate(
+                    "/click-to-pay-success"
+                )
+            }
+        })
+    }
+
     // Function to save card and navigate to the success screen upon successful card saving
     fun saveCard() {
         homeViewModel.saveCard(context = context, completion = { result ->
@@ -105,6 +117,11 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             ElevatedButton(modifier = Modifier.fillMaxWidth(),
                 onClick = { performPaymentWithCheckout() }) {
                 Text(text = "Show Checkout")
+            }
+
+            ElevatedButton(modifier = Modifier.fillMaxWidth(),
+                onClick = { clickToPay() }) {
+                Text(text = "Click To Pay")
             }
 
             ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = { saveCard() }) {
