@@ -269,6 +269,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Show the widget that processes a payment using Click to Pay.
+     */
     private fun clickToPay() {
         deunaSdk.initElements(
             context = this,

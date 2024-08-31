@@ -196,6 +196,9 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
     }
 
 
+    /**
+     * Show the widget that processes a payment using Click to Pay.
+     */
     fun clickToPay(
         context: Context,
         completion: (ElementsResult) -> Unit,
