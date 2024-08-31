@@ -9,16 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 
 class ClickToPaySuccessfulActivity : AppCompatActivity() {
 
-    companion object {
-        const val EXTRA_CLICK_TO_PAY_DATA = "EXTRA_CLICK_TO_PAY_DATA"
-    }
-
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_thank_you)
-
-//        val card = JSONObject(intent.getStringExtra(EXTRA_CLICK_TO_PAY_DATA)!!).toMap()
         findViewById<TextView>(R.id.save_card_message).text = """
             Pago con Click To Pay
             Exitoso

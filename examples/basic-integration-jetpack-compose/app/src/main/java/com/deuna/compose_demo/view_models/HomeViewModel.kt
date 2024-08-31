@@ -207,7 +207,7 @@ class HomeViewModel(private val deunaSDK: DeunaSDK) : ViewModel() {
             ),
             types = listOf(
                 mapOf(
-                    "name" to "click_to_pay"
+                    "name" to ElementsWidget.CLICK_TO_PAY
                 )
             ),
             callbacks = ElementsCallbacks().apply {

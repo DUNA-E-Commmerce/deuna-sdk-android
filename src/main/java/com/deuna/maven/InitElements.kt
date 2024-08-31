@@ -22,7 +22,7 @@ import java.lang.IllegalStateException
  * Example:
  * ```
  * types = listOf(
- *    mapOf( "name" to "click_to_pay")
+ *    mapOf( "name" to ElementsWidget.VAULT)
  * )
  * ```
  * @throws IllegalStateException if the passed userToken is not valid
@@ -41,36 +41,37 @@ fun DeunaSDK.initElements(
     ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val queryParameters = mutableMapOf(
-        QueryParameters.MODE.value to QueryParameters.WIDGET.value,
-        QueryParameters.PUBLIC_API_KEY.value to publicApiKey
+        QueryParameters.MODE to QueryParameters.WIDGET,
+        QueryParameters.PUBLIC_API_KEY to publicApiKey
     )
 
     when {
-        !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+        !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN] = userToken
         userInfo != null && userInfo.isValid() -> {
             queryParameters.apply {
-                put(QueryParameters.FIRST_NAME.value, userInfo.firstName)
-                put(QueryParameters.LAST_NAME.value, userInfo.lastName)
-                put(QueryParameters.EMAIL.value, userInfo.email)
+                put(QueryParameters.FIRST_NAME, userInfo.firstName)
+                put(QueryParameters.LAST_NAME, userInfo.lastName)
+                put(QueryParameters.EMAIL, userInfo.email)
             }
         }
 
         else -> {
-            DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
+            DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO)
             callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
             return
         }
     }
 
     cssFile?.let {
-        queryParameters[QueryParameters.CSS_FILE.value] = it
+        queryParameters[QueryParameters.CSS_FILE] = it
     }
 
-    val path = types.firstOrNull()?.get(ElementsTypeKey.NAME.value)
-        ?.takeIf { it is String && it.isNotEmpty() }
-        ?.let { "/$it" } ?: ElementsTypeName.VAULT.value
+    // Construct the base URL for elements and the URL string
+    // by default the VAULT widget is showed if the types list is empty
+    val widgetName = types.firstOrNull()?.get(ElementsTypeKey.NAME)
+        ?.takeIf { it is String && it.isNotEmpty() } ?: ElementsWidget.VAULT
 
-    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl$path", queryParams = queryParameters)
+    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)

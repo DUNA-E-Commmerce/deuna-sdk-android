@@ -45,29 +45,29 @@ fun DeunaSDK.initPaymentWidget(
     PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val queryParameters = mutableMapOf<String, String>()
-    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
+    queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
 
     if (!userToken.isNullOrEmpty()) {
-        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+        queryParameters[QueryParameters.USER_TOKEN] = userToken
     }
 
     if (!cssFile.isNullOrEmpty()) {
-        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+        queryParameters[QueryParameters.CSS_FILE] = cssFile
     }
 
     val xpropsB64 = mutableMapOf<String, Any>()
-    xpropsB64[QueryParameters.PUBLIC_API_KEY.value] = publicApiKey
+    xpropsB64[QueryParameters.PUBLIC_API_KEY] = publicApiKey
 
 
     if (paymentMethods.isNotEmpty()) {
-        xpropsB64[QueryParameters.PAYMENT_METHODS.value] = paymentMethods
+        xpropsB64[QueryParameters.PAYMENT_METHODS] = paymentMethods
     }
 
     if (checkoutModules.isNotEmpty()) {
-        xpropsB64[QueryParameters.CHECKOUT_MODULES.value] = checkoutModules
+        xpropsB64[QueryParameters.CHECKOUT_MODULES] = checkoutModules
     }
 
-    queryParameters[QueryParameters.XPROPS_B64.value] = xpropsB64.toBase64()
+    queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
 
     val paymentUrl = Utils.buildUrl(
         baseUrl = "$baseUrl/now/$orderToken",

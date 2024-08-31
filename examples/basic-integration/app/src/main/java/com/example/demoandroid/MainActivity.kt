@@ -27,7 +27,7 @@ const val DEBUG_TAG = "👀 DeunaSDK"
 class MainActivity : AppCompatActivity() {
     private val deunaSdk = DeunaSDK(
         environment = Environment.SANDBOX,
-        publicApiKey = "YOUR_PUBLIC_API_KEY",
+        publicApiKey = "YOUR_API_KEY",
     )
 
     private val orderToken: String
@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
             ),
             types = listOf(
                 mapOf(
-                    "name" to "click_to_pay"
+                    "name" to ElementsWidget.CLICK_TO_PAY
                 )
             ),
             callbacks = ElementsCallbacks().apply {
