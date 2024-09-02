@@ -1,4 +1,4 @@
-package com.example.demoandroid
+package com.example.demoandroid.screens
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -12,6 +12,7 @@ import android.widget.ListView
 import android.widget.TextView
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.toMap
+import com.example.demoandroid.R
 import org.json.JSONObject
 
 class PaymentSuccessfulActivity : Activity() {

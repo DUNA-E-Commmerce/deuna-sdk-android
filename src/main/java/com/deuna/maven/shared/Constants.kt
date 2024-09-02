@@ -7,35 +7,50 @@ enum class ErrorCodes {
     UNKNOWN_ERROR
 }
 
-enum class ErrorMessages(val message: String) {
-    UNKNOWN("Unknown error")
+object ErrorMessages {
+    const val UNKNOWN = "Unknown error"
 }
 
-enum class QueryParameters(val value: String) {
-    MODE("mode"),
-    WIDGET("widget"),
-    XPROPS_B64("xpropsB64"),
-    PUBLIC_API_KEY("publicApiKey"),
-    USER_TOKEN("userToken"),
-    CSS_FILE("cssFile"),
-    PAYMENT_METHODS("paymentMethods"),
-    CHECKOUT_MODULES("checkoutModules"),
-    FIRST_NAME("firstName"),
-    LAST_NAME("lastName"),
-    EMAIL("email")
+object ElementsTypeKey {
+    const val NAME = "name"
 }
 
-enum class PaymentsErrorMessages(val message: String) {
-    ORDER_TOKEN_MUST_NOT_BE_EMPTY("OrderToken must not be empty."),
-    PAYMENT_LINK_COULD_NOT_BE_GENERATED("Payment link could not be generated."),
-    NO_INTERNET_CONNECTION("No internet connection available."),
-    ORDER_COULD_NOT_BE_RETRIEVED("Order could not be retrieved.");
+object ElementsWidget {
+    const val VAULT = "vault"
+    const val CLICK_TO_PAY = "click_to_pay"
 }
 
-enum class ElementsErrorMessages(val message: String) {
-    PAYMENT_LINK_COULD_NOT_BE_GENERATED("Vault link could not be generated."),
-    INVALID_USER_INFO("Invalid instance of UserInfo: check the firstName, lastName and email fields."),
-    MISSING_USER_TOKEN_OR_USER_INFO("userToken or userInfo must be passed.")
+object QueryParameters {
+    const val MODE = "mode"
+    const val WIDGET = "widget"
+    const val XPROPS_B64 = "xpropsB64"
+    const val PUBLIC_API_KEY = "publicApiKey"
+    const val USER_TOKEN = "userToken"
+    const val CSS_FILE = "cssFile"
+    const val PAYMENT_METHODS = "paymentMethods"
+    const val CHECKOUT_MODULES = "checkoutModules"
+    const val FIRST_NAME = "firstName"
+    const val LAST_NAME = "lastName"
+    const val EMAIL = "email"
+}
+
+object PaymentsErrorMessages {
+    const val ORDER_TOKEN_MUST_NOT_BE_EMPTY = "OrderToken must not be empty."
+    const val PAYMENT_LINK_COULD_NOT_BE_GENERATED = "Payment link could not be generated."
+    const val NO_INTERNET_CONNECTION = "No internet connection available."
+    const val ORDER_COULD_NOT_BE_RETRIEVED = "Order could not be retrieved."
+}
+
+object ElementsErrorMessages {
+    const val PAYMENT_LINK_COULD_NOT_BE_GENERATED = "Vault link could not be generated."
+
+    const val INVALID_USER_INFO =
+        "Invalid instance of UserInfo: check the firstName, lastName and email fields."
+
+    const val MISSING_USER_INFO =
+        "userInfo must be passed when the types parameter contains click_to_pay."
+
+    const val MISSING_USER_TOKEN_OR_USER_INFO = "userToken or userInfo must be passed."
 }
 
 class PaymentWidgetErrors {
@@ -48,7 +63,7 @@ class PaymentWidgetErrors {
             type = PaymentsError.Type.INVALID_ORDER_TOKEN,
             metadata = PaymentsError.Metadata(
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
-                message = PaymentsErrorMessages.ORDER_TOKEN_MUST_NOT_BE_EMPTY.message
+                message = PaymentsErrorMessages.ORDER_TOKEN_MUST_NOT_BE_EMPTY
             )
         )
 
@@ -56,7 +71,7 @@ class PaymentWidgetErrors {
             type = PaymentsError.Type.INITIALIZATION_FAILED,
             metadata = PaymentsError.Metadata(
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
-                message = PaymentsErrorMessages.PAYMENT_LINK_COULD_NOT_BE_GENERATED.message
+                message = PaymentsErrorMessages.PAYMENT_LINK_COULD_NOT_BE_GENERATED
             )
         )
 
@@ -77,7 +92,15 @@ class ElementsErrors {
             type = ElementsError.Type.INITIALIZATION_FAILED,
             metadata = ElementsError.Metadata(
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
-                message = ElementsErrorMessages.INVALID_USER_INFO.message
+                message = ElementsErrorMessages.INVALID_USER_INFO
+            )
+        )
+
+        val missingUserInfo = ElementsError(
+            type = ElementsError.Type.INITIALIZATION_FAILED,
+            metadata = ElementsError.Metadata(
+                code = ErrorCodes.INITIALIZATION_ERROR.name,
+                message = ElementsErrorMessages.MISSING_USER_INFO
             )
         )
 
@@ -85,7 +108,7 @@ class ElementsErrors {
             type = ElementsError.Type.INITIALIZATION_FAILED,
             metadata = ElementsError.Metadata(
                 code = ErrorCodes.INITIALIZATION_ERROR.name,
-                message = ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message
+                message = ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO
             )
         )
 

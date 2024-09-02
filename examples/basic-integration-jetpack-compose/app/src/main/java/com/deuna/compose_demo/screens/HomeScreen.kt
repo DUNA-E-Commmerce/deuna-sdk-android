@@ -1,7 +1,6 @@
 package com.deuna.compose_demo.screens
 
 import android.annotation.*
-import android.content.*
 import android.net.*
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -11,9 +10,12 @@ import androidx.compose.ui.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
-import androidx.navigation.*
 import com.deuna.compose_demo.*
-import com.deuna.compose_demo.view_models.*
+import com.deuna.compose_demo.view_models.home.HomeViewModel
+import com.deuna.compose_demo.view_models.home.clickToPay
+import com.deuna.compose_demo.view_models.home.saveCard
+import com.deuna.compose_demo.view_models.home.showCheckout
+import com.deuna.compose_demo.view_models.home.showPaymentWidget
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
 import org.json.JSONObject
@@ -56,6 +58,18 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
                 is CheckoutResult.Error -> paymentError = result.error
                 is CheckoutResult.Success -> navController.navigate(
                     "/payment-success/${Uri.encode(JSONObject(result.order).toString())}"
+                )
+            }
+        })
+    }
+
+    fun clickToPay() {
+        homeViewModel.clickToPay(context = context, completion = { result ->
+            when (result) {
+                is ElementsResult.Canceled -> Log.d("Click To Pay", "Canceled")
+                is ElementsResult.Error -> Log.d("Click To Pay ERROR", result.error.type.message)
+                is ElementsResult.Success -> navController.navigate(
+                    "/click-to-pay-success"
                 )
             }
         })
@@ -107,6 +121,11 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
                 Text(text = "Show Checkout")
             }
 
+            ElevatedButton(modifier = Modifier.fillMaxWidth(),
+                onClick = { clickToPay() }) {
+                Text(text = "Click To Pay")
+            }
+
             ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = { saveCard() }) {
                 Text(text = "Save Card")
             }
@@ -135,8 +154,6 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             },
         )
     }
-
-
 }
 
 /**

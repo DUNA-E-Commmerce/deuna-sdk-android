@@ -8,6 +8,7 @@ sealed class Screens(val route: String) {
   data object Home : Screens(route = "/home")
   data object PaymentSuccessful : Screens(route = "/payment-success/{jsonOrder}")
   data object SavedCardSuccessful : Screens(route = "/vault-success/{jsonCard}")
+  data object ClickToPaySuccessful : Screens(route = "/click-to-pay-success")
 }
 
 val LocalNavController = compositionLocalOf<NavHostController> {

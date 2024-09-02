@@ -1,4 +1,4 @@
-package com.example.demoandroid
+package com.example.demoandroid.screens
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -8,13 +8,10 @@ import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
 import com.deuna.maven.shared.toMap
+import com.example.demoandroid.MainActivity
+import com.example.demoandroid.R
 import org.json.JSONObject
 
-fun getFormattedMapString(map: Map<String, Any>): String {
-    return map.entries.joinToString(separator = "\n") { (key, value) ->
-        "$key: $value"
-    }
-}
 
 class SaveCardSuccessfulActivity : AppCompatActivity() {
 

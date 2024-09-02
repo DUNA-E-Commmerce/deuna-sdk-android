@@ -18,6 +18,13 @@ import java.lang.IllegalStateException
  * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
  * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param types (Optional) A list of the widgets to be rendered.
+ * Example:
+ * ```
+ * types = listOf(
+ *    mapOf( "name" to ElementsWidget.VAULT)
+ * )
+ * ```
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(
@@ -26,39 +33,45 @@ fun DeunaSDK.initElements(
     closeEvents: Set<ElementsEvent> = emptySet(),
     userToken: String? = null,
     userInfo: UserInfo? = null,
-    cssFile: String? = null
+    cssFile: String? = null,
+    types: List<Json> = emptyList(),
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
     ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
-    val queryParameters = mutableMapOf<String, String>()
-    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
-    queryParameters[QueryParameters.PUBLIC_API_KEY.value] = publicApiKey
+    val queryParameters = mutableMapOf(
+        QueryParameters.MODE to QueryParameters.WIDGET,
+        QueryParameters.PUBLIC_API_KEY to publicApiKey
+    )
 
-    if (!userToken.isNullOrEmpty()) {
-        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
-    } else if (userInfo != null) {
-        if (!userInfo.isValid()) {
-            // if the user token is not passed or is empty the userInfo must be passed
-            DeunaLogs.error(ElementsErrorMessages.INVALID_USER_INFO.message)
-            callbacks.onError?.invoke(ElementsErrors.invalidUserInfo)
+    when {
+        !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN] = userToken
+        userInfo != null && userInfo.isValid() -> {
+            queryParameters.apply {
+                put(QueryParameters.FIRST_NAME, userInfo.firstName)
+                put(QueryParameters.LAST_NAME, userInfo.lastName)
+                put(QueryParameters.EMAIL, userInfo.email)
+            }
+        }
+
+        else -> {
+            DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO)
+            callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
             return
         }
-        queryParameters[QueryParameters.FIRST_NAME.value] = userInfo.firstName
-        queryParameters[QueryParameters.LAST_NAME.value] = userInfo.lastName
-        queryParameters[QueryParameters.EMAIL.value] = userInfo.email
-    } else {
-        // if the user token is not passed or is empty the userInfo must be passed
-        DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO.message)
-        callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
     }
 
-    if (!cssFile.isNullOrEmpty()) {
-        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+    cssFile?.let {
+        queryParameters[QueryParameters.CSS_FILE] = it
     }
 
-    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/vault", queryParams = queryParameters)
+    // Construct the base URL for elements and the URL string
+    // by default the VAULT widget is showed if the types list is empty
+    val widgetName = types.firstOrNull()?.get(ElementsTypeKey.NAME)
+        ?.takeIf { it is String && it.isNotEmpty() } ?: ElementsWidget.VAULT
+
+    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)

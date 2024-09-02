@@ -5,7 +5,7 @@ import androidx.activity.*
 import androidx.activity.compose.*
 import androidx.navigation.compose.*
 import com.deuna.compose_demo.screens.*
-import com.deuna.compose_demo.view_models.*
+import com.deuna.compose_demo.view_models.home.HomeViewModel
 import com.deuna.maven.*
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.toMap
@@ -44,8 +44,11 @@ class MainActivity() : ComponentActivity() {
                     }
                     composable(Screens.SavedCardSuccessful.route) {
                         VaultSuccessfulScreen(
-                            card = JSONObject( it.arguments?.getString("jsonCard")!!).toMap()
+                            card = JSONObject(it.arguments?.getString("jsonCard")!!).toMap()
                         )
+                    }
+                    composable(Screens.ClickToPaySuccessful.route) {
+                        ClickToPaySuccessfulScreen()
                     }
                 }
             }

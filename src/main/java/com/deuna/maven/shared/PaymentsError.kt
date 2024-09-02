@@ -41,7 +41,7 @@ data class PaymentsError(
                 type = type,
                 metadata = Metadata(
                     code = errorCode ?: ErrorCodes.UNKNOWN_ERROR.name,
-                    message = errorMessage ?: ErrorMessages.UNKNOWN.message
+                    message = errorMessage ?: ErrorMessages.UNKNOWN
                 ),
                 order = order
             )

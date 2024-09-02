@@ -103,14 +103,14 @@ class CheckoutActivity() : BaseWebViewActivity() {
                     }
 
                     val queryParameters = mutableMapOf<String, String>()
-                    queryParameters[QueryParameters.MODE.value] = QueryParameters.WIDGET.value
+                    queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
 
                     if (userToken != null) {
-                        queryParameters[QueryParameters.USER_TOKEN.value] = userToken
+                        queryParameters[QueryParameters.USER_TOKEN] = userToken
                     }
 
                     if (cssFile != null) {
-                        queryParameters[QueryParameters.CSS_FILE.value] = cssFile
+                        queryParameters[QueryParameters.CSS_FILE] = cssFile
                     }
 
                     loadUrl(
