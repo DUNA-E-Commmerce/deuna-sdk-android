@@ -1,7 +1,6 @@
 package com.deuna.compose_demo.screens
 
 import android.annotation.*
-import android.content.*
 import android.net.*
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -11,9 +10,12 @@ import androidx.compose.ui.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
-import androidx.navigation.*
 import com.deuna.compose_demo.*
-import com.deuna.compose_demo.view_models.*
+import com.deuna.compose_demo.view_models.home.HomeViewModel
+import com.deuna.compose_demo.view_models.home.clickToPay
+import com.deuna.compose_demo.view_models.home.saveCard
+import com.deuna.compose_demo.view_models.home.showCheckout
+import com.deuna.compose_demo.view_models.home.showPaymentWidget
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
 import org.json.JSONObject
@@ -152,8 +154,6 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             },
         )
     }
-
-
 }
 
 /**
