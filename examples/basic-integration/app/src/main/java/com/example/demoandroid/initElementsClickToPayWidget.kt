@@ -6,8 +6,10 @@ import com.deuna.maven.element.domain.ElementsError
 import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.ElementsWidget
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
-import com.example.demoandroid.screens.ClickToPaySuccessfulActivity
+import com.example.demoandroid.screens.SaveCardSuccessfulActivity
+import org.json.JSONObject
 
 /**
  * Show the widget that processes a payment using Click to Pay.
@@ -19,7 +21,7 @@ fun MainActivity.clickToPay() {
             // required for click_to_pay
             firstName = "Darwin",
             lastName = "Morocho",
-            email = "dmorocho@deuna.com",
+            email = "dmorocho+3@deuna.com",
         ),
         types = listOf(
             mapOf(
@@ -27,9 +29,18 @@ fun MainActivity.clickToPay() {
             )
         ),
         callbacks = ElementsCallbacks().apply {
-            onSuccess = {
+            onSuccess = { data ->
                 deunaSdk.close()
-                Intent(context, ClickToPaySuccessfulActivity::class.java).apply {
+                Intent(context, SaveCardSuccessfulActivity::class.java).apply {
+                    putExtra(
+                        SaveCardSuccessfulActivity.ARGUMENTS_DATA,
+                        JSONObject(
+                            mapOf(
+                                "title" to "Click To Pay enrollment successful",
+                                "savedCardData"  to (data["metadata"] as Json)["createdCard"] as Json
+                            )
+                        ).toString()
+                    )
                     startActivity(this)
                 }
             }
