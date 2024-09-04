@@ -20,7 +20,7 @@ const val DEBUG_TAG = "👀 DeunaSDK"
 class MainActivity : AppCompatActivity() {
     val deunaSdk = DeunaSDK(
         environment = Environment.SANDBOX,
-        publicApiKey = "YOUR_API_KEY",
+        publicApiKey = "YOUR_PUBLIC_API_KEY",
     )
 
     val context: Context

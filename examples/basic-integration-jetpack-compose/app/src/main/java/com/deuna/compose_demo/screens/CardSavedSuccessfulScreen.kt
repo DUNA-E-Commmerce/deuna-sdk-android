@@ -13,7 +13,7 @@ import org.json.JSONObject
 
 
 @Composable
-fun VaultSuccessfulScreen(card: Json) {
+fun CardSavedSuccessfulScreen(title: String, savedCardData: Json) {
     val navController = LocalNavController.current
 
     Scaffold { innerPadding ->
@@ -24,12 +24,14 @@ fun VaultSuccessfulScreen(card: Json) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Card Saved")
+            Text(text = title)
             Box(modifier = Modifier.height(20.dp))
-            Text(text = "ID: ${card["id"]}")
-            Text(text = "Holder Name: ${card["cardHolder"]}")
-            Text(text = "First Six Digits: ${card["firstSix"]}")
-            Text(text = "Last Four Digits: ${card["lastFour"]}")
+            Text(text = "ID: ${savedCardData["id"]}")
+            Text(text = "Holder Name: ${savedCardData["cardHolder"] ?: savedCardData["card_holder"]}")
+            Text(text = "Card brand: ${savedCardData["company"]}")
+            Text(text = "Expiration date: ${savedCardData["expirationDate"] ?: savedCardData["expiration_date"]}")
+            Text(text = "First Six Digits: ${savedCardData["firstSix"] ?: savedCardData["first_six"]}")
+            Text(text = "Last Four Digits: ${savedCardData["lastFour"] ?: savedCardData["last_four"]}")
             Box(modifier = Modifier.height(20.dp))
             ElevatedButton(
                 onClick = {
@@ -48,8 +50,9 @@ fun VaultSuccessfulScreen(card: Json) {
 @Composable
 private fun Preview() {
     Navigator {
-        VaultSuccessfulScreen(
-            card = JSONObject(
+        CardSavedSuccessfulScreen(
+            title = "Card saved successfully",
+            savedCardData = JSONObject(
                 """
       {
       "id": "4fd0584b-d336-4406-ad63-cc253fd47f14",

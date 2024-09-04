@@ -23,12 +23,16 @@ fun MainActivity.initElementsVaultWidget() {
         ) else null,
         callbacks = ElementsCallbacks().apply {
             onSuccess = { data ->
-                val metadata = (data["metadata"] as Json)["createdCard"] as Json
                 deunaSdk.close()
                 Intent(context, SaveCardSuccessfulActivity::class.java).apply {
                     putExtra(
-                        SaveCardSuccessfulActivity.EXTRA_CREATED_CARD,
-                        JSONObject(metadata).toString()
+                        SaveCardSuccessfulActivity.ARGUMENTS_DATA,
+                        JSONObject(
+                            mapOf(
+                                "title" to "Card saved successfully",
+                                "savedCardData"  to (data["metadata"] as Json)["createdCard"] as Json
+                            )
+                        ).toString()
                     )
                     startActivity(this)
                 }

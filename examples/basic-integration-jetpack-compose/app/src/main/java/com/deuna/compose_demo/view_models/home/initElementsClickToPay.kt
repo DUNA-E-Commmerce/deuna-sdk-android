@@ -30,10 +30,14 @@ fun HomeViewModel.clickToPay(
             )
         ),
         callbacks = ElementsCallbacks().apply {
-            onSuccess = {
+            onSuccess = { response ->
                 deunaSDK.close()
                 viewModelScope.launch {
-                    completion(ElementsResult.Success(it["metadata"] as Json))
+                    completion(
+                        ElementsResult.Success(
+                            (response["metadata"] as Json)["createdCard"] as Json
+                        )
+                    )
                 }
             }
             onError = {

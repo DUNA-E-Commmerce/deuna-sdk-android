@@ -37,6 +37,22 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
     // Retrieve the Context from the composition's LocalContext
     val context = LocalContext.current
 
+
+    fun handleCardSavedSuccess(title: String, savedCardData: Json) {
+        navController.navigate(
+            "/vault-success/${
+                Uri.encode(
+                    JSONObject(
+                        mapOf(
+                            "title" to title,
+                            "savedCardData" to savedCardData
+                        )
+                    ).toString()
+                )
+            }"
+        )
+    }
+
     // Function to perform payment and navigate to the success screen upon successful payment
     fun performPaymentWithPaymentWidget() {
         homeViewModel.showPaymentWidget(context = context, completion = { result ->
@@ -68,8 +84,8 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             when (result) {
                 is ElementsResult.Canceled -> Log.d("Click To Pay", "Canceled")
                 is ElementsResult.Error -> Log.d("Click To Pay ERROR", result.error.type.message)
-                is ElementsResult.Success -> navController.navigate(
-                    "/click-to-pay-success"
+                is ElementsResult.Success -> handleCardSavedSuccess(
+                    title = "Click To Pay enrollment successful", savedCardData = result.savedCard
                 )
             }
         })
@@ -81,12 +97,13 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             when (result) {
                 is ElementsResult.Canceled -> Log.d("SAVING CARD", "Canceled")
                 is ElementsResult.Error -> Log.d("SAVING CARD ERROR", result.error.type.message)
-                is ElementsResult.Success -> navController.navigate(
-                    "/vault-success/${Uri.encode(JSONObject(result.savedCard).toString())}"
+                is ElementsResult.Success -> handleCardSavedSuccess(
+                    title = "Card saved successfully", savedCardData = result.savedCard
                 )
             }
         })
     }
+
 
     // Build the UI using Scaffold and Column composables
     Scaffold {

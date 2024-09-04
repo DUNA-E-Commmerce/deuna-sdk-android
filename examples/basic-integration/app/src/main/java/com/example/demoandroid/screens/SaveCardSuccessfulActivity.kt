@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.toMap
 import com.example.demoandroid.MainActivity
 import com.example.demoandroid.R
@@ -16,7 +17,7 @@ import org.json.JSONObject
 class SaveCardSuccessfulActivity : AppCompatActivity() {
 
     companion object {
-        const val EXTRA_CREATED_CARD = "EXTRA_CREATED_CARD"
+        const val ARGUMENTS_DATA = "ARGUMENTS_DATA"
     }
 
     @SuppressLint("SetTextI18n")
@@ -24,15 +25,17 @@ class SaveCardSuccessfulActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_thank_you)
 
-        val card = JSONObject(intent.getStringExtra(EXTRA_CREATED_CARD)!!).toMap()
+        val arguments = JSONObject(intent.getStringExtra(ARGUMENTS_DATA)!!).toMap()
+        val savedCardData = arguments["savedCardData"] as Json
+
         findViewById<TextView>(R.id.save_card_message).text = """
-            TARJETA GUARDADA
+           ${arguments["title"]}
        
-            ID: ${card["id"]}
-            Primeros 6 dígitos: ${card["firstSix"]}
-            Últimos 4 dígitos: ${card["lastFour"]}
-            Nombre en la tarjeta: ${card["cardHolder"]}
-            Fecha de expiración: ${card["expirationDate"]}
+            ID: ${savedCardData["id"]}
+            Primeros 6 dígitos: ${savedCardData["firstSix"] ?: savedCardData["first_six"]}
+            Últimos 4 dígitos: ${savedCardData["lastFour"] ?: savedCardData["last_four"]}
+            Nombre en la tarjeta: ${savedCardData["cardHolder"] ?: savedCardData["card_holder"]}
+            Fecha de expiración: ${savedCardData["expirationDate"] ?: savedCardData["expiration_date"]}
         """.trimIndent()
     }
 
