@@ -203,13 +203,6 @@ abstract class BaseWebViewActivity : Activity() {
 
         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
 
-            /// Disable duplicated urls
-            if (url == this@BaseWebViewActivity.webView.url) {
-                return
-            }
-
-            DeunaLogs.info("onLoadUrl $url")
-
             // handle legal urls
             if (url.startsWith(LEGAL_URL_HOST)) {
                 DeunaLogs.info("open in external url $url")

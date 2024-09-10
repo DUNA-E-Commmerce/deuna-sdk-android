@@ -4,6 +4,7 @@ import android.util.Log
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentsError
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import org.json.JSONObject
 
@@ -13,16 +14,19 @@ import org.json.JSONObject
  */
 fun MainActivity.showPaymentWidget() {
     deunaSdk.initPaymentWidget(
-        context = this, orderToken = orderToken, styleFile = "YOUR_THEME_UUID", // optional
+        context = this, orderToken = orderToken,
+        styleFile = "YOUR_THEME_UUID", // optional
         callbacks = PaymentWidgetCallbacks().apply {
-            onSuccess = { data ->
+            onSuccess = { order ->
                 deunaSdk.close()
-                handlePaymentSuccess(da ta)
+                handlePaymentSuccess(order)
             }
-            onCanceled = {
-                Log.d(DEBUG_TAG, "Payment was canceled by user")
+            onClosed = { action ->
+                if (action == CloseAction.userAction) {
+                    Log.d(DEBUG_TAG, "Payment was canceled by user")
+                }
             }
-            onCardBinDetected = { cardBinMetadata, refetchOrder ->
+            onCardBinDetected = { cardBinMetadata ->
                 Log.d(DEBUG_TAG, "cardBinMetadata: $cardBinMetadata")
                 if (cardBinMetadata != null) {
 
@@ -55,20 +59,10 @@ fun MainActivity.showPaymentWidget() {
                         ).toMap()
                     )
 
-                    refetchOrder { order ->
-                        Log.d(DEBUG_TAG, "onCardBinDetected > refetchOrder: $order")
-                    }
-
                 }
             }
-            onInstallmentSelected = { metadata, refetchOrder ->
+            onInstallmentSelected = { metadata ->
                 Log.d(DEBUG_TAG, "installmentMetadata: $metadata")
-                refetchOrder { order ->
-                    Log.d(DEBUG_TAG, "onInstallmentSelected > refetchOrder: $order")
-                }
-            }
-            onClosed = {
-                Log.d(DEBUG_TAG, "Widget was closed")
             }
             onError = { error ->
                 Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
@@ -86,6 +80,7 @@ fun MainActivity.showPaymentWidget() {
             onEventDispatch = { type, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
             }
-        }, userToken = userToken
+        },
+        userToken = userToken,
     )
 }

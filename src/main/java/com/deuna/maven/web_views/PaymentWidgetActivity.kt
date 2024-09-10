@@ -5,6 +5,7 @@ import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WebViewBridge
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 
 class PaymentWidgetActivity() : BaseWebViewActivity() {
@@ -68,12 +69,13 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     }
 
     override fun onCanceledByUser() {
-        callbacks?.onCanceled?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.userAction)
+        callbacks?.onClosed = null
     }
 
     override fun onDestroy() {
         // Notify callbacks about activity closure
-        callbacks?.onClosed?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.systemAction)
         activities.remove(sdkInstanceId!!)
         super.onDestroy()
     }

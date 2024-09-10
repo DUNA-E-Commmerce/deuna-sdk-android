@@ -5,6 +5,7 @@ import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.base.*
 import retrofit2.*
 
@@ -164,11 +165,12 @@ class CheckoutActivity() : BaseWebViewActivity() {
     }
 
     override fun onCanceledByUser() {
-        callbacks?.onCanceled?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.userAction)
+        callbacks?.onClosed = null
     }
 
     override fun onDestroy() {
-        callbacks?.onClosed?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.systemAction)
         super.onDestroy()
     }
 

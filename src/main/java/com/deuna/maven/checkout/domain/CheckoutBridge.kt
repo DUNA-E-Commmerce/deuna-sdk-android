@@ -3,6 +3,7 @@ package com.deuna.maven.checkout.domain
 import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.CheckoutActivity
 import org.json.*
 
@@ -59,8 +60,8 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
+                    activity.onCanceledByUser()
                     closeWebView(activity.sdkInstanceId!!)
-                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {

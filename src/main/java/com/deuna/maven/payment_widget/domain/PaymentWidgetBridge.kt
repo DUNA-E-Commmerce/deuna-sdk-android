@@ -2,12 +2,12 @@ package com.deuna.maven.payment_widget.domain
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.checkout.domain.CheckoutEvent
-import com.deuna.maven.closePaymentWidget
 import com.deuna.maven.closeWebView
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import org.json.JSONException
@@ -18,18 +18,9 @@ class PaymentWidgetBridge(
     private val activity: PaymentWidgetActivity
 ) : WebViewBridge(name = "android") {
 
-
-    private val refetchOrderRequests = mutableMapOf<Int, (Json?) -> Unit>()
-    private var refetchOrderRequestId = 0
-
     @JavascriptInterface
     fun consoleLog(message: String) {
         DeunaLogs.info("ConsoleLogBridge: $message")
-    }
-
-    @JavascriptInterface
-    fun onRefetchOrder(message: String) {
-        handleEvent(message)
     }
 
     override fun handleEvent(message: String) {
@@ -43,16 +34,13 @@ class PaymentWidgetBridge(
                 return
             }
 
-            try {
-                val checkoutEvent = CheckoutEvent.valueOf(type)
-                activity.callbacks?.onEventDispatch?.invoke(checkoutEvent, data)
-            } catch (_: Exception) {
-            }
+            val event = CheckoutEvent.valueOf(type)
 
-            val event = PaymentWidgetEvent.valueOf(type)
+            val checkoutEvent = CheckoutEvent.valueOf(type)
+            activity.callbacks?.onEventDispatch?.invoke(checkoutEvent, data)
 
             when (event) {
-                PaymentWidgetEvent.purchaseError -> {
+                CheckoutEvent.purchaseError -> {
                     activity.updateCloseEnabled(true)
                     val error = PaymentsError.fromJson(
                         type = PaymentsError.Type.PAYMENT_ERROR, data = data
@@ -62,29 +50,27 @@ class PaymentWidgetBridge(
                     }
                 }
 
-                PaymentWidgetEvent.onBinDetected -> {
+                CheckoutEvent.onBinDetected -> {
                     handleCardBinDetected(data["metadata"] as? Json)
                 }
 
-                PaymentWidgetEvent.onInstallmentSelected -> {
+                CheckoutEvent.onInstallmentSelected -> {
                     handleInstallmentSelected(data["metadata"] as? Json)
                 }
 
-                PaymentWidgetEvent.refetchOrder -> {
-                    handleOnRefetchOrder(json)
-                }
-
-                PaymentWidgetEvent.paymentProcessing -> {
+                CheckoutEvent.paymentProcessing -> {
                     activity.updateCloseEnabled(false)
                     activity.callbacks?.onPaymentProcessing?.invoke()
                 }
 
-                PaymentWidgetEvent.purchase -> activity.callbacks?.onSuccess?.invoke(data)
-                PaymentWidgetEvent.paymentMethods3dsInitiated -> {}
-                PaymentWidgetEvent.linkClose -> {
+                CheckoutEvent.purchase -> activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
+                CheckoutEvent.paymentMethods3dsInitiated -> {}
+                CheckoutEvent.linkClose -> {
+                    activity.onCanceledByUser()
                     closeWebView(activity.sdkInstanceId!!)
-                    activity.callbacks?.onCanceled?.invoke()
                 }
+
+                else -> {}
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {
@@ -94,67 +80,10 @@ class PaymentWidgetBridge(
 
 
     private fun handleCardBinDetected(metadata: Json?) {
-        if (metadata == null) {
-            activity.callbacks?.onCardBinDetected?.invoke(
-                null
-            ) { callback -> refetchOrder(callback) }
-            return
-        }
-
-        activity.callbacks?.onCardBinDetected?.invoke(
-            metadata,
-        ) { callback -> refetchOrder(callback) }
+        activity.callbacks?.onCardBinDetected?.invoke(metadata)
     }
 
     private fun handleInstallmentSelected(metadata: Json?) {
-        if (metadata == null) {
-            activity.callbacks?.onInstallmentSelected?.invoke(
-                null
-            ) { callback -> refetchOrder(callback) }
-            return
-        }
-
-        activity.callbacks?.onInstallmentSelected?.invoke(
-            metadata,
-        ) { callback -> refetchOrder(callback) }
-    }
-
-    private fun handleOnRefetchOrder(json: Json) {
-        val requestId = json["requestId"] as? Int
-        if (!refetchOrderRequests.contains(requestId)) {
-            return
-        }
-
-        refetchOrderRequests[requestId]?.invoke(
-            json["data"] as? Json
-        )
-        refetchOrderRequests.remove(requestId)
-    }
-
-    private fun refetchOrder(callback: (Json?) -> Unit) {
-        refetchOrderRequestId++
-        refetchOrderRequests[refetchOrderRequestId] = callback
-
-        activity.runOnUiThread {
-            activity.webView.evaluateJavascript(
-                """
-        (function() {
-            function refetchOrder(callback) {
-                deunaRefetchOrder()
-                    .then(data => {
-                        callback({type:"refetchOrder", data: data , requestId: $refetchOrderRequestId });
-                    })
-                    .catch(error => {
-                        callback({type:"refetchOrder", data: null , requestId: $refetchOrderRequestId });
-                    });
-            }
-
-            refetchOrder(function(result) {
-                android.onRefetchOrder(JSON.stringify(result));
-            });
-        })();
-            """.trimIndent(), null
-            )
-        }
+        activity.callbacks?.onInstallmentSelected?.invoke(metadata)
     }
 }

@@ -8,6 +8,7 @@ import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -21,19 +22,14 @@ fun HomeViewModel.showPaymentWidget(
         context = context,
         orderToken = orderToken.value.trim(),
         callbacks = PaymentWidgetCallbacks().apply {
-            onSuccess = { data ->
+            onSuccess = { order ->
                 deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         PaymentWidgetResult.Success(
-                            data["order"] as Json
+                            order
                         )
                     )
-                }
-            }
-            onCanceled = {
-                viewModelScope.launch {
-                    completion(PaymentWidgetResult.Canceled)
                 }
             }
             onError = { error ->
@@ -48,10 +44,16 @@ fun HomeViewModel.showPaymentWidget(
                 }
 
             }
-            onClosed = {
+            onClosed = { action ->
+                Log.e(DEBUG_TAG, "closeAction: $action")
+                if (action == CloseAction.userAction) { // payment process was canceled
+                    viewModelScope.launch {
+                        completion(PaymentWidgetResult.Canceled)
+                    }
+                }
 
             }
-            onCardBinDetected = { cardBinMetadata, refetchOrder ->
+            onCardBinDetected = { cardBinMetadata ->
                 deunaSDK.setCustomStyle(
                     data = JSONObject(
                         """
@@ -89,15 +91,7 @@ fun HomeViewModel.showPaymentWidget(
             }
         },
         userToken = userTokenValue,
-        cssFile = "YOUR_THEME_UUID", // optional
-        paymentMethods = listOf(
-            mapOf(
-                "payment_method" to "voucher",
-                "processors" to listOf("daviplata", "nequi_push_voucher")
-            ), mapOf(
-                "payment_method" to "paypal", "processors" to listOf("paypal")
-            )
-        )
+        styleFile = "YOUR_THEME_UUID", // optional
     )
 }
 

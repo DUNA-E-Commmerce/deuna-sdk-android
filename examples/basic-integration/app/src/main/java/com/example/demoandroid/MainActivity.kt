@@ -56,11 +56,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun handlePaymentSuccess(data: Json) {
+    fun handlePaymentSuccess(order: Json) {
         Intent(this@MainActivity, PaymentSuccessfulActivity::class.java).apply {
             putExtra(
                 PaymentSuccessfulActivity.EXTRA_JSON_ORDER,
-                JSONObject(data["order"] as Json).toString()
+                JSONObject(order).toString()
             )
             startActivity(this)
         }
