@@ -33,7 +33,7 @@ class MainActivity() : ComponentActivity() {
                             homeViewModel = HomeViewModel(
                                 deunaSDK = DeunaSDK(
                                     environment = Environment.SANDBOX,
-                                    publicApiKey = "YOUR_PAYMENT_WIDGET"
+                                    publicApiKey = "YOUR_PUBLIC_API_KEY"
                                 ),
                             )
                         )
