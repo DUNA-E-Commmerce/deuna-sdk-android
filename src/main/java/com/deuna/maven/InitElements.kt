@@ -17,7 +17,7 @@ import java.lang.IllegalStateException
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
- * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param styleFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom style file.
  * @param types (Optional) A list of the widgets to be rendered.
  * Example:
  * ```
@@ -33,7 +33,7 @@ fun DeunaSDK.initElements(
     closeEvents: Set<ElementsEvent> = emptySet(),
     userToken: String? = null,
     userInfo: UserInfo? = null,
-    cssFile: String? = null,
+    styleFile: String? = null,
     types: List<Json> = emptyList(),
 ) {
     val baseUrl = this.environment.elementsBaseUrl
@@ -62,8 +62,9 @@ fun DeunaSDK.initElements(
         }
     }
 
-    cssFile?.let {
-        queryParameters[QueryParameters.CSS_FILE] = it
+    styleFile?.let {
+        queryParameters[QueryParameters.CSS_FILE] = it // should be removed in future versions
+        queryParameters[QueryParameters.STYLE_FILE] = it
     }
 
     // Construct the base URL for elements and the URL string

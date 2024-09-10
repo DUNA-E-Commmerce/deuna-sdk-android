@@ -15,7 +15,7 @@ import com.deuna.maven.web_views.base.*
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
  * @param closeEvents (Optional) A Set of CheckoutEvent values specifying when to close the checkout activity automatically.
  * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
- * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file
+ * @param styleFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom style file
  */
 fun DeunaSDK.initCheckout(
     context: Context,
@@ -23,7 +23,7 @@ fun DeunaSDK.initCheckout(
     callbacks: CheckoutCallbacks,
     closeEvents: Set<CheckoutEvent> = emptySet(),
     userToken: String? = null,
-    cssFile: String? = null,
+    styleFile: String? = null,
 ) {
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
@@ -39,8 +39,8 @@ fun DeunaSDK.initCheckout(
         if (!userToken.isNullOrEmpty()) {
             putExtra(CheckoutActivity.EXTRA_USER_TOKEN, userToken)
         }
-        if (!cssFile.isNullOrEmpty()) {
-            putExtra(CheckoutActivity.EXTRA_CSS_FILE, cssFile)
+        if (!styleFile.isNullOrEmpty()) {
+            putExtra(CheckoutActivity.EXTRA_STYLE_FILE, styleFile)
         }
         putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
         putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)

@@ -21,6 +21,7 @@ fun MainActivity.initElementsVaultWidget() {
             lastName = "Morocho",
             email = "dmorocho@deuna.com",
         ) else null,
+        styleFile = "YOUR_THEME_UUID",
         callbacks = ElementsCallbacks().apply {
             onSuccess = { data ->
                 deunaSdk.close()

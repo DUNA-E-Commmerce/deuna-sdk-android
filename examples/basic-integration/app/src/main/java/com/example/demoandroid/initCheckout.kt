@@ -14,6 +14,7 @@ fun MainActivity.startPaymentProcess() {
     deunaSdk.initCheckout(
         context = this,
         orderToken = orderToken,
+        styleFile = "YOUR_THEME_UUID",
         callbacks = CheckoutCallbacks().apply {
             onSuccess = { data ->
                 Log.d(DEBUG_TAG, "Payment success $data")

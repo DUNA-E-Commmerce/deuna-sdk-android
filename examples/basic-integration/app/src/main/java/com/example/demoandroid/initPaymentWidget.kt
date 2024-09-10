@@ -13,11 +13,11 @@ import org.json.JSONObject
  */
 fun MainActivity.showPaymentWidget() {
     deunaSdk.initPaymentWidget(
-        context = this, orderToken = orderToken, cssFile = "YOUR_THEME_UUID", // optional
+        context = this, orderToken = orderToken, styleFile = "YOUR_THEME_UUID", // optional
         callbacks = PaymentWidgetCallbacks().apply {
             onSuccess = { data ->
                 deunaSdk.close()
-                handlePaymentSuccess(data)
+                handlePaymentSuccess(da ta)
             }
             onCanceled = {
                 Log.d(DEBUG_TAG, "Payment was canceled by user")
@@ -86,15 +86,6 @@ fun MainActivity.showPaymentWidget() {
             onEventDispatch = { type, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")
             }
-        }, userToken = userToken, paymentMethods = listOf(
-            mapOf(
-                "payment_method" to "voucher",
-                "processors" to listOf("daviplata", "nequi_push_voucher")
-            ), mapOf(
-                "payment_method" to "paypal", "processors" to listOf("paypal")
-            )
-        ), checkoutModules = listOf(
-            mapOf("name" to "module_name")
-        )
+        }, userToken = userToken
     )
 }

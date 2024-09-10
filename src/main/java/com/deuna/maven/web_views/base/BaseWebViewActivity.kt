@@ -54,6 +54,8 @@ abstract class BaseWebViewActivity : Activity() {
     /// When this var is false the close feature is disabled
     var closeEnabled = true
 
+    private var pageLoaded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sdkInstanceId = intent.getIntExtra(EXTRA_SDK_INSTANCE_ID, 0)
@@ -104,6 +106,7 @@ abstract class BaseWebViewActivity : Activity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                pageLoaded = true
 
                 webView.evaluateJavascript(
                     """
@@ -142,8 +145,10 @@ abstract class BaseWebViewActivity : Activity() {
                 request: WebResourceRequest?,
                 error: WebResourceError?
             ) {
-                super.onReceivedError(view, request, error)
-
+                // ignore errors when the page is already loaded
+                if (pageLoaded) {
+                    return
+                }
                 if (error != null) {
                     onError()
                 }
@@ -197,6 +202,14 @@ abstract class BaseWebViewActivity : Activity() {
 
 
         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+
+            /// Disable duplicated urls
+            if (url == this@BaseWebViewActivity.webView.url) {
+                return
+            }
+
+            DeunaLogs.info("onLoadUrl $url")
+
             // handle legal urls
             if (url.startsWith(LEGAL_URL_HOST)) {
                 DeunaLogs.info("open in external url $url")
