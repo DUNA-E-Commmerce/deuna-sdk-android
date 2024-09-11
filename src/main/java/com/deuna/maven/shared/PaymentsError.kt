@@ -21,15 +21,22 @@ data class PaymentsError(
 
 
     companion object {
-        fun fromJson(type: Type, data: Json): PaymentsError? {
+        fun fromJson(type: Type, data: Json): PaymentsError {
             val metadata = data["metadata"] as? Json
             val order: Json? = data["order"] as? Json
-            if (metadata == null || order == null) {
-                return null
+            if (metadata == null) {
+                return PaymentsError(
+                    type = type,
+                    metadata = Metadata(
+                        code =  ErrorCodes.UNKNOWN_ERROR.name,
+                        message = ErrorMessages.UNKNOWN
+                    ),
+                    order = order
+                )
             }
 
-            val errorCode = metadata["errorCode"] as? String
-            val errorMessage = metadata["errorMessage"] as? String
+            val errorCode = metadata["errorCode"] as? String ?: metadata["code"] as? String
+            val errorMessage = metadata["errorMessage"] as? String ?: metadata["reason"] as? String
 
 
             if (errorCode == null || errorMessage == null) {

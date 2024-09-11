@@ -46,9 +46,7 @@ class CheckoutBridge(
                         type = PaymentsError.Type.PAYMENT_ERROR,
                         data = data
                     )
-                    if (error != null) {
-                        activity.callbacks?.onError?.invoke(error)
-                    }
+                    activity.callbacks?.onError?.invoke(error)
                 }
 
                 CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError -> {
@@ -56,9 +54,7 @@ class CheckoutBridge(
                         type = PaymentsError.Type.INITIALIZATION_FAILED,
                         data = data
                     )
-                    if (error != null) {
-                        activity.callbacks?.onError?.invoke(error)
-                    }
+                    activity.callbacks?.onError?.invoke(error)
                 }
 
                 CheckoutEvent.linkClose -> {
