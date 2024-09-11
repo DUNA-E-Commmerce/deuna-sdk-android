@@ -3,6 +3,7 @@ package com.deuna.maven.checkout.domain
 import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.CheckoutActivity
 import org.json.*
 
@@ -35,10 +36,12 @@ class CheckoutBridge(
 
             when (event) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
-                    activity.callbacks?.onSuccess?.invoke(data)
+                    activity.closeSubWebView()
+                    activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
                 }
 
                 CheckoutEvent.purchaseRejected, CheckoutEvent.purchaseError -> {
+                    activity.closeSubWebView()
                     val error = PaymentsError.fromJson(
                         type = PaymentsError.Type.PAYMENT_ERROR,
                         data = data
@@ -59,8 +62,8 @@ class CheckoutBridge(
                 }
 
                 CheckoutEvent.linkClose -> {
+                    activity.onCanceledByUser()
                     closeWebView(activity.sdkInstanceId!!)
-                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {

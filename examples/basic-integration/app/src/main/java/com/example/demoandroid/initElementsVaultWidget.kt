@@ -6,6 +6,7 @@ import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.shared.enums.CloseAction
 import com.example.demoandroid.screens.SaveCardSuccessfulActivity
 import org.json.JSONObject
 
@@ -21,6 +22,7 @@ fun MainActivity.initElementsVaultWidget() {
             lastName = "Morocho",
             email = "dmorocho@deuna.com",
         ) else null,
+        styleFile = "YOUR_THEME_UUID",
         callbacks = ElementsCallbacks().apply {
             onSuccess = { data ->
                 deunaSdk.close()
@@ -44,11 +46,10 @@ fun MainActivity.initElementsVaultWidget() {
                 Log.e(ERROR_TAG, it.type.message)
                 deunaSdk.close()
             }
-            onCanceled = {
-                Log.d(DEBUG_TAG, "Saving card was canceled by user")
-            }
-            onClosed = {
-                Log.d(DEBUG_TAG, "Widget was closed")
+            onClosed = { action ->
+                if(action == CloseAction.userAction){
+                    Log.d(DEBUG_TAG, "Saving card was canceled by user")
+                }
             }
         },
     )

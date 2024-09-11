@@ -5,6 +5,7 @@ import com.deuna.maven.checkout.domain.CheckoutEvent
 import com.deuna.maven.initCheckout
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.PaymentsError
+import com.deuna.maven.shared.enums.CloseAction
 
 
 /**
@@ -14,11 +15,12 @@ fun MainActivity.startPaymentProcess() {
     deunaSdk.initCheckout(
         context = this,
         orderToken = orderToken,
+        styleFile = "YOUR_THEME_UUID",
         callbacks = CheckoutCallbacks().apply {
-            onSuccess = { data ->
-                Log.d(DEBUG_TAG, "Payment success $data")
+            onSuccess = { order ->
+                Log.d(DEBUG_TAG, "Payment success $order")
                 deunaSdk.close()
-                handlePaymentSuccess(data)
+                handlePaymentSuccess(order)
             }
             onError = { error ->
                 Log.e(DEBUG_TAG, "Error type: ${error.type}, metadata: ${error.metadata}")
@@ -33,8 +35,10 @@ fun MainActivity.startPaymentProcess() {
                     else -> {}
                 }
             }
-            onCanceled = {
-                Log.d(DEBUG_TAG, "Payment was canceled by user")
+            onClosed = { action ->
+                if (action == CloseAction.userAction) {
+                    Log.d(DEBUG_TAG, "Payment was canceled by user")
+                }
             }
             onEventDispatch = { type, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${type.name}: $data")

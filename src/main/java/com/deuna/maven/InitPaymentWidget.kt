@@ -19,7 +19,7 @@ import org.json.JSONObject
  * @param context The application or activity context
  * @param callbacks An instance of PaymentWidgetCallbacks to receive event notifications.
  * @param userToken (Optional) A user authentication token that allows skipping the OTP flow and shows the user's saved cards.
- * @param cssFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom CSS file.
+ * @param styleFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom style file.
  * @param paymentMethods (Optional) A list of allowed payment methods. This parameter determines what type of widget should be rendered.
  * @param checkoutModules (Optional) A list  display the payment widget with new patterns or with different functionalities
  */
@@ -28,7 +28,7 @@ fun DeunaSDK.initPaymentWidget(
     orderToken: String,
     callbacks: PaymentWidgetCallbacks,
     userToken: String? = null,
-    cssFile: String? = null,
+    styleFile: String? = null,
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
 ) {
@@ -51,8 +51,8 @@ fun DeunaSDK.initPaymentWidget(
         queryParameters[QueryParameters.USER_TOKEN] = userToken
     }
 
-    if (!cssFile.isNullOrEmpty()) {
-        queryParameters[QueryParameters.CSS_FILE] = cssFile
+    if (!styleFile.isNullOrEmpty()) {
+        queryParameters[QueryParameters.STYLE_FILE] = styleFile
     }
 
     val xpropsB64 = mutableMapOf<String, Any>()

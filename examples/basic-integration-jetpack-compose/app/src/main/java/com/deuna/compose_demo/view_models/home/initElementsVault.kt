@@ -8,6 +8,7 @@ import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.shared.enums.CloseAction
 import kotlinx.coroutines.launch
 
 /**
@@ -19,8 +20,7 @@ fun HomeViewModel.saveCard(
     context: Context,
     completion: (ElementsResult) -> Unit,
 ) {
-    deunaSDK.initElements(
-        context = context,
+    deunaSDK.initElements(context = context,
         userToken = userTokenValue,
         userInfo = if (userTokenValue == null) UserInfo(
             firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
@@ -42,16 +42,18 @@ fun HomeViewModel.saveCard(
                     completion(ElementsResult.Error(error))
                 }
             }
-            onCanceled = {
-                viewModelScope.launch {
-                    completion(ElementsResult.Canceled)
+            onClosed = { action ->
+                Log.e(DEBUG_TAG, "closeAction: $action")
+                if (action == CloseAction.userAction) { // The operation was canceled
+                    viewModelScope.launch {
+                        completion(ElementsResult.Canceled)
+                    }
                 }
             }
             onEventDispatch = { event, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
-        }
-    )
+        })
 }
 
 

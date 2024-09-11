@@ -5,6 +5,7 @@ import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.base.*
 import retrofit2.*
 
@@ -19,7 +20,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         const val EXTRA_API_KEY = "API_KEY"
         const val EXTRA_ORDER_TOKEN = "ORDER_TOKEN"
         const val EXTRA_USER_TOKEN = "USER_TOKEN"
-        const val EXTRA_CSS_FILE = "CSS_FILE"
+        const val EXTRA_STYLE_FILE = "STYLE_FILE"
         const val EXTRA_BASE_URL = "BASE_URL"
 
 
@@ -53,7 +54,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         val orderToken = intent.getStringExtra(EXTRA_ORDER_TOKEN)!!
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
         val userToken = intent.getStringExtra(EXTRA_USER_TOKEN)
-        val cssFile = intent.getStringExtra(EXTRA_CSS_FILE)
+        val styleFile = intent.getStringExtra(EXTRA_STYLE_FILE)
 
         val closeEventAsStrings =
             intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
@@ -65,7 +66,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
             orderToken = orderToken,
             apiKey = apiKey,
             userToken = userToken,
-            cssFile = cssFile
+            styleFile = styleFile
         )
     }
 
@@ -78,7 +79,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         orderToken: String,
         apiKey: String,
         userToken: String?,
-        cssFile: String?
+        styleFile: String?
     ) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
@@ -109,8 +110,8 @@ class CheckoutActivity() : BaseWebViewActivity() {
                         queryParameters[QueryParameters.USER_TOKEN] = userToken
                     }
 
-                    if (cssFile != null) {
-                        queryParameters[QueryParameters.CSS_FILE] = cssFile
+                    if (styleFile != null) {
+                        queryParameters[QueryParameters.STYLE_FILE] = styleFile
                     }
 
                     loadUrl(
@@ -164,11 +165,12 @@ class CheckoutActivity() : BaseWebViewActivity() {
     }
 
     override fun onCanceledByUser() {
-        callbacks?.onCanceled?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.userAction)
+        callbacks?.onClosed = null
     }
 
     override fun onDestroy() {
-        callbacks?.onClosed?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.systemAction)
         super.onDestroy()
     }
 

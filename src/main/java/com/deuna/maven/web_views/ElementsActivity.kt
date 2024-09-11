@@ -3,6 +3,7 @@ package com.deuna.maven.web_views
 import android.os.*
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.base.*
 
 /**
@@ -75,12 +76,13 @@ class ElementsActivity() : BaseWebViewActivity() {
     }
 
     override fun onCanceledByUser() {
-        callbacks?.onCanceled?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.userAction)
+        callbacks?.onClosed = null
     }
 
     override fun onDestroy() {
         // Notify callbacks about activity closure
-        callbacks?.onClosed?.invoke()
+        callbacks?.onClosed?.invoke(CloseAction.systemAction)
         super.onDestroy()
     }
 

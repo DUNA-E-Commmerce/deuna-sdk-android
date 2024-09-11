@@ -27,6 +27,7 @@ object QueryParameters {
     const val PUBLIC_API_KEY = "publicApiKey"
     const val USER_TOKEN = "userToken"
     const val CSS_FILE = "cssFile"
+    const val STYLE_FILE = "styleFile"
     const val PAYMENT_METHODS = "paymentMethods"
     const val CHECKOUT_MODULES = "checkoutModules"
     const val FIRST_NAME = "firstName"

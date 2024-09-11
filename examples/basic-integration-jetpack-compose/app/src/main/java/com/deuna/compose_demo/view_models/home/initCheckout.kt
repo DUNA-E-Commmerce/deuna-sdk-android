@@ -9,6 +9,7 @@ import com.deuna.maven.initCheckout
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
+import com.deuna.maven.shared.enums.CloseAction
 import kotlinx.coroutines.launch
 
 
@@ -25,12 +26,12 @@ fun HomeViewModel.showCheckout(
         context = context,
         orderToken = orderToken.value.trim(),
         callbacks = CheckoutCallbacks().apply {
-            onSuccess = { data ->
+            onSuccess = { order ->
                 deunaSDK.close()
                 viewModelScope.launch {
                     completion(
                         CheckoutResult.Success(
-                            data["order"] as Json
+                            order
                         )
                     )
                 }
@@ -38,7 +39,7 @@ fun HomeViewModel.showCheckout(
             onError = { error ->
                 Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
                 when (error.type) {
-                    PaymentsError.Type.PAYMENT_ERROR, PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED, PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                    PaymentsError.Type.INITIALIZATION_FAILED, PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED, PaymentsError.Type.NO_INTERNET_CONNECTION -> {
                         deunaSDK.close()
                         completion(CheckoutResult.Error(error))
                     }
@@ -46,9 +47,12 @@ fun HomeViewModel.showCheckout(
                     else -> {}
                 }
             }
-            onCanceled = {
-                viewModelScope.launch {
-                    completion(CheckoutResult.Canceled)
+            onClosed = { action ->
+                Log.e(DEBUG_TAG, "closeAction: $action")
+                if (action == CloseAction.userAction) { // The operation was canceled
+                    viewModelScope.launch {
+                        completion(CheckoutResult.Canceled)
+                    }
                 }
             }
             onEventDispatch = { event, data ->

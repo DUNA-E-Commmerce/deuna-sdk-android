@@ -3,6 +3,7 @@ package com.deuna.maven.element.domain
 import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.ElementsActivity
 import org.json.*
 
@@ -35,10 +36,12 @@ class ElementsBridge(
             when (event) {
 
                 ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated -> {
+                    activity.closeSubWebView()
                     activity.callbacks?.onSuccess?.invoke(data)
                 }
 
                 ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> {
+                    activity.closeSubWebView()
                     val error = ElementsError.fromJson(
                         type = ElementsError.Type.VAULT_SAVE_ERROR,
                         data = data
@@ -49,8 +52,8 @@ class ElementsBridge(
                 }
 
                 ElementsEvent.vaultClosed -> {
+                    activity.onCanceledByUser()
                     closeWebView(activity.sdkInstanceId!!)
-                    activity.callbacks?.onCanceled?.invoke()
                 }
 
                 else -> {}

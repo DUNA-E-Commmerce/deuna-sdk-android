@@ -37,4 +37,6 @@ enum class CheckoutEvent(val value: String) {
   paymentMethodsShowMyCards("paymentMethodsShowMyCards"),
   benefitsStarted("benefitsStarted"),
   donationsStarted("donationsStarted"),
+  onBinDetected("onBinDetected"),
+  onInstallmentSelected("onInstallmentSelected")
 }

@@ -16,7 +16,6 @@ import org.json.JSONObject
 const val ERROR_TAG = "❌ DeunaSDK"
 const val DEBUG_TAG = "👀 DeunaSDK"
 
-@Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
     val deunaSdk = DeunaSDK(
         environment = Environment.SANDBOX,
@@ -56,11 +55,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun handlePaymentSuccess(data: Json) {
+    fun handlePaymentSuccess(order: Json) {
         Intent(this@MainActivity, PaymentSuccessfulActivity::class.java).apply {
             putExtra(
                 PaymentSuccessfulActivity.EXTRA_JSON_ORDER,
-                JSONObject(data["order"] as Json).toString()
+                JSONObject(order).toString()
             )
             startActivity(this)
         }
