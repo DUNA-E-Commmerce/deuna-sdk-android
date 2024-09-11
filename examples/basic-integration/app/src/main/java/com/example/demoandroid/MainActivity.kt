@@ -16,7 +16,6 @@ import org.json.JSONObject
 const val ERROR_TAG = "❌ DeunaSDK"
 const val DEBUG_TAG = "👀 DeunaSDK"
 
-@Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
     val deunaSdk = DeunaSDK(
         environment = Environment.SANDBOX,

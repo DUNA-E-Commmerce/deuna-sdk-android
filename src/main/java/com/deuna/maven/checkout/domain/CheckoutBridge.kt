@@ -36,10 +36,12 @@ class CheckoutBridge(
 
             when (event) {
                 CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
-                    activity.callbacks?.onSuccess?.invoke(data)
+                    activity.closeSubWebView()
+                    activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
                 }
 
                 CheckoutEvent.purchaseRejected, CheckoutEvent.purchaseError -> {
+                    activity.closeSubWebView()
                     val error = PaymentsError.fromJson(
                         type = PaymentsError.Type.PAYMENT_ERROR,
                         data = data

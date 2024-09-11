@@ -36,10 +36,12 @@ class ElementsBridge(
             when (event) {
 
                 ElementsEvent.vaultSaveSuccess, ElementsEvent.cardSuccessfullyCreated -> {
+                    activity.closeSubWebView()
                     activity.callbacks?.onSuccess?.invoke(data)
                 }
 
                 ElementsEvent.vaultFailed, ElementsEvent.cardCreationError, ElementsEvent.vaultSaveError -> {
+                    activity.closeSubWebView()
                     val error = ElementsError.fromJson(
                         type = ElementsError.Type.VAULT_SAVE_ERROR,
                         data = data

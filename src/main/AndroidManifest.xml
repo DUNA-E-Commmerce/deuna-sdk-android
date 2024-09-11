@@ -13,6 +13,9 @@
         <activity
             android:name=".web_views.PaymentWidgetActivity"
             android:exported="false" />
+        <activity
+            android:name=".web_views.base.SubWebViewActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
