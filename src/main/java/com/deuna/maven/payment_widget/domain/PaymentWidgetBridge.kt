@@ -40,15 +40,13 @@ class PaymentWidgetBridge(
             activity.callbacks?.onEventDispatch?.invoke(checkoutEvent, data)
 
             when (event) {
-                CheckoutEvent.purchaseError -> {
+                CheckoutEvent.purchaseError, CheckoutEvent.purchaseRejected -> {
                     activity.closeSubWebView()
                     activity.updateCloseEnabled(true)
                     val error = PaymentsError.fromJson(
                         type = PaymentsError.Type.PAYMENT_ERROR, data = data
                     )
-                    if (error != null) {
-                        activity.callbacks?.onError?.invoke(error)
-                    }
+                    activity.callbacks?.onError?.invoke(error)
                 }
 
                 CheckoutEvent.onBinDetected -> {
@@ -64,7 +62,7 @@ class PaymentWidgetBridge(
                     activity.callbacks?.onPaymentProcessing?.invoke()
                 }
 
-                CheckoutEvent.purchase -> {
+                CheckoutEvent.purchase, CheckoutEvent.apmSuccess -> {
                     activity.closeSubWebView()
                     activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
                 }
