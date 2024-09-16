@@ -99,6 +99,7 @@ abstract class BaseWebViewActivity : Activity() {
         // Add JavascriptInterface
         val bridge = getBridge()
         webView.addJavascriptInterface(bridge, bridge.name)
+        webView.addJavascriptInterface(LocalBridge(),"local")
 
         webView.webViewClient = object : WebViewClient() {
 
@@ -110,6 +111,10 @@ abstract class BaseWebViewActivity : Activity() {
                     """
                         console.log = function(message) {
                            android.consoleLog(message);
+                        };
+                        
+                        window.open = function(url, target, features) {
+                           local.openInNewTab(url);
                         };
                         
                         window.xprops = {
@@ -151,6 +156,7 @@ abstract class BaseWebViewActivity : Activity() {
                     onError()
                 }
             }
+
         }
         webView.webChromeClient = object : WebChromeClient() {
             override fun onCreateWindow(
@@ -159,9 +165,7 @@ abstract class BaseWebViewActivity : Activity() {
                 isUserGesture: Boolean,
                 resultMsg: Message?,
             ): Boolean {
-
-                if (!isDialog){
-
+                if (!isDialog) {
                     val newWebView = WebView(this@BaseWebViewActivity).apply {
                         webViewClient = WebViewClient()
                         settings.javaScriptEnabled = true
@@ -171,14 +175,14 @@ abstract class BaseWebViewActivity : Activity() {
                     transport.webView = newWebView
                     resultMsg.sendToTarget()
 
-                    // Custom WebViewClient to handle external URLs and loading URLs in a new WebView or the current WebView.
-                    val webViewClient = CustomWebViewClient(object : WebViewCallback{
+                    // Custom WebViewClient to handle external URLs and loading URLs in a new WebView
+                    // for example when a link is clicked
+                    val webViewClient = CustomWebViewClient(object : WebViewCallback {
                         override fun onExternalUrl(webView: WebView, url: String) {
                             openExternalUrl(url)
                         }
 
                         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
-                            DeunaLogs.info("url ${url}")
                             openExternalUrl(url)
                         }
                     }, newWebView)
@@ -224,7 +228,8 @@ abstract class BaseWebViewActivity : Activity() {
     abstract fun onCanceledByUser()
 
     /**
-     * Configures whether the widget close action is enabled or disabled
+     * Configures whether the widget close action is enabled or disabled,
+     * Useful for automatic redirects like 3Ds
      */
     fun updateCloseEnabled(enabled: Boolean) {
         closeEnabled = enabled
@@ -235,5 +240,15 @@ abstract class BaseWebViewActivity : Activity() {
         closeSubWebView()
         activities.remove(sdkInstanceId!!)
         super.onDestroy()
+    }
+
+    /**
+     * Intercepts window.open and launches a new activity with a new web view
+     */
+    inner class LocalBridge() {
+        @JavascriptInterface
+        fun openInNewTab(url: String) {
+            openExternalUrl(url)
+        }
     }
 }
