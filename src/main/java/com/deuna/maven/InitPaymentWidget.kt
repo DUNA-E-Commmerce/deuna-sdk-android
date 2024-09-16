@@ -82,6 +82,15 @@ fun DeunaSDK.initPaymentWidget(
 }
 
 /**
+ * Sends a re-fetch order request and handles the response.
+ *
+ * @param callback A callback function to be invoked when the request completes. The callback receives a `Json` object containing the order data or `null` if the request fails.
+ */
+fun DeunaSDK.refetchOrder(callback: (Json?) -> Unit) {
+    PaymentWidgetActivity.refetchOrder(sdkInstanceId = sdkInstanceId, callback = callback);
+}
+
+/**
  * Set custom css on the payment widget.
  * This function must be only called inside the onCardBinDetected callback
  *
