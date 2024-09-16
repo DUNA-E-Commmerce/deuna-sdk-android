@@ -101,13 +101,13 @@ fun HomeViewModel.showPaymentWidget(
             }
         },
         userToken = userTokenValue,
-        styleFile = "YOUR_THEME_UUID", // optional
-        paymentMethods = listOf(
-            mapOf(
-                "paymentMethod" to "pse",
-                "processors" to listOf("mercadopago")
-            )
-        )
+        styleFile = "YOUR_THEME_UUID" // optional
+//        paymentMethods = listOf(
+//            mapOf(
+//                "paymentMethod" to "pse",
+//                "processors" to listOf("mercadopago")
+//            )
+//        )
     )
 }
 
