@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.deuna.compose_demo.screens.PaymentWidgetResult
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.refetchOrder
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.enums.CloseAction
@@ -82,6 +83,15 @@ fun HomeViewModel.showPaymentWidget(
                         """
                     ).toMap()
                 )
+
+                deunaSDK.refetchOrder { order ->
+                    if (order != null) {
+                        Log.d(DEBUG_TAG, "refetchOrder $order")
+                    } else {
+                        Log.d(DEBUG_TAG, "refetchOrder has failed")
+                    }
+
+                }
             }
             onPaymentProcessing = {
                 Log.d(DEBUG_TAG, "onPaymentProcessing")
@@ -91,7 +101,13 @@ fun HomeViewModel.showPaymentWidget(
             }
         },
         userToken = userTokenValue,
-        styleFile = "YOUR_THEME_UUID", // optional
+        styleFile = "YOUR_THEME_UUID" // optional
+//        paymentMethods = listOf(
+//            mapOf(
+//                "paymentMethod" to "pse",
+//                "processors" to listOf("mercadopago")
+//            )
+//        )
     )
 }
 
