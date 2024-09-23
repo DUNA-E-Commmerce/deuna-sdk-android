@@ -15,12 +15,17 @@ import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    private val activity: PaymentWidgetActivity
+    val activity: PaymentWidgetActivity
 ) : WebViewBridge(name = "android") {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
         DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
+    @JavascriptInterface
+    fun saveBase64Image(base64Image: String) {
+        saveBase64ImageToDevice(base64Image)
     }
 
     override fun handleEvent(message: String) {
@@ -31,6 +36,11 @@ class PaymentWidgetBridge(
             val data = json["data"] as? Json
 
             if (type == null || data == null) {
+                return
+            }
+
+            if (type == "apmSaveId") {
+                downloadVoucher()
                 return
             }
 
@@ -66,6 +76,7 @@ class PaymentWidgetBridge(
                     activity.closeSubWebView()
                     activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
                 }
+
                 CheckoutEvent.paymentMethods3dsInitiated -> {}
                 CheckoutEvent.linkClose -> {
                     activity.onCanceledByUser()
@@ -87,6 +98,34 @@ class PaymentWidgetBridge(
 
     private fun handleInstallmentSelected(metadata: Json?) {
         activity.callbacks?.onInstallmentSelected?.invoke(metadata)
+    }
+
+    private fun downloadVoucher() {
+        DeunaLogs.info("Start downloading")
+        val js = """
+             (function() {
+                function captureInvoice() {
+                    html2canvas(document.body, { allowTaint:true, useCORS: true }).then((canvas) => {
+                        // Convert the canvas to a base64 image
+                        var imgData = canvas.toDataURL("image/png");
+                        android.saveBase64Image(imgData);
+                    });
+                }
+            
+                if (typeof html2canvas === "undefined") {
+                    var script = document.createElement("script");
+                    script.src = "https://html2canvas.hertzen.com/dist/html2canvas.min.js";
+                    script.onload = function () {
+                        captureInvoice();
+                    };
+                    document.head.appendChild(script);
+                } else { captureInvoice(); }
+             })();
+        """.trimIndent()
+
+        activity.runOnUiThread {
+            activity.webView.evaluateJavascript(js, null)
+        }
     }
 
 
