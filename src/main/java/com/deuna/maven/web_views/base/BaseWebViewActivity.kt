@@ -262,7 +262,6 @@ abstract class BaseWebViewActivity : Activity() {
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        DeunaLogs.info("request code $requestCode")
         if (requestCode != SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE) {
             return
         }
