@@ -39,6 +39,9 @@ class PaymentWidgetBridge(
                 return
             }
 
+
+            // This event is emitted by the widget when the download voucher button
+            // is pressed
             if (type == "apmSaveId") {
                 downloadVoucher()
                 return
@@ -100,6 +103,10 @@ class PaymentWidgetBridge(
         activity.callbacks?.onInstallmentSelected?.invoke(metadata)
     }
 
+    /**
+     * Uses js injection with html2canvas library to
+     * take a screen shoot of the web page loaded in the web view
+     */
     private fun downloadVoucher() {
         DeunaLogs.info("Start downloading")
         val js = """
@@ -108,10 +115,13 @@ class PaymentWidgetBridge(
                     html2canvas(document.body, { allowTaint:true, useCORS: true }).then((canvas) => {
                         // Convert the canvas to a base64 image
                         var imgData = canvas.toDataURL("image/png");
+                        // Emit a local post message with the image as a base64 string.
                         android.saveBase64Image(imgData);
                     });
                 }
-            
+             
+             
+                // If html2canvas is not added
                 if (typeof html2canvas === "undefined") {
                     var script = document.createElement("script");
                     script.src = "https://html2canvas.hertzen.com/dist/html2canvas.min.js";
