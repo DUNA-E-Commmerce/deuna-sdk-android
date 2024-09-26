@@ -99,7 +99,7 @@ abstract class BaseWebViewActivity : Activity() {
         // Add JavascriptInterface
         val bridge = getBridge()
         webView.addJavascriptInterface(bridge, bridge.name)
-        webView.addJavascriptInterface(LocalBridge(),"local")
+        webView.addJavascriptInterface(LocalBridge(), "local")
 
         webView.webViewClient = object : WebViewClient() {
 
@@ -108,13 +108,14 @@ abstract class BaseWebViewActivity : Activity() {
                 pageLoaded = true
 
                 webView.evaluateJavascript(
-                    """
+                    """ 
                         console.log = function(message) {
                            android.consoleLog(message);
                         };
                         
                         window.open = function(url, target, features) {
                            local.openInNewTab(url);
+                           return window.open(url, target, features);
                         };
                         
                         window.xprops = {
@@ -197,11 +198,15 @@ abstract class BaseWebViewActivity : Activity() {
 
     /// Open the url in a new web view, for example for 3Ds auth
     private fun openExternalUrl(url: String) {
+        if (externalUrl != null) {
+            return
+        }
+        externalUrl = url
         val intent = Intent(this, SubWebViewActivity::class.java).apply {
             putExtra(SubWebViewActivity.EXTRA_URL, url)
             putExtra(SubWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         }
-        startActivity(intent)
+        startActivityForResult(intent, SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE)
     }
 
     /// Closes the sub web view
@@ -242,6 +247,9 @@ abstract class BaseWebViewActivity : Activity() {
         super.onDestroy()
     }
 
+
+    var externalUrl: String? = null
+
     /**
      * Intercepts window.open and launches a new activity with a new web view
      */
@@ -250,5 +258,13 @@ abstract class BaseWebViewActivity : Activity() {
         fun openInNewTab(url: String) {
             openExternalUrl(url)
         }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode != SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE) {
+            return
+        }
+        externalUrl = null
     }
 }

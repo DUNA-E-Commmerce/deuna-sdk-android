@@ -15,12 +15,17 @@ import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    private val activity: PaymentWidgetActivity
+    val activity: PaymentWidgetActivity
 ) : WebViewBridge(name = "android") {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
         DeunaLogs.info("ConsoleLogBridge: $message")
+    }
+
+    @JavascriptInterface
+    fun saveBase64Image(base64Image: String) {
+        saveBase64ImageToDevice(base64Image)
     }
 
     override fun handleEvent(message: String) {
@@ -31,6 +36,14 @@ class PaymentWidgetBridge(
             val data = json["data"] as? Json
 
             if (type == null || data == null) {
+                return
+            }
+
+
+            // This event is emitted by the widget when the download voucher button
+            // is pressed
+            if (type == "apmSaveId") {
+                downloadVoucher()
                 return
             }
 
@@ -66,6 +79,7 @@ class PaymentWidgetBridge(
                     activity.closeSubWebView()
                     activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
                 }
+
                 CheckoutEvent.paymentMethods3dsInitiated -> {}
                 CheckoutEvent.linkClose -> {
                     activity.onCanceledByUser()
@@ -87,6 +101,41 @@ class PaymentWidgetBridge(
 
     private fun handleInstallmentSelected(metadata: Json?) {
         activity.callbacks?.onInstallmentSelected?.invoke(metadata)
+    }
+
+    /**
+     * Uses js injection with html2canvas library to
+     * take a screen shoot of the web page loaded in the web view
+     */
+    private fun downloadVoucher() {
+        DeunaLogs.info("Start downloading")
+        val js = """
+             (function() {
+                function captureInvoice() {
+                    html2canvas(document.body, { allowTaint:true, useCORS: true }).then((canvas) => {
+                        // Convert the canvas to a base64 image
+                        var imgData = canvas.toDataURL("image/png");
+                        // Emit a local post message with the image as a base64 string.
+                        android.saveBase64Image(imgData);
+                    });
+                }
+             
+             
+                // If html2canvas is not added
+                if (typeof html2canvas === "undefined") {
+                    var script = document.createElement("script");
+                    script.src = "https://html2canvas.hertzen.com/dist/html2canvas.min.js";
+                    script.onload = function () {
+                        captureInvoice();
+                    };
+                    document.head.appendChild(script);
+                } else { captureInvoice(); }
+             })();
+        """.trimIndent()
+
+        activity.runOnUiThread {
+            activity.webView.evaluateJavascript(js, null)
+        }
     }
 
 

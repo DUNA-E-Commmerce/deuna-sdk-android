@@ -46,7 +46,7 @@ fun HomeViewModel.showPaymentWidget(
 
             }
             onClosed = { action ->
-                Log.e(DEBUG_TAG, "closeAction: $action")
+                Log.i(DEBUG_TAG, "closeAction: $action")
                 if (action == CloseAction.userAction) { // payment process was canceled
                     viewModelScope.launch {
                         completion(PaymentWidgetResult.Canceled)
@@ -101,7 +101,7 @@ fun HomeViewModel.showPaymentWidget(
             }
         },
         userToken = userTokenValue,
-        styleFile = "YOUR_THEME_UUID" // optional
+        styleFile = "YOUR_THEME_UUID", // optional
 //        paymentMethods = listOf(
 //            mapOf(
 //                "paymentMethod" to "pse",
