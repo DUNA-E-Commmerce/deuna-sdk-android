@@ -34,16 +34,21 @@ fun HomeViewModel.showPaymentWidget(
                 }
             }
             onError = { error ->
-                Log.e(ERROR_TAG, "on error ${error.type} , ${error.metadata}")
                 when (error.type) {
-                    PaymentsError.Type.INITIALIZATION_FAILED, PaymentsError.Type.NO_INTERNET_CONNECTION -> {
+                    // The widget could not be loaded
+                    PaymentsError.Type.INITIALIZATION_FAILED -> {
                         deunaSDK.close()
                         completion(PaymentWidgetResult.Error(error))
                     }
 
+                    // The payment was failed
+                    PaymentsError.Type.PAYMENT_ERROR -> {
+                        // YOUR CODE HERE
+                        Log.i(DEBUG_TAG, error.type.name)
+                    }
+
                     else -> {}
                 }
-
             }
             onClosed = { action ->
                 Log.i(DEBUG_TAG, "closeAction: $action")
