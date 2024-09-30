@@ -13,7 +13,7 @@ private fun getFileNameFromUrl(url: String): String {
 }
 
 
-// Function to download a PDF from a URL and save it to the device
+// Function to download a PDF from an URL and save it to the device
 fun PaymentWidgetBridge.downloadPdf(context: Context, url: String) {
 
     if (url.isEmpty()) {
