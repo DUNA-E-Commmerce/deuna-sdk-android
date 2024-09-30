@@ -109,8 +109,8 @@ fun HomeViewModel.showPaymentWidget(
         styleFile = "YOUR_THEME_UUID", // optional
 //        paymentMethods = listOf(
 //            mapOf(
-//                "paymentMethod" to "pse",
-//                "processors" to listOf("mercadopago")
+//                "paymentMethod" to "voucher",
+//                "processors" to listOf("payu_oxxo_cash")
 //            )
 //        )
     )
