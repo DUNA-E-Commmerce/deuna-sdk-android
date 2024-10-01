@@ -82,5 +82,11 @@ fun MainActivity.showPaymentWidget() {
             }
         },
         userToken = userToken,
+//        paymentMethods = listOf(
+//            mapOf(
+//                "paymentMethod" to "voucher",
+//                "processors" to listOf("payu_oxxo_cash")
+//            )
+//        )
     )
 }

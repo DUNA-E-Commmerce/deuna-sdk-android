@@ -61,6 +61,7 @@ dependencies {
     // DEUNA SDK
     implementation 'com.github.deuna-developers:deuna-sdk-android:2.8.4'
 
+
     // Material Design 3
     implementation 'androidx.compose.material3:material3'
 

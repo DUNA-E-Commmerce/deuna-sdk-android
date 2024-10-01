@@ -43,7 +43,15 @@ class PaymentWidgetBridge(
             // This event is emitted by the widget when the download voucher button
             // is pressed
             if (type == "apmSaveId") {
-                downloadVoucher()
+                val metadata = data["metadata"] as Json?
+                val downloadUrl =
+                    metadata?.get("voucherPdfDownloadUrl") as String?
+
+                if (downloadUrl != null) {
+                    downloadPdf(activity, downloadUrl)
+                } else {
+                    downloadVoucher()
+                }
                 return
             }
 
