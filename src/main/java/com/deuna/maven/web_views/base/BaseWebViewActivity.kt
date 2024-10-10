@@ -115,7 +115,6 @@ abstract class BaseWebViewActivity : Activity() {
                         
                         window.open = function(url, target, features) {
                            local.openInNewTab(url);
-                           return window.open(url, target, features);
                         };
                         
                         window.xprops = {
