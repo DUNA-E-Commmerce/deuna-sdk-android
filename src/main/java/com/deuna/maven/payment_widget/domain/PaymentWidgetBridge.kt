@@ -7,10 +7,9 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
-import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.file_downloaders.takeSnapshot
 import com.deuna.maven.shared.toMap
-import com.deuna.maven.web_views.PaymentWidgetActivity
+import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
 import org.json.JSONException
 import org.json.JSONObject
 

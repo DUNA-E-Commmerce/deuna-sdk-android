@@ -1,9 +1,10 @@
-package com.deuna.maven.web_views
+package com.deuna.maven.web_views.widgets
 
 import android.os.*
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.web_views.DeunaWebViewActivity
 import com.deuna.maven.web_views.base.*
 
 /**
@@ -11,7 +12,7 @@ import com.deuna.maven.web_views.base.*
  * for communication between the WebView and the native Android code. It also interacts with the
  * ElementsCallbacks interface to report success, errors, or cancellation.
  */
-class ElementsActivity() : BaseWebViewActivity() {
+class ElementsActivity() : DeunaWebViewActivity() {
 
     companion object {
         const val EXTRA_URL = "EXTRA_URL"
@@ -69,7 +70,7 @@ class ElementsActivity() : BaseWebViewActivity() {
         )
     }
 
-    override fun onError() {
+    override fun onWebViewError() {
         callbacks?.onError?.invoke(
             ElementsErrors.initializationFailed
         )

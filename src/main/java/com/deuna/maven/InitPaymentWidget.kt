@@ -8,8 +8,8 @@ import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
 import com.deuna.maven.shared.toBase64
-import com.deuna.maven.web_views.PaymentWidgetActivity
-import com.deuna.maven.web_views.base.BaseWebViewActivity
+import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
+import com.deuna.maven.web_views.DeunaWebViewActivity
 import org.json.JSONObject
 
 /**
@@ -76,7 +76,7 @@ fun DeunaSDK.initPaymentWidget(
 
     val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
         putExtra(PaymentWidgetActivity.EXTRA_URL, paymentUrl)
-        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
+        putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
     }
     context.startActivity(intent)
 }

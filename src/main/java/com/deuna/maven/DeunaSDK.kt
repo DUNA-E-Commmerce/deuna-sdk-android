@@ -2,7 +2,7 @@ package com.deuna.maven
 
 
 import com.deuna.maven.shared.Environment
-import com.deuna.maven.web_views.base.BaseWebViewActivity
+import com.deuna.maven.web_views.DeunaWebViewActivity
 import org.json.JSONObject
 import java.lang.IllegalStateException
 
@@ -66,7 +66,7 @@ open class DeunaSDK(
      * @param data The JSON data to update the payment widget UI
      */
     fun setCustomStyle(data: Map<String, Any>) {
-        BaseWebViewActivity.sendCustomStyle(
+        DeunaWebViewActivity.sendCustomStyle(
             sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
         )
     }
@@ -83,5 +83,5 @@ open class DeunaSDK(
  * Global function used to send a broadcast event to close the elements view
  */
 fun closeWebView(sdkInstanceId: Int) {
-    BaseWebViewActivity.closeWebView(sdkInstanceId)
+    DeunaWebViewActivity.closeWebView(sdkInstanceId)
 }

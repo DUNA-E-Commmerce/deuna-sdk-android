@@ -1,4 +1,4 @@
-package com.deuna.maven.web_views
+package com.deuna.maven.web_views.widgets
 
 import android.os.Bundle
 import android.util.Log
@@ -11,10 +11,10 @@ import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.shared.toMap
-import com.deuna.maven.web_views.base.BaseWebViewActivity
+import com.deuna.maven.web_views.DeunaWebViewActivity
 import org.json.JSONObject
 
-class PaymentWidgetActivity() : BaseWebViewActivity() {
+class PaymentWidgetActivity() : DeunaWebViewActivity() {
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
 
@@ -87,7 +87,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         callbacks?.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
     }
 
-    override fun onError() {
+    override fun onWebViewError() {
         callbacks?.onError?.invoke(PaymentWidgetErrors.initializationFailed)
     }
 
