@@ -3,15 +3,12 @@ package com.deuna.maven.web_views.base
 import android.annotation.*
 import android.app.Activity
 import android.content.*
-import android.net.*
 import android.os.*
 import android.view.*
 import android.webkit.*
 import android.widget.*
 import com.deuna.maven.R
 import com.deuna.maven.shared.*
-import com.deuna.maven.shared.file_downloaders.TakeSnapshotBridge
-import com.deuna.maven.shared.file_downloaders.takeSnapshot
 
 /**
  * This abstract class provides a foundation for activities that display web content
@@ -212,6 +209,7 @@ abstract class BaseWebViewActivity : Activity() {
 
     /// Closes the sub web view
     fun closeSubWebView() {
+        externalUrl = null
         SubWebViewActivity.closeWebView(sdkInstanceId!!)
     }
 
@@ -265,6 +263,17 @@ abstract class BaseWebViewActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode != SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE) {
             return
+        }
+        if (externalUrl != null) {
+            webView.evaluateJavascript(
+                """
+                if(!window.onEmbedEvent){
+                   console.log('window.onEmbedEvent is not defined');
+                } else {
+                   window.onEmbedEvent('${OnEmbedEvents.APM_CLOSED}');
+                }
+            """.trimIndent(), null
+            );
         }
         externalUrl = null
     }
