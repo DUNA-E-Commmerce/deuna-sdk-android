@@ -10,6 +10,8 @@ import android.webkit.*
 import android.widget.*
 import com.deuna.maven.R
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.file_downloaders.TakeSnapshotBridge
+import com.deuna.maven.shared.file_downloaders.takeSnapshot
 
 /**
  * This abstract class provides a foundation for activities that display web content

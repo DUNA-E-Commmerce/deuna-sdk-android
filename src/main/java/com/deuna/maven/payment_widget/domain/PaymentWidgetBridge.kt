@@ -8,6 +8,7 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.shared.file_downloaders.takeSnapshot
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.PaymentWidgetActivity
 import org.json.JSONException
@@ -21,11 +22,6 @@ class PaymentWidgetBridge(
     @JavascriptInterface
     fun consoleLog(message: String) {
         DeunaLogs.info("ConsoleLogBridge: $message")
-    }
-
-    @JavascriptInterface
-    fun saveBase64Image(base64Image: String) {
-        saveBase64ImageToDevice(base64Image)
     }
 
     override fun handleEvent(message: String) {
@@ -116,33 +112,12 @@ class PaymentWidgetBridge(
      * take a screen shoot of the web page loaded in the web view
      */
     private fun downloadVoucher() {
-        DeunaLogs.info("Start downloading")
-        val js = """
-             (function() {
-                function captureInvoice() {
-                    html2canvas(document.body, { allowTaint:true, useCORS: true }).then((canvas) => {
-                        // Convert the canvas to a base64 image
-                        var imgData = canvas.toDataURL("image/png");
-                        // Emit a local post message with the image as a base64 string.
-                        android.saveBase64Image(imgData);
-                    });
-                }
-             
-             
-                // If html2canvas is not added
-                if (typeof html2canvas === "undefined") {
-                    var script = document.createElement("script");
-                    script.src = "https://html2canvas.hertzen.com/dist/html2canvas.min.js";
-                    script.onload = function () {
-                        captureInvoice();
-                    };
-                    document.head.appendChild(script);
-                } else { captureInvoice(); }
-             })();
-        """.trimIndent()
-
         activity.runOnUiThread {
-            activity.webView.evaluateJavascript(js, null)
+            activity.webView.takeSnapshot(activity.takeSnapshotBridge) { base64Image ->
+                if (base64Image != null) {
+                    saveBase64ImageToDevice(base64Image)
+                }
+            }
         }
     }
 

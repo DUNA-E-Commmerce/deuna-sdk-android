@@ -9,11 +9,15 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.shared.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.base.BaseWebViewActivity
 import org.json.JSONObject
 
 class PaymentWidgetActivity() : BaseWebViewActivity() {
+
+    val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
+
     companion object {
         const val EXTRA_URL = "EXTRA_URL"
 
@@ -47,7 +51,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         /**
          * Send a re-fetch order request
          */
-        fun refetchOrder(sdkInstanceId: Int, callback: (Json?) -> Unit){
+        fun refetchOrder(sdkInstanceId: Int, callback: (Json?) -> Unit) {
             val activity = activities[sdkInstanceId] ?: return
             activity.runOnUiThread {
                 activity.refetchOrder(callback)
@@ -71,7 +75,8 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
         loadUrl(url)
 
         // Add a JS interface to send re-fetch order requests
-        webView.addJavascriptInterface(RefetchOrderBridge(),"refecthOrder")
+        webView.addJavascriptInterface(RefetchOrderBridge(), "refecthOrder")
+        webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
     }
 
     override fun getBridge(): WebViewBridge {
@@ -132,7 +137,7 @@ class PaymentWidgetActivity() : BaseWebViewActivity() {
     private var refetchOrderRequestId = 0
 
     @Suppress("UNCHECKED_CAST")
-    inner class RefetchOrderBridge()  {
+    inner class RefetchOrderBridge() {
         @JavascriptInterface
         fun onRefetched(message: String) {
             try {
