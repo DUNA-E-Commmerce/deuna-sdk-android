@@ -1,6 +1,5 @@
 package com.deuna.maven.web_views
 
-import android.content.*
 import android.os.*
 import android.webkit.*
 import com.deuna.maven.shared.DeunaLogs
@@ -29,17 +28,28 @@ class NewTabWebViewActivity : BaseWebViewActivity() {
         sdkInstanceId = intent.getIntExtra(EXTRA_SDK_INSTANCE_ID, 0)
         activities[sdkInstanceId!!] = this
 
-        webView.addJavascriptInterface(LocalBridge(), "local")
+        webView.addJavascriptInterface(LocalBridge(), "windowClose")
         loadUrl(
             intent.getStringExtra(EXTRA_URL)!!, javascriptToInject = """
             window.close = function() {
-               local.closeWindow();
+               windowClose.onCloseWindowCalled();
             };
             """.trimIndent()
         )
     }
 
-    override fun onWebViewLoaded() {}
+    override fun onWebViewLoaded() {
+        webView.evaluateJavascript(
+            """
+            (function() {
+                var button = document.getElementById("cash_efecty_button_print");
+                if (button) {
+                    button.style.display = "none";
+                }
+            })();
+        """, null
+        )
+    }
 
     override fun onWebViewError() {}
 
@@ -53,7 +63,7 @@ class NewTabWebViewActivity : BaseWebViewActivity() {
 
     inner class LocalBridge {
         @JavascriptInterface
-        fun closeWindow() {
+        fun onCloseWindowCalled() {
             DeunaLogs.info("window.close()")
             finish()
         }
