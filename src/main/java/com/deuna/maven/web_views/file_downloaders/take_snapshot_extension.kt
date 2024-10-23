@@ -1,4 +1,4 @@
-package com.deuna.maven.shared.file_downloaders
+package com.deuna.maven.web_views.file_downloaders
 
 import android.webkit.JavascriptInterface
 import android.webkit.WebView

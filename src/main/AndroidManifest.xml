@@ -14,7 +14,7 @@
             android:name=".web_views.widgets.PaymentWidgetActivity"
             android:exported="false" />
         <activity
-            android:name=".web_views.base.SubWebViewActivity"
+            android:name=".web_views.NewTabWebViewActivity"
             android:exported="false" />
     </application>
 

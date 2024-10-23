@@ -9,7 +9,7 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.enums.CloseAction
-import com.deuna.maven.shared.file_downloaders.TakeSnapshotBridge
+import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.DeunaWebViewActivity
 import org.json.JSONObject

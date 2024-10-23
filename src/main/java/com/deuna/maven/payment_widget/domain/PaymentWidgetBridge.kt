@@ -7,15 +7,15 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
-import com.deuna.maven.shared.file_downloaders.takeSnapshot
 import com.deuna.maven.shared.toMap
+import com.deuna.maven.web_views.file_downloaders.*
 import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
 import org.json.JSONException
 import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    val activity: PaymentWidgetActivity
+    val activity: PaymentWidgetActivity,
 ) : WebViewBridge(name = "android") {
 
     @JavascriptInterface
@@ -43,7 +43,7 @@ class PaymentWidgetBridge(
                     metadata?.get("voucherPdfDownloadUrl") as String?
 
                 if (downloadUrl != null) {
-                    downloadPdf(activity, downloadUrl)
+                    activity.downloadFile(downloadUrl)
                 } else {
                     downloadVoucher()
                 }
@@ -119,6 +119,4 @@ class PaymentWidgetBridge(
             }
         }
     }
-
-
 }

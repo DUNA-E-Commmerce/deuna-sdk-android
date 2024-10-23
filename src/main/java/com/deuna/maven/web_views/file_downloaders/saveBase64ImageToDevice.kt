@@ -1,4 +1,4 @@
-package com.deuna.maven.payment_widget.domain
+package com.deuna.maven.web_views.file_downloaders
 
 
 import android.graphics.Bitmap
@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Base64
 import android.widget.Toast
+import com.deuna.maven.payment_widget.domain.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

@@ -14,6 +14,7 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import com.deuna.maven.R
 import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.web_views.file_downloaders.*
 
 abstract class BaseWebViewActivity : Activity() {
 
@@ -102,10 +103,18 @@ abstract class BaseWebViewActivity : Activity() {
                     // for example when a link is clicked
                     val webViewClient = CustomWebViewClient(object : WebViewCallback {
                         override fun onExternalUrl(webView: WebView, url: String) {
+                            if (url.isFileDownloadUrl) {
+                                onDownloadFile(url)
+                                return
+                            }
                             onOpenInNewTab(url)
                         }
 
                         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
+                            if (url.isFileDownloadUrl) {
+                                onDownloadFile(url)
+                                return
+                            }
                             onOpenInNewTab(url)
                         }
                     }, newWebView)
@@ -136,6 +145,10 @@ abstract class BaseWebViewActivity : Activity() {
     inner class LocalBridge() {
         @JavascriptInterface
         fun openInNewTab(url: String) {
+            if (url.isFileDownloadUrl) {
+                onDownloadFile(url)
+                return
+            }
             onOpenInNewTab(url)
         }
     }

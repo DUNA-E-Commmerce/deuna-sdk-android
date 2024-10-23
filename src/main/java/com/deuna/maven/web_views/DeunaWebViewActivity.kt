@@ -3,10 +3,9 @@ package com.deuna.maven.web_views
 import android.annotation.*
 import android.content.*
 import android.os.*
-import com.deuna.maven.R
 import com.deuna.maven.shared.*
 import com.deuna.maven.web_views.base.BaseWebViewActivity
-import com.deuna.maven.web_views.base.SubWebViewActivity
+import com.deuna.maven.web_views.file_downloaders.*
 
 /**
  * This abstract class provides a foundation for activities that display web content
@@ -44,10 +43,10 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
 
     var sdkInstanceId: Int? = null
 
+    private var externalUrl: String? = null
+
     /// When this var is false the close feature is disabled
     private var closeEnabled = true
-
-    private var pageLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +81,11 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
         val bridge = getBridge()
         webView.addJavascriptInterface(bridge, bridge.name)
 
-        val jsToInject = """ 
-         console.log = function(message) {
+        super.loadUrl(
+            url, """
+        console.log = function(message) {
             android.consoleLog(message);
-         };
+        };
          
          window.open = function(url, target, features) {
             local.openInNewTab(url);
@@ -105,11 +105,6 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
                  window.deunaRefetchOrder = refetchOrder;
              },
          };
-                """.trimIndent()
-
-        super.loadUrl(
-            url, """
-            $jsToInject
             ${javascriptToInject ?: ""}
         """.trimIndent()
         )
@@ -119,7 +114,7 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
     /// Closes the sub web view
     fun closeSubWebView() {
         externalUrl = null
-        SubWebViewActivity.closeWebView(sdkInstanceId!!)
+        NewTabWebViewActivity.closeWebView(sdkInstanceId!!)
     }
 
     // Abstract methods to be implemented by subclasses
@@ -144,12 +139,8 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
         super.onDestroy()
     }
 
-
-    var externalUrl: String? = null
-
-
     override fun onDownloadFile(url: String) {
-
+        downloadFile(url)
     }
 
     override fun onWebViewLoaded() {}
@@ -159,16 +150,16 @@ abstract class DeunaWebViewActivity : BaseWebViewActivity() {
             return
         }
         externalUrl = url
-        val intent = Intent(this, SubWebViewActivity::class.java).apply {
-            putExtra(SubWebViewActivity.EXTRA_URL, url)
-            putExtra(SubWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
+        val intent = Intent(this, NewTabWebViewActivity::class.java).apply {
+            putExtra(NewTabWebViewActivity.EXTRA_URL, url)
+            putExtra(NewTabWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         }
-        startActivityForResult(intent, SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE)
+        startActivityForResult(intent, NewTabWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE)
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != SubWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE) {
+        if (requestCode != NewTabWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE) {
             return
         }
         if (externalUrl != null) {
