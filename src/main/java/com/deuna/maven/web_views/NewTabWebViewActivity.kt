@@ -42,10 +42,12 @@ class NewTabWebViewActivity : BaseWebViewActivity() {
         webView.evaluateJavascript(
             """
             (function() {
-                var button = document.getElementById("cash_efecty_button_print");
-                if (button) {
-                    button.style.display = "none";
-                }
+                setTimeout(function() {
+                    var button = document.getElementById("cash_efecty_button_print");
+                    if (button) {
+                        button.style.display = "none";
+                    }
+                }, 500); // time out 500 ms
             })();
         """, null
         )
