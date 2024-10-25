@@ -3,8 +3,7 @@ package com.deuna.maven.checkout.domain
 import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.shared.enums.CloseAction
-import com.deuna.maven.web_views.CheckoutActivity
+import com.deuna.maven.web_views.widgets.CheckoutActivity
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")

@@ -1,4 +1,4 @@
-package com.deuna.maven.web_views
+package com.deuna.maven.web_views.widgets
 
 import android.os.*
 import com.deuna.maven.checkout.domain.*
@@ -6,6 +6,7 @@ import com.deuna.maven.client.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.web_views.DeunaWebViewActivity
 import com.deuna.maven.web_views.base.*
 import retrofit2.*
 
@@ -14,7 +15,7 @@ import retrofit2.*
  * from the server and loads it in a WebView. It also communicates with the CheckoutCallbacks
  * interface to report success, errors, or cancellation.
  */
-class CheckoutActivity() : BaseWebViewActivity() {
+class CheckoutActivity() : DeunaWebViewActivity() {
 
     companion object {
         const val EXTRA_API_KEY = "API_KEY"
@@ -158,7 +159,7 @@ class CheckoutActivity() : BaseWebViewActivity() {
         )
     }
 
-    override fun onError() {
+    override fun onWebViewError() {
         callbacks?.onError?.invoke(
             PaymentWidgetErrors.initializationFailed
         )

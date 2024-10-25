@@ -5,8 +5,8 @@ import android.content.Intent
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.web_views.*
-import com.deuna.maven.web_views.base.*
+import com.deuna.maven.web_views.DeunaWebViewActivity
+import com.deuna.maven.web_views.widgets.ElementsActivity
 import java.lang.IllegalStateException
 
 /**
@@ -76,9 +76,9 @@ fun DeunaSDK.initElements(
 
     val intent = Intent(context, ElementsActivity::class.java).apply {
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
-        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
+        putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         putStringArrayListExtra(
-            BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
+            DeunaWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
         )
     }

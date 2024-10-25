@@ -3,8 +3,7 @@ package com.deuna.maven.element.domain
 import android.webkit.JavascriptInterface
 import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.shared.enums.CloseAction
-import com.deuna.maven.web_views.ElementsActivity
+import com.deuna.maven.web_views.widgets.ElementsActivity
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")

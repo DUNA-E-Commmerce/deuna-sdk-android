@@ -8,7 +8,7 @@ enum class Environment(
     DEVELOPMENT(
         "https://api.dev.deuna.io",
         "https://elements.dev.deuna.io",
-        "https://pay.dev.deuna.com"
+        "https://pay.dev.deuna.io"
     ),
     PRODUCTION(
         "https://api.deuna.io",

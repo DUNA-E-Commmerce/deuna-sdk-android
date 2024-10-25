@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import com.deuna.maven.checkout.domain.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.web_views.*
-import com.deuna.maven.web_views.base.*
+import com.deuna.maven.web_views.DeunaWebViewActivity
+import com.deuna.maven.web_views.widgets.CheckoutActivity
 
 /**
  * Launch the Checkout View
@@ -45,9 +45,9 @@ fun DeunaSDK.initCheckout(
         putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
         putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)
         putExtra(CheckoutActivity.EXTRA_BASE_URL, baseUrl)
-        putExtra(BaseWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
+        putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         putStringArrayListExtra(
-            BaseWebViewActivity.EXTRA_CLOSE_EVENTS,
+            DeunaWebViewActivity.EXTRA_CLOSE_EVENTS,
             ArrayList(closeEvents.map { it.name })
         )
     }

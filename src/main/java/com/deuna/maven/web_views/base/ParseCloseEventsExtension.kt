@@ -1,7 +1,9 @@
 package com.deuna.maven.web_views.base
 
+import com.deuna.maven.web_views.DeunaWebViewActivity
 
-inline fun <reified T : Enum<T>> BaseWebViewActivity.parseCloseEvents(closeEventAsListString: List<String>): Set<T> {
+
+inline fun <reified T : Enum<T>> DeunaWebViewActivity.parseCloseEvents(closeEventAsListString: List<String>): Set<T> {
     // Use `T` as the generic type for the enum
     return closeEventAsListString.mapNotNull { stringValue ->
         try {

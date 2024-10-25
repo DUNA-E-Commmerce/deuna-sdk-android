@@ -20,6 +20,10 @@ object ElementsWidget {
     const val CLICK_TO_PAY = "click_to_pay"
 }
 
+object OnEmbedEvents {
+    const val APM_CLOSED = "apmClosed"
+}
+
 object QueryParameters {
     const val MODE = "mode"
     const val WIDGET = "widget"
