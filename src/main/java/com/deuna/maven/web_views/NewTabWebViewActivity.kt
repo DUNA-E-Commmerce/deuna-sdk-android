@@ -73,7 +73,6 @@ class NewTabWebViewActivity : BaseWebViewActivity() {
 
 
     override fun onDestroy() {
-        webView.destroy()
         activities.remove(sdkInstanceId)
         super.onDestroy()
     }

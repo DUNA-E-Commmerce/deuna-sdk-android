@@ -5,6 +5,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.Message
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -151,6 +152,22 @@ abstract class BaseWebViewActivity : Activity() {
             }
             onOpenInNewTab(url)
         }
+    }
+
+    override fun onDestroy() {
+        webView.apply {
+            // Remove the WebView from the view hierarchy
+            (webView.parent as? ViewGroup)?.removeView(webView)
+
+            // Stop loading and clear cache
+            webView.stopLoading()
+            webView.clearHistory()
+            webView.clearCache(true)
+
+            // Destroy the WebView
+            webView.destroy()
+        }
+        super.onDestroy()
     }
 
 
