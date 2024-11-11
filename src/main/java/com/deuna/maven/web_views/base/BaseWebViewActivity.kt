@@ -19,10 +19,11 @@ import com.deuna.maven.web_views.file_downloaders.*
 
 abstract class BaseWebViewActivity : Activity() {
 
-
     private var pageLoaded = false
     lateinit var loader: ProgressBar
     lateinit var webView: WebView
+
+    private var disposed = false // used to known that the webView was destroyed
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,6 +147,10 @@ abstract class BaseWebViewActivity : Activity() {
     inner class LocalBridge() {
         @JavascriptInterface
         fun openInNewTab(url: String) {
+            if (disposed) {
+                return
+            }
+
             if (url.isFileDownloadUrl) {
                 onDownloadFile(url)
                 return
@@ -155,6 +160,7 @@ abstract class BaseWebViewActivity : Activity() {
     }
 
     override fun onDestroy() {
+        disposed = true
         webView.apply {
             // Remove the WebView from the view hierarchy
             (webView.parent as? ViewGroup)?.removeView(webView)
