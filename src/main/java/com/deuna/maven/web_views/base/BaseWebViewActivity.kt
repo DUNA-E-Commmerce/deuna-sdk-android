@@ -23,8 +23,6 @@ abstract class BaseWebViewActivity : Activity() {
     lateinit var loader: ProgressBar
     lateinit var webView: WebView
 
-    private var disposed = false // used to known that the webView was destroyed
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.webview_activity)
@@ -147,10 +145,6 @@ abstract class BaseWebViewActivity : Activity() {
     inner class LocalBridge() {
         @JavascriptInterface
         fun openInNewTab(url: String) {
-            if (disposed) {
-                return
-            }
-
             if (url.isFileDownloadUrl) {
                 onDownloadFile(url)
                 return
@@ -160,7 +154,6 @@ abstract class BaseWebViewActivity : Activity() {
     }
 
     override fun onDestroy() {
-        disposed = true
         webView.apply {
             // Remove the WebView from the view hierarchy
             (webView.parent as? ViewGroup)?.removeView(webView)
