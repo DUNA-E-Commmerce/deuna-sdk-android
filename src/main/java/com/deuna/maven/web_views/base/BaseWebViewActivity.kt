@@ -125,20 +125,9 @@ abstract class BaseWebViewActivity : Activity() {
             }
         }
 
-        val cleanedUrl = cleanUrl(url)
-        DeunaLogs.info("Loading url: $cleanedUrl")
-        webView.loadUrl(cleanedUrl)
+        DeunaLogs.info("Loading url: $url")
+        webView.loadUrl(url)
     }
-
-
-    // Remove unnecessary slashes from the URL
-    private fun cleanUrl(url: String): String {
-        val protocolEndIndex = url.indexOf("//") + 2
-        val protocol = url.substring(0, protocolEndIndex)
-        val restOfUrl = url.substring(protocolEndIndex).replace("//", "/")
-        return "$protocol$restOfUrl"
-    }
-
 
     /**
      * Intercepts window.open and launches a new activity with a new web view
