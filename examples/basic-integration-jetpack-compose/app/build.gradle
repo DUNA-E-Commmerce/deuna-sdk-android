@@ -25,6 +25,7 @@ android {
     }
     buildFeatures {
         compose true
+        dataBinding true // SE DEBE AGREGAR SI SE USA EL SDK DE BAZ
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
@@ -59,8 +60,13 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // DEUNA SDK
-    implementation 'com.github.deuna-developers:deuna-sdk-android:2.8.11'
+//    implementation 'com.github.deuna-developers:deuna-sdk-android:2.8.11'
+    implementation files('../../../build/outputs/aar/deuna-sdk-android-debug.aar')
 
+    // SE DEBE AGREGAR SI SE USA EL SDK DE BAZ
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation(files("libs/baz.aar"))
+    // FIN BAZ
 
     // Material Design 3
     implementation 'androidx.compose.material3:material3'

@@ -11,5 +11,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        // BAZ DEPENDENCIES
+        // IMPORTANTE REVISAR EN EL EJEMPLO DE COMPOSE QUE EL SDK DE BAZ TAMBIEN DEBE AGREGARSE MANUALMENTE
+        // REVISAR EL SETTINGS.GRADLE y EL BUILD.GRADLE
+        flatDir {
+            dirs 'libs'
+        }
+        // END BAZ DEPENDENCIES
     }
 }

@@ -19,3 +19,25 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Preserva todas las clases y métodos del paquete `mx.com.bancoazteca.azteca360.sdk`
+-keep class mx.com.bancoazteca.azteca360.sdk.** { *; }
+
+# Preserva las anotaciones
+-keepattributes *Annotation*
+
+# Preserva los nombres de los métodos y clases reflejados
+-keepclassmembers class * {
+    public static void main(java.lang.String[]);
+    void set*(***);
+    *** get*();
+}
+
+# Evita la eliminación de clases utilizadas en llamadas reflexivas
+-keepclassmembers class * {
+    *;
+}
+
+# Previene la optimización de las clases de la biblioteca
+-dontoptimize
+-dontshrink

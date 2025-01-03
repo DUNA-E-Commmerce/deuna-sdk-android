@@ -20,40 +20,41 @@ fun HomeViewModel.saveCard(
     context: Context,
     completion: (ElementsResult) -> Unit,
 ) {
-    deunaSDK.initElements(context = context,
-        userToken = userTokenValue,
-        userInfo = if (userTokenValue == null) UserInfo(
-            firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
-        ) else null,
-        callbacks = ElementsCallbacks().apply {
-            onSuccess = { response ->
-                deunaSDK.close()
-                viewModelScope.launch {
-                    completion(
-                        ElementsResult.Success(
-                            (response["metadata"] as Json)["createdCard"] as Json
-                        )
-                    )
-                }
-            }
-            onError = { error ->
-                deunaSDK.close()
-                viewModelScope.launch {
-                    completion(ElementsResult.Error(error))
-                }
-            }
-            onClosed = { action ->
-                Log.e(DEBUG_TAG, "closeAction: $action")
-                if (action == CloseAction.userAction) { // The operation was canceled
-                    viewModelScope.launch {
-                        completion(ElementsResult.Canceled)
-                    }
-                }
-            }
-            onEventDispatch = { event, data ->
-                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
-            }
-        })
+    deunaSDK.launchBaz(context)
+//    deunaSDK.initElements(context = context,
+//        userToken = userTokenValue,
+//        userInfo = if (userTokenValue == null) UserInfo(
+//            firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
+//        ) else null,
+//        callbacks = ElementsCallbacks().apply {
+//            onSuccess = { response ->
+//                deunaSDK.close()
+//                viewModelScope.launch {
+//                    completion(
+//                        ElementsResult.Success(
+//                            (response["metadata"] as Json)["createdCard"] as Json
+//                        )
+//                    )
+//                }
+//            }
+//            onError = { error ->
+//                deunaSDK.close()
+//                viewModelScope.launch {
+//                    completion(ElementsResult.Error(error))
+//                }
+//            }
+//            onClosed = { action ->
+//                Log.e(DEBUG_TAG, "closeAction: $action")
+//                if (action == CloseAction.userAction) { // The operation was canceled
+//                    viewModelScope.launch {
+//                        completion(ElementsResult.Canceled)
+//                    }
+//                }
+//            }
+//            onEventDispatch = { event, data ->
+//                Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
+//            }
+//        })
 }
 
 

@@ -16,6 +16,11 @@
         <activity
             android:name=".web_views.NewTabWebViewActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".BazActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

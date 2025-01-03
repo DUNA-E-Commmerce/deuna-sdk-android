@@ -9,10 +9,10 @@ group = 'com.github.deuna-developers'
 
 android {
     namespace 'com.deuna.maven'
-    compileSdk 32
+    compileSdk 34 // CAMBIAR A 34 PARA BAZ
 
     defaultConfig {
-        minSdk 22
+        minSdk 23  // CAMBIAR A 23 PARA BAZ
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -32,6 +32,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        dataBinding true // AGREGAR PARA BAZ
     }
 }
 
@@ -40,11 +41,21 @@ tasks.withType(Sign).configureEach {
 }
 
 dependencies {
+
+
     api 'com.squareup.okhttp3:okhttp:4.12.0'
     api 'com.squareup.retrofit2:retrofit:2.9.0'
     api 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     api 'com.squareup.retrofit2:converter-gson:2.9.0'
     testImplementation 'junit:junit:4.13.2'
+
+    // BAZ DEPENDENCIES
+    api(name: 'baz-sdk-android', ext: 'aar')
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.8.5'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.8.5'
+    // END BAZ
+
     implementation("com.google.code.gson:gson") {
         version {
             strictly("2.8.9")

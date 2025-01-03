@@ -1,6 +1,8 @@
 package com.deuna.maven
 
 
+import android.content.Context
+import android.content.Intent
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.web_views.DeunaWebViewActivity
 import org.json.JSONObject
@@ -17,7 +19,7 @@ open class DeunaSDK(
     val environment: Environment,
     val publicApiKey: String,
 ) {
-    
+
     val sdkInstanceId: Int
         get() = hashCode()
 
@@ -69,6 +71,10 @@ open class DeunaSDK(
         DeunaWebViewActivity.sendCustomStyle(
             sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
         )
+    }
+
+    fun launchBaz(context: Context) {
+        context.startActivity(Intent(context, BazActivity::class.java))
     }
 
     /**
