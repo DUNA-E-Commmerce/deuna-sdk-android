@@ -23,6 +23,7 @@ class CheckoutActivity() : DeunaWebViewActivity() {
         const val EXTRA_USER_TOKEN = "USER_TOKEN"
         const val EXTRA_STYLE_FILE = "STYLE_FILE"
         const val EXTRA_BASE_URL = "BASE_URL"
+        const val EXTRA_LANGUAGE = "LANGUAGE"
 
 
         /**
@@ -56,6 +57,7 @@ class CheckoutActivity() : DeunaWebViewActivity() {
         val apiKey = intent.getStringExtra(EXTRA_API_KEY)!!
         val userToken = intent.getStringExtra(EXTRA_USER_TOKEN)
         val styleFile = intent.getStringExtra(EXTRA_STYLE_FILE)
+        val language = intent.getStringExtra(EXTRA_LANGUAGE)
 
         val closeEventAsStrings =
             intent.getStringArrayListExtra(EXTRA_CLOSE_EVENTS) ?: emptyList<String>()
@@ -67,7 +69,8 @@ class CheckoutActivity() : DeunaWebViewActivity() {
             orderToken = orderToken,
             apiKey = apiKey,
             userToken = userToken,
-            styleFile = styleFile
+            styleFile = styleFile,
+            language = language
         )
     }
 
@@ -80,7 +83,8 @@ class CheckoutActivity() : DeunaWebViewActivity() {
         orderToken: String,
         apiKey: String,
         userToken: String?,
-        styleFile: String?
+        styleFile: String?,
+        language: String?
     ) {
         sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
@@ -113,6 +117,10 @@ class CheckoutActivity() : DeunaWebViewActivity() {
 
                     if (styleFile != null) {
                         queryParameters[QueryParameters.STYLE_FILE] = styleFile
+                    }
+
+                    if (!language.isNullOrEmpty()) {
+                        queryParameters[QueryParameters.LANGUAGE] = language
                     }
 
                     loadUrl(

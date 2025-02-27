@@ -35,6 +35,7 @@ fun DeunaSDK.initElements(
     userInfo: UserInfo? = null,
     styleFile: String? = null,
     types: List<Json> = emptyList(),
+    language: String? = null
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
@@ -60,6 +61,10 @@ fun DeunaSDK.initElements(
             callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
             return
         }
+    }
+
+    if (!language.isNullOrEmpty()) {
+        queryParameters[QueryParameters.LANGUAGE] = language
     }
 
     styleFile?.let {

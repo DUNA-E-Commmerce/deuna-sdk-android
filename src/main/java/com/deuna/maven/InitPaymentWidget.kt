@@ -31,6 +31,7 @@ fun DeunaSDK.initPaymentWidget(
     styleFile: String? = null,
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
+    language: String? = null
 ) {
 
     if (orderToken.isEmpty()) {
@@ -46,6 +47,10 @@ fun DeunaSDK.initPaymentWidget(
 
     val queryParameters = mutableMapOf<String, String>()
     queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
+
+    if (!language.isNullOrEmpty()) {
+        queryParameters[QueryParameters.LANGUAGE] = language
+    }
 
     if (!userToken.isNullOrEmpty()) {
         queryParameters[QueryParameters.USER_TOKEN] = userToken

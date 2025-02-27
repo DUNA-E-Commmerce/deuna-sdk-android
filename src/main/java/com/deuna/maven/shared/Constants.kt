@@ -37,6 +37,7 @@ object QueryParameters {
     const val FIRST_NAME = "firstName"
     const val LAST_NAME = "lastName"
     const val EMAIL = "email"
+    const val LANGUAGE = "language"
 }
 
 object PaymentsErrorMessages {
