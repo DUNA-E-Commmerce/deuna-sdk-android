@@ -24,6 +24,7 @@ fun DeunaSDK.initCheckout(
     closeEvents: Set<CheckoutEvent> = emptySet(),
     userToken: String? = null,
     styleFile: String? = null,
+    language: String? = null
 ) {
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
@@ -41,6 +42,9 @@ fun DeunaSDK.initCheckout(
         }
         if (!styleFile.isNullOrEmpty()) {
             putExtra(CheckoutActivity.EXTRA_STYLE_FILE, styleFile)
+        }
+        if (!language.isNullOrEmpty()) {
+            putExtra(CheckoutActivity.EXTRA_LANGUAGE, language)
         }
         putExtra(CheckoutActivity.EXTRA_ORDER_TOKEN, orderToken)
         putExtra(CheckoutActivity.EXTRA_API_KEY, apiKey)
