@@ -30,6 +30,7 @@ object QueryParameters {
     const val XPROPS_B64 = "xpropsB64"
     const val PUBLIC_API_KEY = "publicApiKey"
     const val USER_TOKEN = "userToken"
+    const val ORDER_TOKEN = "orderToken"
     const val CSS_FILE = "cssFile"
     const val STYLE_FILE = "styleFile"
     const val PAYMENT_METHODS = "paymentMethods"
@@ -38,6 +39,8 @@ object QueryParameters {
     const val LAST_NAME = "lastName"
     const val EMAIL = "email"
     const val LANGUAGE = "language"
+    const val SHOW_SAVED_CARD_FLOW = "showSavedCardFlow"
+    const val DEFAULT_CARD_FLOW = "defaultCardFlow"
 }
 
 object PaymentsErrorMessages {
