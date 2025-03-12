@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.deuna.compose_demo.screens.ElementsResult
+import com.deuna.maven.ElementsWidgetExperience
 import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
@@ -20,7 +21,8 @@ fun HomeViewModel.saveCard(
     context: Context,
     completion: (ElementsResult) -> Unit,
 ) {
-    deunaSDK.initElements(context = context,
+    deunaSDK.initElements(
+        context = context,
         userToken = userTokenValue,
         userInfo = if (userTokenValue == null) UserInfo(
             firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
@@ -53,7 +55,13 @@ fun HomeViewModel.saveCard(
             onEventDispatch = { event, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
-        })
+        },
+        widgetExperience = ElementsWidgetExperience(
+            userExperience = ElementsWidgetExperience.UserExperience(
+                showSavedCardFlow = false, defaultCardFlow = false
+            )
+        ),
+    )
 }
 
 

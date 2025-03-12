@@ -11,7 +11,7 @@ import java.lang.IllegalStateException
 
 
 class ElementsWidgetExperience(val userExperience: UserExperience) {
-    inner class UserExperience(
+    class UserExperience(
         val showSavedCardFlow: Boolean? = null,
         val defaultCardFlow: Boolean? = null,
     )
