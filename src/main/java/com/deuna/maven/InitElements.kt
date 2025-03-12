@@ -9,6 +9,14 @@ import com.deuna.maven.web_views.DeunaWebViewActivity
 import com.deuna.maven.web_views.widgets.ElementsActivity
 import java.lang.IllegalStateException
 
+
+class ElementsWidgetExperience(val userExperience: UserExperience) {
+    inner class UserExperience(
+        val showSavedCardFlow: Boolean? = null,
+        val defaultCardFlow: Boolean? = null,
+    )
+}
+
 /**
  * Launch the Elements View
  *
@@ -26,19 +34,10 @@ import java.lang.IllegalStateException
  * )
  * ```
  * @param orderToken (Optional) The orderToken is a unique token generated for the payment order. This token is generated through the DEUNA API and you must implement the corresponding endpoint in your backend to obtain this information.
- * @param widgetExperience (Optional)  A dictionary containing custom configurations for the widget.
+ * @param widgetExperience (Optional)  An instance of ElementsWidgetExperience that contains a custom configurations for the widget.
  *  The currently supported configurations are:
  *   - `userExperience.showSavedCardFlow`: (Bool) Shows the saved cards toggle.
  *   - `userExperience.defaultCardFlow`: (Bool) Shows the toggle to save the card as default.
- * Example:
- * ```
- * widgetExperience = mapOf(
- *      "userExperience" to mapOf(
- *         "showSavedCardFlow" to true,
- *         "defaultCardFlow" to true,
- *      )
- * )
- * ```
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(
@@ -51,7 +50,7 @@ fun DeunaSDK.initElements(
     types: List<Json> = emptyList(),
     language: String? = null,
     orderToken: String? = null,
-    widgetExperience: Json = emptyMap()
+    widgetExperience: ElementsWidgetExperience? = null
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
@@ -87,8 +86,13 @@ fun DeunaSDK.initElements(
         queryParameters[QueryParameters.ORDER_TOKEN] = orderToken
     }
 
-    if (widgetExperience.isNotEmpty()) {
-        queryParameters[QueryParameters.WIDGET_EXPERIENCE] = widgetExperience.toBase64()
+    widgetExperience?.let {
+        it.userExperience.showSavedCardFlow?.let { value ->
+            queryParameters[QueryParameters.SHOW_SAVED_CARD_FLOW] = "$value"
+        }
+        it.userExperience.defaultCardFlow?.let { value ->
+            queryParameters[QueryParameters.DEFAULT_CARD_FLOW] = "$value"
+        }
     }
 
     styleFile?.let {
@@ -98,8 +102,9 @@ fun DeunaSDK.initElements(
 
     // Construct the base URL for elements and the URL string
     // by default the VAULT widget is showed if the types list is empty
-    val widgetName = types.firstOrNull()?.get(ElementsTypeKey.NAME)
-        ?.takeIf { it is String && it.isNotEmpty() } ?: ElementsWidget.VAULT
+    val widgetName =
+        types.firstOrNull()?.get(ElementsTypeKey.NAME)?.takeIf { it is String && it.isNotEmpty() }
+            ?: ElementsWidget.VAULT
 
     val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
 
@@ -107,8 +112,7 @@ fun DeunaSDK.initElements(
         putExtra(ElementsActivity.EXTRA_URL, elementUrl)
         putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
         putStringArrayListExtra(
-            DeunaWebViewActivity.EXTRA_CLOSE_EVENTS,
-            ArrayList(closeEvents.map { it.name })
+            DeunaWebViewActivity.EXTRA_CLOSE_EVENTS, ArrayList(closeEvents.map { it.name })
         )
     }
     context.startActivity(intent)

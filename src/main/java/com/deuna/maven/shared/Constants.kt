@@ -39,7 +39,8 @@ object QueryParameters {
     const val LAST_NAME = "lastName"
     const val EMAIL = "email"
     const val LANGUAGE = "language"
-    const val WIDGET_EXPERIENCE = "widgetExperience"
+    const val SHOW_SAVED_CARD_FLOW = "showSavedCardFlow"
+    const val DEFAULT_CARD_FLOW = "defaultCardFlow"
 }
 
 object PaymentsErrorMessages {
