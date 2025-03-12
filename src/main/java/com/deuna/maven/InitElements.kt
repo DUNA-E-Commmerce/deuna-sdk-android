@@ -25,6 +25,20 @@ import java.lang.IllegalStateException
  *    mapOf( "name" to ElementsWidget.VAULT)
  * )
  * ```
+ * @param orderToken (Optional) The orderToken is a unique token generated for the payment order. This token is generated through the DEUNA API and you must implement the corresponding endpoint in your backend to obtain this information.
+ * @param widgetExperience (Optional)  A dictionary containing custom configurations for the widget.
+ *  The currently supported configurations are:
+ *   - `userExperience.showSavedCardFlow`: (Bool) Shows the saved cards toggle.
+ *   - `userExperience.defaultCardFlow`: (Bool) Shows the toggle to save the card as default.
+ * Example:
+ * ```
+ * widgetExperience = mapOf(
+ *      "userExperience" to mapOf(
+ *         "showSavedCardFlow" to true,
+ *         "defaultCardFlow" to true,
+ *      )
+ * )
+ * ```
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(
@@ -35,7 +49,9 @@ fun DeunaSDK.initElements(
     userInfo: UserInfo? = null,
     styleFile: String? = null,
     types: List<Json> = emptyList(),
-    language: String? = null
+    language: String? = null,
+    orderToken: String? = null,
+    widgetExperience: Json = emptyMap()
 ) {
     val baseUrl = this.environment.elementsBaseUrl
 
@@ -65,6 +81,14 @@ fun DeunaSDK.initElements(
 
     if (!language.isNullOrEmpty()) {
         queryParameters[QueryParameters.LANGUAGE] = language
+    }
+
+    if (!orderToken.isNullOrEmpty()) {
+        queryParameters[QueryParameters.ORDER_TOKEN] = orderToken
+    }
+
+    if (widgetExperience.isNotEmpty()) {
+        queryParameters[QueryParameters.WIDGET_EXPERIENCE] = widgetExperience.toBase64()
     }
 
     styleFile?.let {
