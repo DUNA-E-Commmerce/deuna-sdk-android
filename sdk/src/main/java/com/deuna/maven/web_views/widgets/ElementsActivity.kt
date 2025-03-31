@@ -58,7 +58,8 @@ class ElementsActivity() : DeunaWebViewActivity() {
     override fun getBridge(): WebViewBridge {
         return ElementsBridge(
             activity = this,
-            closeEvents = closeEvents
+            closeEvents = closeEvents,
+            onClosedByUser = {}
         )
     }
 

@@ -2,21 +2,25 @@ package com.deuna.maven.web_views.deuna
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.AttributeSet
 import android.util.Log
 import android.webkit.JavascriptInterface
+import com.deuna.maven.findFragmentActivity
+import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.base.BaseWebView
+import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
-class DeunaWebView(context: Context) : BaseWebView(context) {
+class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
-    private var externalUrl: String? = null
+    private var newTabDialogFragment: NewTabDialogFragment? = null
 
     /// When this var is false the close feature is disabled
     private var closeEnabled = true
@@ -38,9 +42,10 @@ class DeunaWebView(context: Context) : BaseWebView(context) {
     override fun loadUrl(url: String, javascriptToInject: String?) {
         // Add JavascriptInterface
 
-//        bridge?.let {
-//            webView.addJavascriptInterface(it, it.name)
-//        }
+        bridge?.let {
+            DeunaLogs.info("Adding bridge ${it.name}")
+            webView.addJavascriptInterface(it, it.name)
+        }
 
         super.loadUrl(
             url, """
@@ -70,21 +75,28 @@ class DeunaWebView(context: Context) : BaseWebView(context) {
         """.trimIndent()
         )
 
-        listener = object : BaseWebView.Listener {
+        listener = object : Listener {
             override fun onWebViewLoaded() {}
 
             override fun onWebViewError() {}
 
             override fun onOpenInNewTab(url: String) {
-                if (externalUrl != null) {
+                if (newTabDialogFragment != null) {
                     return
                 }
-                externalUrl = url
-                //  val intent = Intent(this, NewTabWebViewActivity::class.java).apply {
-                //  putExtra(NewTabWebViewActivity.EXTRA_URL, url)
-                //  putExtra(NewTabWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
-                // }
-                // startActivityForResult(intent, NewTabWebViewActivity.SUB_WEB_VIEW_REQUEST_CODE)
+
+                val fragmentActivity = context.findFragmentActivity() ?: return
+
+                newTabDialogFragment = NewTabDialogFragment(
+                    url = url,
+                    onDialogDestroyed = {
+                        newTabDialogFragment = null
+                    }
+                )
+                newTabDialogFragment?.show(
+                    fragmentActivity.supportFragmentManager,
+                    "NewTabDialogFragment+${System.currentTimeMillis()}"
+                )
             }
 
             override fun onDownloadFile(url: String) {
@@ -92,7 +104,6 @@ class DeunaWebView(context: Context) : BaseWebView(context) {
             }
 
         }
-        super.loadUrl(url, javascriptToInject)
     }
 
     // Check internet connection and initialize other components
@@ -114,7 +125,8 @@ class DeunaWebView(context: Context) : BaseWebView(context) {
 
     /// Closes the sub web view
     fun closeSubWebView() {
-        externalUrl = null
+        newTabDialogFragment?.dismiss()
+        newTabDialogFragment = null
     }
 
     override fun destroy() {
@@ -162,7 +174,6 @@ class DeunaWebView(context: Context) : BaseWebView(context) {
 
     fun onNoInternet() {}
 
-    fun onCanceledByUser(){}
-
+    fun onCanceledByUser() {}
 
 }

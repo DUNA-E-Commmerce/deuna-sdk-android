@@ -158,6 +158,7 @@ class CheckoutActivity() : DeunaWebViewActivity() {
         return CheckoutBridge(
             activity = this,
             closeEvents = closeEvents,
+            onClosedByUser = {}
         )
     }
 

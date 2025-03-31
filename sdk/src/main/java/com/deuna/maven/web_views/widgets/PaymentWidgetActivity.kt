@@ -81,7 +81,7 @@ class PaymentWidgetActivity() : DeunaWebViewActivity() {
     }
 
     override fun getBridge(): WebViewBridge {
-        return PaymentWidgetBridge(DeunaWebView(this),PaymentWidgetCallbacks())
+        return PaymentWidgetBridge(DeunaWebView(this),PaymentWidgetCallbacks(),{})
     }
 
     override fun onNoInternet() {

@@ -15,8 +15,9 @@ import org.json.JSONObject
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
     val deunaWebView: DeunaWebView,
-    val callbacks: PaymentWidgetCallbacks
-) : WebViewBridge(name = "android") {
+    val callbacks: PaymentWidgetCallbacks,
+    val onClosedByUser: () -> Unit
+) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
@@ -85,8 +86,7 @@ class PaymentWidgetBridge(
 
                 CheckoutEvent.paymentMethods3dsInitiated -> {}
                 CheckoutEvent.linkClose -> {
-                    deunaWebView.onCanceledByUser()
-//                    closeWebView(activity.sdkInstanceId!!)
+                    onClosedByUser()
                 }
 
                 else -> {}

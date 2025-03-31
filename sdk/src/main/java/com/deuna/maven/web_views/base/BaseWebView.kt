@@ -20,8 +20,9 @@ import com.deuna.maven.web_views.file_downloaders.isFileDownloadUrl
 
 
 open class BaseWebView(
-    context: Context
-) : FrameLayout(context) {
+    context: Context,
+    val attrs: AttributeSet? = null,
+) : FrameLayout(context, attrs) {
     private var pageLoaded = false
     var loader: ProgressBar
     var webView: WebView

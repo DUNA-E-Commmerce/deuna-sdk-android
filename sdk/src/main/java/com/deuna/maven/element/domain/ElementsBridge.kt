@@ -10,7 +10,8 @@ import org.json.*
 class ElementsBridge(
     private val activity: ElementsActivity,
     private val closeEvents: Set<ElementsEvent>,
-) : WebViewBridge(name = "android") {
+    private val onClosedByUser: () -> Unit
+) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {

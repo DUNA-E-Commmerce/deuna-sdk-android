@@ -10,7 +10,8 @@ import org.json.*
 class CheckoutBridge(
     private val activity: CheckoutActivity,
     private val closeEvents: Set<CheckoutEvent>,
-) : WebViewBridge(name = "android") {
+    private val onClosedByUser: () -> Unit
+) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
