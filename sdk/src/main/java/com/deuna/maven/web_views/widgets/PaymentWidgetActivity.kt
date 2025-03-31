@@ -12,6 +12,7 @@ import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.DeunaWebViewActivity
+import com.deuna.maven.web_views.deuna.DeunaWebView
 import org.json.JSONObject
 
 class PaymentWidgetActivity() : DeunaWebViewActivity() {
@@ -80,7 +81,7 @@ class PaymentWidgetActivity() : DeunaWebViewActivity() {
     }
 
     override fun getBridge(): WebViewBridge {
-        return PaymentWidgetBridge(this)
+        return PaymentWidgetBridge(DeunaWebView(this),PaymentWidgetCallbacks())
     }
 
     override fun onNoInternet() {

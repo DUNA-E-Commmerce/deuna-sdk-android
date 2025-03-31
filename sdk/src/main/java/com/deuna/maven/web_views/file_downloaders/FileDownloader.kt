@@ -1,5 +1,6 @@
 package com.deuna.maven.web_views.file_downloaders
 
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
@@ -8,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.base.*
 import java.net.*
 import java.util.concurrent.Executors
@@ -158,6 +160,68 @@ fun BaseWebViewActivity.downloadFile(urlString: String) {
 
     }
 }
+
+
+fun BaseWebView.runOnUiThread(runnable: Runnable) {
+    val ctx = context
+    if (ctx is Activity) {
+        ctx.runOnUiThread(runnable)
+    } else {
+        Handler(Looper.getMainLooper()).post(runnable)
+    }
+}
+
+
+fun BaseWebView.downloadFile(urlString: String) {
+    runOnUiThread {
+        if (urlString.isEmpty()) {
+            return@runOnUiThread
+        }
+
+        var downloadUrl = urlString
+
+        if (!downloadUrl.startsWith("https://") && !downloadUrl.startsWith("http://")) {
+            downloadUrl = "${getProtocolAndDomain(webView.url ?: "")}$urlString"
+        }
+
+        // Attempt to get the file name and extension
+        val fileName = getFileNameFromUrl(downloadUrl)
+        val extension = downloadUrl.getFileExtension()
+
+        if (extension != null) {
+            startDownloadTask(
+                context = context,
+                downloadUrl = downloadUrl,
+                fileName = fileName,
+                mimeType = extension.mimeType
+            )
+            return@runOnUiThread
+        }
+
+
+        getMimeTypeFromUrl(downloadUrl) { mime ->
+
+            if (mime == null) {
+                Toast.makeText(context, "No se pudo descargar el archivo", Toast.LENGTH_SHORT)
+                    .show()
+                return@getMimeTypeFromUrl
+            }
+
+            val ext = FileExtension.fromMime(mime) ?: return@getMimeTypeFromUrl
+
+            startDownloadTask(
+                context = context,
+                downloadUrl = downloadUrl,
+                fileName = "$fileName.${ext.extension}",
+                mimeType = mime
+            )
+
+        }
+
+
+    }
+}
+
 
 
 private fun startDownloadTask(

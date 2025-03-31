@@ -2,20 +2,20 @@ package com.deuna.maven.payment_widget.domain
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.checkout.domain.CheckoutEvent
-import com.deuna.maven.closeWebView
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.WebViewBridge
 import com.deuna.maven.shared.toMap
+import com.deuna.maven.web_views.deuna.DeunaWebView
 import com.deuna.maven.web_views.file_downloaders.*
-import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
 import org.json.JSONException
 import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    val activity: PaymentWidgetActivity,
+    val deunaWebView: DeunaWebView,
+    val callbacks: PaymentWidgetCallbacks
 ) : WebViewBridge(name = "android") {
 
     @JavascriptInterface
@@ -43,7 +43,7 @@ class PaymentWidgetBridge(
                     metadata?.get("voucherPdfDownloadUrl") as String?
 
                 if (downloadUrl != null) {
-                    activity.downloadFile(downloadUrl)
+                    deunaWebView.downloadFile(downloadUrl)
                 } else {
                     downloadVoucher()
                 }
@@ -53,16 +53,16 @@ class PaymentWidgetBridge(
             val event = CheckoutEvent.valueOf(type)
 
             val checkoutEvent = CheckoutEvent.valueOf(type)
-            activity.callbacks?.onEventDispatch?.invoke(checkoutEvent, data)
+            callbacks.onEventDispatch?.invoke(checkoutEvent, data)
 
             when (event) {
                 CheckoutEvent.purchaseError -> {
-                    activity.closeSubWebView()
-                    activity.updateCloseEnabled(true)
+                    deunaWebView.closeSubWebView()
+                    deunaWebView.updateCloseEnabled(true)
                     val error = PaymentsError.fromJson(
                         type = PaymentsError.Type.PAYMENT_ERROR, data = data
                     )
-                    activity.callbacks?.onError?.invoke(error)
+                    callbacks.onError?.invoke(error)
                 }
 
                 CheckoutEvent.onBinDetected -> {
@@ -74,19 +74,19 @@ class PaymentWidgetBridge(
                 }
 
                 CheckoutEvent.paymentProcessing -> {
-                    activity.updateCloseEnabled(false)
-                    activity.callbacks?.onPaymentProcessing?.invoke()
+                    deunaWebView.updateCloseEnabled(false)
+                    callbacks.onPaymentProcessing?.invoke()
                 }
 
                 CheckoutEvent.purchase -> {
-                    activity.closeSubWebView()
-                    activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
+                    deunaWebView.closeSubWebView()
+                    callbacks.onSuccess?.invoke(data["order"] as Json)
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated -> {}
                 CheckoutEvent.linkClose -> {
-                    activity.onCanceledByUser()
-                    closeWebView(activity.sdkInstanceId!!)
+                    deunaWebView.onCanceledByUser()
+//                    closeWebView(activity.sdkInstanceId!!)
                 }
 
                 else -> {}
@@ -99,11 +99,11 @@ class PaymentWidgetBridge(
 
 
     private fun handleCardBinDetected(metadata: Json?) {
-        activity.callbacks?.onCardBinDetected?.invoke(metadata)
+        callbacks.onCardBinDetected?.invoke(metadata)
     }
 
     private fun handleInstallmentSelected(metadata: Json?) {
-        activity.callbacks?.onInstallmentSelected?.invoke(metadata)
+        callbacks.onInstallmentSelected?.invoke(metadata)
     }
 
     /**
@@ -111,8 +111,8 @@ class PaymentWidgetBridge(
      * take a screen shoot of the web page loaded in the web view
      */
     private fun downloadVoucher() {
-        activity.runOnUiThread {
-            activity.webView.takeSnapshot(activity.takeSnapshotBridge) { base64Image ->
+        deunaWebView.runOnUiThread {
+            deunaWebView.webView.takeSnapshot(deunaWebView.takeSnapshotBridge) { base64Image ->
                 if (base64Image != null) {
                     saveBase64ImageToDevice(base64Image)
                 }

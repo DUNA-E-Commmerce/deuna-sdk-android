@@ -21,7 +21,7 @@ fun PaymentWidgetBridge.saveBase64ImageToDevice(base64Image: String) {
     val filename = "${Date().time}.png"
 
     // Save the image temporarily in the cache directory
-    val tempFile = File(activity.cacheDir, filename)
+    val tempFile = File(deunaWebView.context.cacheDir, filename)
     try {
         val fos = FileOutputStream(tempFile)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
@@ -29,7 +29,7 @@ fun PaymentWidgetBridge.saveBase64ImageToDevice(base64Image: String) {
         fos.close()
     } catch (e: Exception) {
         e.printStackTrace()
-        Toast.makeText(activity, "Error al guardar la imagen", Toast.LENGTH_LONG).show()
+        Toast.makeText(deunaWebView.context, "Error al guardar la imagen", Toast.LENGTH_LONG).show()
         return
     }
 
@@ -45,12 +45,12 @@ fun PaymentWidgetBridge.saveBase64ImageToDevice(base64Image: String) {
 
         // Notify the user that the image has been downloaded
         Toast.makeText(
-            activity, "Imagen descargada: ${downloadFile.absolutePath}", Toast.LENGTH_LONG
+            deunaWebView.context, "Imagen descargada: ${downloadFile.absolutePath}", Toast.LENGTH_LONG
         ).show()
 
     } catch (e: IOException) {
         e.printStackTrace()
-        Toast.makeText(activity, "Error al guardar la imagen.", Toast.LENGTH_LONG).show()
+        Toast.makeText(deunaWebView.context, "Error al guardar la imagen.", Toast.LENGTH_LONG).show()
     } finally {
         // Delete the temporary file if it exists
         if (tempFile.exists()) {

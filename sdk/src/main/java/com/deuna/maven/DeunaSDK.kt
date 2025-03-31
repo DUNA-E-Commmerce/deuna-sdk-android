@@ -3,6 +3,7 @@ package com.deuna.maven
 
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.web_views.DeunaWebViewActivity
+import com.deuna.maven.web_views.dialog_fragments.BaseDialogFragment
 import org.json.JSONObject
 import java.lang.IllegalStateException
 
@@ -75,8 +76,12 @@ open class DeunaSDK(
      * Close the active DEUNA widget
      */
     fun close() {
-        closeWebView(sdkInstanceId)
+//        closeWebView(sdkInstanceId)
+        dialogFragment?.dismiss()
     }
+
+
+    var dialogFragment: BaseDialogFragment? = null
 }
 
 /**

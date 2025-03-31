@@ -1,7 +1,9 @@
 package com.deuna.maven
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import androidx.fragment.app.FragmentActivity
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
@@ -10,6 +12,9 @@ import com.deuna.maven.shared.Utils
 import com.deuna.maven.shared.toBase64
 import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
 import com.deuna.maven.web_views.DeunaWebViewActivity
+import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.extensions.refetchOrder
+import com.deuna.maven.web_views.dialog_fragments.PaymentWidgetDialogFragment
 import org.json.JSONObject
 
 /**
@@ -43,7 +48,7 @@ fun DeunaSDK.initPaymentWidget(
 
     val baseUrl = this.environment.paymentWidgetBaseUrl
 
-    PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
+//    PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val queryParameters = mutableMapOf<String, String>()
     queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
@@ -79,11 +84,19 @@ fun DeunaSDK.initPaymentWidget(
         queryParams = queryParameters,
     )
 
-    val intent = Intent(context, PaymentWidgetActivity::class.java).apply {
-        putExtra(PaymentWidgetActivity.EXTRA_URL, paymentUrl)
-        putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
+    val fragmentActivity = context.findFragmentActivity() ?: return
+
+    dialogFragment = PaymentWidgetDialogFragment(url = paymentUrl, callbacks = callbacks)
+    dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
+}
+
+fun Context.findFragmentActivity(): FragmentActivity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is FragmentActivity) return ctx
+        ctx = ctx.baseContext
     }
-    context.startActivity(intent)
+    return null
 }
 
 /**
@@ -92,34 +105,8 @@ fun DeunaSDK.initPaymentWidget(
  * @param callback A callback function to be invoked when the request completes. The callback receives a `Json` object containing the order data or `null` if the request fails.
  */
 fun DeunaSDK.refetchOrder(callback: (Json?) -> Unit) {
-    PaymentWidgetActivity.refetchOrder(sdkInstanceId = sdkInstanceId, callback = callback);
-}
-
-/**
- * Set custom css on the payment widget.
- * This function must be only called inside the onCardBinDetected callback
- *
- * @param data The JSON data to update the payment widget UI
- */
-@Deprecated(
-    message = "This function will be removed in the future. Use setCustomStyle instead",
-    replaceWith = ReplaceWith("setCustomStyle(data)")
-)
-fun DeunaSDK.setCustomCss(data: Map<String, Any>) {
-    PaymentWidgetActivity.sendCustomCss(
-        sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
-    )
-}
-
-
-/**
- * Closes the payment widget if it's currently running.
- *
- */
-@Deprecated(
-    message = "This function will be removed in the future. Use close instead",
-    replaceWith = ReplaceWith("close()")
-)
-fun DeunaSDK.closePaymentWidget() {
-    close()
+    val deunaWebView = dialogFragment?.baseWebView
+    if (deunaWebView is DeunaWebView) {
+        deunaWebView.refetchOrder(callback)
+    }
 }
