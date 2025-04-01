@@ -2,9 +2,11 @@ package com.deuna.maven
 
 
 import com.deuna.maven.shared.Environment
-import com.deuna.maven.web_views.DeunaWebViewActivity
-import com.deuna.maven.web_views.dialog_fragments.BaseDialogFragment
-import org.json.JSONObject
+import com.deuna.maven.shared.Json
+import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.extensions.refetchOrder
+import com.deuna.maven.web_views.deuna.extensions.setCustomStyle
+import com.deuna.maven.web_views.dialog_fragments.base.BaseDialogFragment
 import java.lang.IllegalStateException
 
 
@@ -18,7 +20,7 @@ open class DeunaSDK(
     val environment: Environment,
     val publicApiKey: String,
 ) {
-    
+
     val sdkInstanceId: Int
         get() = hashCode()
 
@@ -66,27 +68,32 @@ open class DeunaSDK(
      *
      * @param data The JSON data to update the payment widget UI
      */
-    fun setCustomStyle(data: Map<String, Any>) {
-        DeunaWebViewActivity.sendCustomStyle(
-            sdkInstanceId = sdkInstanceId, dataAsJsonString = JSONObject(data).toString()
-        )
+    fun setCustomStyle(data: Json) {
+        val deunaWebView = dialogFragment?.baseWebView
+        if (deunaWebView is DeunaWebView) {
+            deunaWebView.setCustomStyle(data)
+        }
+    }
+
+    /**
+     * Sends a re-fetch order request and handles the response.
+     *
+     * @param callback A callback function to be invoked when the request completes. The callback receives a `Json` object containing the order data or `null` if the request fails.
+     */
+    fun refetchOrder(callback: (Json?) -> Unit) {
+        val deunaWebView = dialogFragment?.baseWebView
+        if (deunaWebView is DeunaWebView) {
+            deunaWebView.refetchOrder(callback)
+        }
     }
 
     /**
      * Close the active DEUNA widget
      */
     fun close() {
-//        closeWebView(sdkInstanceId)
         dialogFragment?.dismiss()
     }
 
 
     var dialogFragment: BaseDialogFragment? = null
-}
-
-/**
- * Global function used to send a broadcast event to close the elements view
- */
-fun closeWebView(sdkInstanceId: Int) {
-    DeunaWebViewActivity.closeWebView(sdkInstanceId)
 }

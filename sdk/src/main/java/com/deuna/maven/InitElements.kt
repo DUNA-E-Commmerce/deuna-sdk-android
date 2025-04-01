@@ -1,12 +1,10 @@
 package com.deuna.maven
 
 import android.content.Context
-import android.content.Intent
 import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.web_views.DeunaWebViewActivity
-import com.deuna.maven.web_views.widgets.ElementsActivity
+import com.deuna.maven.web_views.dialog_fragments.ElementsWidgetDialogFragment
 import java.lang.IllegalStateException
 
 
@@ -53,8 +51,6 @@ fun DeunaSDK.initElements(
     widgetExperience: ElementsWidgetExperience? = null
 ) {
     val baseUrl = this.environment.elementsBaseUrl
-
-    ElementsActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val queryParameters = mutableMapOf(
         QueryParameters.MODE to QueryParameters.WIDGET,
@@ -108,14 +104,14 @@ fun DeunaSDK.initElements(
 
     val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
 
-    val intent = Intent(context, ElementsActivity::class.java).apply {
-        putExtra(ElementsActivity.EXTRA_URL, elementUrl)
-        putExtra(DeunaWebViewActivity.EXTRA_SDK_INSTANCE_ID, sdkInstanceId)
-        putStringArrayListExtra(
-            DeunaWebViewActivity.EXTRA_CLOSE_EVENTS, ArrayList(closeEvents.map { it.name })
-        )
-    }
-    context.startActivity(intent)
+    val fragmentActivity = context.findFragmentActivity() ?: return
+
+    dialogFragment = ElementsWidgetDialogFragment(
+        url = elementUrl,
+        callbacks = callbacks,
+        closeEvents = closeEvents
+    )
+    dialogFragment?.show(fragmentActivity.supportFragmentManager, "ElementsWidgetDialogFragment")
 }
 
 

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <com.deuna.maven.web_views.deuna.DeunaWebView
+    <com.deuna.maven.web_views.new_tab.NewTabWebView
         android:id="@+id/new_tab_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

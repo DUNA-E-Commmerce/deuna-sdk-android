@@ -10,23 +10,19 @@ import com.deuna.maven.web_views.file_downloaders.downloadFile
 
 @Suppress("UNCHECKED_CAST")
 class NewTabWebView(
-    private val url: String,
     context: Context,
-) : BaseWebView(context) {
+    attrs: AttributeSet? = null
+) : BaseWebView(context, attrs) {
+
+    var onRemoteCloseCalled: (() -> Unit)? = null
 
 
     init {
         webView.addJavascriptInterface(LocalBridge(), "windowClose")
-        loadUrl(
-            url, javascriptToInject = """
-            window.close = function() {
-               windowClose.onCloseWindowCalled();
-            };
-            """.trimIndent()
-        )
-        listener = object : BaseWebView.Listener {
+        listener = object : Listener {
             override fun onWebViewLoaded() {
-                webView.evaluateJavascript("""
+                webView.evaluateJavascript(
+                    """
                     (function() {
                         setTimeout(function() {
                             var button = document.getElementById("cash_efecty_button_print");
@@ -52,12 +48,22 @@ class NewTabWebView(
         }
     }
 
+    override fun loadUrl(url: String, javascriptToInject: String?) {
+        super.loadUrl(
+            url, javascriptToInject = """
+            window.close = function() {
+               windowClose.onCloseWindowCalled();
+            };
+            """.trimIndent()
+        )
+    }
+
 
     inner class LocalBridge {
         @JavascriptInterface
         fun onCloseWindowCalled() {
             DeunaLogs.info("window.close()")
-//            finish()
+            onRemoteCloseCalled?.invoke()
         }
     }
 }

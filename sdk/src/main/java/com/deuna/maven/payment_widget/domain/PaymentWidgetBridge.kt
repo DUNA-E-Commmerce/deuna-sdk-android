@@ -16,8 +16,15 @@ import org.json.JSONObject
 class PaymentWidgetBridge(
     val deunaWebView: DeunaWebView,
     val callbacks: PaymentWidgetCallbacks,
-    val onClosedByUser: () -> Unit
-) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
+    onCloseByUser: () -> Unit,
+    onNoInternet: () -> Unit,
+    onWebViewError: () -> Unit
+) : WebViewBridge(
+    name = "android",
+    onCloseByUser = onCloseByUser,
+    onNoInternet = onNoInternet,
+    onWebViewError = onWebViewError
+) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
@@ -86,7 +93,7 @@ class PaymentWidgetBridge(
 
                 CheckoutEvent.paymentMethods3dsInitiated -> {}
                 CheckoutEvent.linkClose -> {
-                    onClosedByUser()
+                    onCloseByUser()
                 }
 
                 else -> {}

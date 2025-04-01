@@ -4,7 +4,12 @@ import android.util.*
 import android.webkit.*
 
 // Abstract class to handle communication between the WebView and the native Android code
-abstract class WebViewBridge(val name: String, onClosedByUser: () -> Unit) {
+abstract class WebViewBridge(
+    val name: String,
+    val onCloseByUser: () -> Unit,
+    val onWebViewError: () -> Unit,
+    val onNoInternet: () -> Unit
+) {
     /**
      * The postMessage function is called when a message is received from JavaScript code in a WebView.
      * The message is parsed and the corresponding callbacks are called based on the event type.

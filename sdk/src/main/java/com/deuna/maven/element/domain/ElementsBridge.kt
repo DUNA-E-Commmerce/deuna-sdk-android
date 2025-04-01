@@ -1,17 +1,25 @@
 package com.deuna.maven.element.domain
 
 import android.webkit.JavascriptInterface
-import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.web_views.widgets.ElementsActivity
+import com.deuna.maven.web_views.deuna.DeunaWebView
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")
 class ElementsBridge(
-    private val activity: ElementsActivity,
+    val deunaWebView: DeunaWebView,
+    val callbacks: ElementsCallbacks,
     private val closeEvents: Set<ElementsEvent>,
-    private val onClosedByUser: () -> Unit
-) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
+    val onCloseByEvent: () -> Unit,
+    onCloseByUser: () -> Unit,
+    onNoInternet: () -> Unit,
+    onWebViewError: () -> Unit
+) : WebViewBridge(
+    name = "android",
+    onCloseByUser = onCloseByUser,
+    onNoInternet = onNoInternet,
+    onWebViewError = onWebViewError
+) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
@@ -30,37 +38,35 @@ class ElementsBridge(
             }
 
             val event = ElementsEvent.valueOf(type)
-            activity.callbacks?.eventListener?.invoke(event, data)
-            activity.callbacks?.onEventDispatch?.invoke(event, data)
+            callbacks.onEventDispatch?.invoke(event, data)
 
             when (event) {
 
                 ElementsEvent.vaultSaveSuccess -> {
-                    activity.closeSubWebView()
-                    activity.callbacks?.onSuccess?.invoke(data)
+                    deunaWebView.closeSubWebView()
+                    callbacks.onSuccess?.invoke(data)
                 }
 
                 ElementsEvent.vaultSaveError -> {
-                    activity.closeSubWebView()
+                    deunaWebView.closeSubWebView()
                     val error = ElementsError.fromJson(
                         type = ElementsError.Type.VAULT_SAVE_ERROR,
                         data = data
                     )
                     if (error != null) {
-                        activity.callbacks?.onError?.invoke(error)
+                        callbacks.onError?.invoke(error)
                     }
                 }
 
                 ElementsEvent.vaultClosed -> {
-                    activity.onCanceledByUser()
-                    closeWebView(activity.sdkInstanceId!!)
+                    onCloseByUser()
                 }
 
                 else -> {}
             }
 
             if (closeEvents.contains(event)) {
-                closeWebView(activity.sdkInstanceId!!)
+                onCloseByEvent()
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {

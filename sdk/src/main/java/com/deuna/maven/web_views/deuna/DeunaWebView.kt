@@ -23,7 +23,7 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
     private var newTabDialogFragment: NewTabDialogFragment? = null
 
     /// When this var is false the close feature is disabled
-    private var closeEnabled = true
+    var closeEnabled = true
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
     val remoteJsFunctionsBridgeName = "onRemoteJsFunctionCalled"
@@ -78,7 +78,9 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
         listener = object : Listener {
             override fun onWebViewLoaded() {}
 
-            override fun onWebViewError() {}
+            override fun onWebViewError() {
+                bridge?.onWebViewError?.invoke()
+            }
 
             override fun onOpenInNewTab(url: String) {
                 if (newTabDialogFragment != null) {
@@ -109,7 +111,7 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
     // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(context).hasInternet) {
-            onNoInternet()
+            bridge?.onNoInternet?.invoke()
             return
         }
     }
@@ -170,10 +172,5 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
             }
         }
     }
-
-
-    fun onNoInternet() {}
-
-    fun onCanceledByUser() {}
 
 }

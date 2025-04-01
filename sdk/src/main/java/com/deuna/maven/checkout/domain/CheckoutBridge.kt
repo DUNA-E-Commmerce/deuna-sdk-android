@@ -1,17 +1,25 @@
 package com.deuna.maven.checkout.domain
 
 import android.webkit.JavascriptInterface
-import com.deuna.maven.*
 import com.deuna.maven.shared.*
-import com.deuna.maven.web_views.widgets.CheckoutActivity
+import com.deuna.maven.web_views.deuna.DeunaWebView
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")
 class CheckoutBridge(
-    private val activity: CheckoutActivity,
+    val deunaWebView: DeunaWebView,
+    private val callbacks: CheckoutCallbacks,
     private val closeEvents: Set<CheckoutEvent>,
-    private val onClosedByUser: () -> Unit
-) : WebViewBridge(name = "android", onClosedByUser = onClosedByUser) {
+    val onCloseByEvent: () -> Unit,
+    onCloseByUser: () -> Unit,
+    onNoInternet: () -> Unit,
+    onWebViewError: () -> Unit
+) : WebViewBridge(
+    name = "android",
+    onCloseByUser = onCloseByUser,
+    onNoInternet = onNoInternet,
+    onWebViewError = onWebViewError
+) {
 
     @JavascriptInterface
     fun consoleLog(message: String) {
@@ -31,35 +39,31 @@ class CheckoutBridge(
             }
 
             val event = CheckoutEvent.valueOf(type)
-            activity.callbacks?.eventListener?.invoke(event, data)
-            activity.callbacks?.onEventDispatch?.invoke(event, data)
+            callbacks.onEventDispatch?.invoke(event, data)
 
             when (event) {
                 CheckoutEvent.purchase -> {
-                    activity.closeSubWebView()
-                    activity.callbacks?.onSuccess?.invoke(data["order"] as Json)
+                    deunaWebView.closeSubWebView()
+                    callbacks.onSuccess?.invoke(data["order"] as Json)
                 }
 
                 CheckoutEvent.purchaseError -> {
-                    activity.closeSubWebView()
+                    deunaWebView.closeSubWebView()
                     val error = PaymentsError.fromJson(
-                        type = PaymentsError.Type.PAYMENT_ERROR,
-                        data = data
+                        type = PaymentsError.Type.PAYMENT_ERROR, data = data
                     )
-                    activity.callbacks?.onError?.invoke(error)
+                    callbacks.onError?.invoke(error)
                 }
 
                 CheckoutEvent.linkFailed, CheckoutEvent.linkCriticalError -> {
                     val error = PaymentsError.fromJson(
-                        type = PaymentsError.Type.INITIALIZATION_FAILED,
-                        data = data
+                        type = PaymentsError.Type.INITIALIZATION_FAILED, data = data
                     )
-                    activity.callbacks?.onError?.invoke(error)
+                    callbacks.onError?.invoke(error)
                 }
 
                 CheckoutEvent.linkClose -> {
-                    activity.onCanceledByUser()
-                    closeWebView(activity.sdkInstanceId!!)
+                    onCloseByUser()
                 }
 
                 CheckoutEvent.paymentMethods3dsInitiated, CheckoutEvent.apmClickRedirect -> {
@@ -72,7 +76,7 @@ class CheckoutBridge(
             }
 
             if (closeEvents.contains(event)) {
-                closeWebView(activity.sdkInstanceId!!)
+                onCloseByEvent()
             }
         } catch (_: IllegalArgumentException) {
         } catch (e: JSONException) {

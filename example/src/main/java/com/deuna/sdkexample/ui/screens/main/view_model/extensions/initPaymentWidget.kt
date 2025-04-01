@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.refetchOrder
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap

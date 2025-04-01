@@ -2,7 +2,6 @@ package com.deuna.maven
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
@@ -10,12 +9,9 @@ import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
 import com.deuna.maven.shared.toBase64
-import com.deuna.maven.web_views.widgets.PaymentWidgetActivity
-import com.deuna.maven.web_views.DeunaWebViewActivity
 import com.deuna.maven.web_views.deuna.DeunaWebView
 import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.dialog_fragments.PaymentWidgetDialogFragment
-import org.json.JSONObject
 
 /**
  * Launch the payment widget View
@@ -47,8 +43,6 @@ fun DeunaSDK.initPaymentWidget(
     }
 
     val baseUrl = this.environment.paymentWidgetBaseUrl
-
-//    PaymentWidgetActivity.setCallbacks(sdkInstanceId = sdkInstanceId, callbacks = callbacks)
 
     val queryParameters = mutableMapOf<String, String>()
     queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
@@ -97,16 +91,4 @@ fun Context.findFragmentActivity(): FragmentActivity? {
         ctx = ctx.baseContext
     }
     return null
-}
-
-/**
- * Sends a re-fetch order request and handles the response.
- *
- * @param callback A callback function to be invoked when the request completes. The callback receives a `Json` object containing the order data or `null` if the request fails.
- */
-fun DeunaSDK.refetchOrder(callback: (Json?) -> Unit) {
-    val deunaWebView = dialogFragment?.baseWebView
-    if (deunaWebView is DeunaWebView) {
-        deunaWebView.refetchOrder(callback)
-    }
 }

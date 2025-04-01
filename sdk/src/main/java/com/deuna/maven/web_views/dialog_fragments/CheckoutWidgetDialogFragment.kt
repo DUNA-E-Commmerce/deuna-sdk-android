@@ -4,16 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
-import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.checkout.domain.CheckoutBridge
+import com.deuna.maven.checkout.domain.CheckoutEvent
+import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 
-
-class PaymentWidgetDialogFragment(
-    private val url: String,
-    val callbacks: PaymentWidgetCallbacks,
+class CheckoutWidgetDialogFragment(
+    val callbacks: CheckoutCallbacks,
+    val closeEvents: Set<CheckoutEvent> = emptySet(),
 ) : DeunaDialogFragment() {
 
     override fun onCreateView(
@@ -22,11 +22,16 @@ class PaymentWidgetDialogFragment(
         savedInstanceState: Bundle?
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        deunaWebView.bridge = PaymentWidgetBridge(
+        deunaWebView.bridge = CheckoutBridge(
             deunaWebView = deunaWebView,
             callbacks = callbacks,
+            closeEvents = closeEvents,
             onCloseByUser = {
                 callbacks.onClosed?.invoke(CloseAction.userAction)
+                dismiss()
+            },
+            onCloseByEvent = {
+                callbacks.onClosed?.invoke(CloseAction.systemAction)
                 dismiss()
             },
             onWebViewError = {
@@ -34,10 +39,12 @@ class PaymentWidgetDialogFragment(
             },
             onNoInternet = {
                 callbacks.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
-            }
-
+            },
         )
-        baseWebView.loadUrl(url)
         return view
+    }
+
+    fun loadUrl(url: String) {
+        deunaWebView.loadUrl(url)
     }
 }
