@@ -7,6 +7,15 @@ enum class ErrorCodes {
     UNKNOWN_ERROR
 }
 
+enum class WidgetExperience(val value: String) {
+    MODAL("modal"),
+    EMBEDDED("embedded");
+
+    override fun toString(): String {
+        return value
+    }
+}
+
 object ErrorMessages {
     const val UNKNOWN = "Unknown error"
 }
@@ -41,6 +50,7 @@ object QueryParameters {
     const val LANGUAGE = "language"
     const val SHOW_SAVED_CARD_FLOW = "showSavedCardFlow"
     const val DEFAULT_CARD_FLOW = "defaultCardFlow"
+    const val INT = "int"
 }
 
 object PaymentsErrorMessages {

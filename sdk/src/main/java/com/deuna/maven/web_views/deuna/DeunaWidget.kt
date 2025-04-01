@@ -3,22 +3,27 @@ package com.deuna.maven.web_views.deuna
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.webkit.JavascriptInterface
+import com.deuna.maven.checkout.domain.CheckoutBridge
+import com.deuna.maven.element.domain.ElementsBridge
 import com.deuna.maven.findFragmentActivity
+import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
+import com.deuna.maven.shared.DeunaBridge
 import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.shared.ElementsErrors
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
-import com.deuna.maven.shared.WebViewBridge
+import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
+import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
-class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
+class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
     private var newTabDialogFragment: NewTabDialogFragment? = null
 
@@ -26,22 +31,21 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
     var closeEnabled = true
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
-    val remoteJsFunctionsBridgeName = "onRemoteJsFunctionCalled"
     private val remoteFunctionsRequests = mutableMapOf<Int, (Json) -> Unit>()
     private var remoteFunctionsRequestId = 0
-    var bridge: WebViewBridge? = null
+    var bridge: DeunaBridge? = null
 
-    init {
-        webView.addJavascriptInterface(RemoteFunctionBridge(), remoteJsFunctionsBridgeName)
-        webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
-        initialize()
-    }
+    // Hide the pay button
+    var hidePayButton = false
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     override fun loadUrl(url: String, javascriptToInject: String?) {
-        // Add JavascriptInterface
+        webView.addJavascriptInterface(RemoteJsFunctionBridge(), "remoteJs")
+        webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
+        initialize()
 
+        // Add JavascriptInterface
         bridge?.let {
             DeunaLogs.info("Adding bridge ${it.name}")
             webView.addJavascriptInterface(it, it.name)
@@ -58,6 +62,7 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
          };
          
          window.xprops = {
+             hidePayButton: $hidePayButton,
              onEventDispatch : function (event) {
                  android.postMessage(JSON.stringify(event));
              },
@@ -70,6 +75,15 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
              onRefetchOrderSubscribe: function (refetchOrder) {
                  window.deunaRefetchOrder = refetchOrder;
              },
+             onGetStateSubscribe: function (state){
+               window.deunaWidgetState = state;
+             },
+             isValid: function(fn){
+                window.isValid = fn;
+             },
+             onSubmit: function(fn){
+                window.submit = fn;
+             }
          };
             ${javascriptToInject ?: ""}
         """.trimIndent()
@@ -79,7 +93,19 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
             override fun onWebViewLoaded() {}
 
             override fun onWebViewError() {
-                bridge?.onWebViewError?.invoke()
+                bridge?.let {
+                    runOnUiThread {
+                        when (it) {
+                            is PaymentWidgetBridge -> it.callbacks.onError?.invoke(
+                                PaymentWidgetErrors.initializationFailed
+                            )
+
+                            is CheckoutBridge -> it.callbacks.onError?.invoke(PaymentWidgetErrors.initializationFailed)
+                            is ElementsBridge -> it.callbacks.onError?.invoke(ElementsErrors.initializationFailed)
+                            else -> {}
+                        }
+                    }
+                }
             }
 
             override fun onOpenInNewTab(url: String) {
@@ -89,12 +115,9 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
 
                 val fragmentActivity = context.findFragmentActivity() ?: return
 
-                newTabDialogFragment = NewTabDialogFragment(
-                    url = url,
-                    onDialogDestroyed = {
-                        newTabDialogFragment = null
-                    }
-                )
+                newTabDialogFragment = NewTabDialogFragment(url = url, onDialogDestroyed = {
+                    newTabDialogFragment = null
+                })
                 newTabDialogFragment?.show(
                     fragmentActivity.supportFragmentManager,
                     "NewTabDialogFragment+${System.currentTimeMillis()}"
@@ -111,7 +134,17 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
     // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(context).hasInternet) {
-            bridge?.onNoInternet?.invoke()
+
+            bridge?.let {
+                runOnUiThread {
+                    when (it) {
+                        is PaymentWidgetBridge -> it.callbacks.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
+                        is CheckoutBridge -> it.callbacks.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
+                        is ElementsBridge -> it.callbacks.onError?.invoke(ElementsErrors.noInternetConnection)
+                        else -> {}
+                    }
+                }
+            }
             return
         }
     }
@@ -141,21 +174,22 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
      * Build and execute a remote JS function
      */
     fun executeRemoteFunction(
-        jsBuilder: (requestId: Int) -> String,
-        callback: (Json) -> Unit
+        jsBuilder: (requestId: Int) -> String, callback: (Json) -> Unit
     ) {
-        remoteFunctionsRequestId++
-        remoteFunctionsRequests[remoteFunctionsRequestId] = callback
-        webView.evaluateJavascript(jsBuilder(remoteFunctionsRequestId), null)
+        runOnUiThread {
+            remoteFunctionsRequestId++
+            remoteFunctionsRequests[remoteFunctionsRequestId] = callback
+            webView.evaluateJavascript(jsBuilder(remoteFunctionsRequestId), null)
+        }
     }
 
 
     /**
      * Js Bridge to listen the remote functions responses
      */
-    inner class RemoteFunctionBridge {
+    inner class RemoteJsFunctionBridge {
         @JavascriptInterface
-        fun onRemoteJsFunctionCalled(message: String) {
+        fun onRequestResult(message: String) {
             try {
                 val json = JSONObject(message).toMap()
                 val requestId = json["requestId"] as? Int
@@ -168,7 +202,7 @@ class DeunaWebView(context: Context, attrs: AttributeSet? = null) : BaseWebView(
                 )
                 remoteFunctionsRequests.remove(requestId)
             } catch (e: Exception) {
-                Log.d("WebViewBridge", "postMessage: $e")
+                DeunaLogs.error("RemoteJsFunctionBridge error: $e")
             }
         }
     }

@@ -1,19 +1,20 @@
 package com.deuna.maven.web_views.deuna.extensions
 
+import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
-import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.DeunaWidget
 import org.json.JSONObject
 
 
-fun DeunaWebView.buildResultFunction(requestId: Int, type: String): String {
+fun DeunaWidget.buildResultFunction(requestId: Int, type: String): String {
     return """
     function sendResult(data){
-        window.webkit.messageHandlers.$remoteJsFunctionsBridgeName.postMessage(JSON.stringify({type:"$type$", data: data , requestId: $requestId$) }));
+        remoteJs.onRequestResult(JSON.stringify({type:"$type", data: data , requestId: $requestId }));
     }     
     """.trimIndent()
 }
 
-fun DeunaWebView.setCustomStyle(data: Json) {
+fun DeunaWidget.setCustomStyle(data: Json) {
     val dataAsJsonString = JSONObject(data).toString()
     executeRemoteFunction(
         jsBuilder = { requestId ->
@@ -30,7 +31,7 @@ fun DeunaWebView.setCustomStyle(data: Json) {
     )
 }
 
-fun DeunaWebView.refetchOrder(callback: (Json?) -> Unit) {
+fun DeunaWidget.refetchOrder(callback: (Json?) -> Unit) {
     executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
@@ -54,7 +55,7 @@ fun DeunaWebView.refetchOrder(callback: (Json?) -> Unit) {
     )
 }
 
-fun DeunaWebView.isValid(callback: (Boolean) -> Unit) {
+fun DeunaWidget.isValid(callback: (Boolean) -> Unit) {
     executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
@@ -75,7 +76,7 @@ fun DeunaWebView.isValid(callback: (Boolean) -> Unit) {
     )
 }
 
-fun DeunaWebView.submit(callback: (SubmitResult) -> Unit) {
+fun DeunaWidget.submit(callback: (SubmitResult) -> Unit) {
     executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
@@ -102,7 +103,7 @@ fun DeunaWebView.submit(callback: (SubmitResult) -> Unit) {
     )
 }
 
-fun DeunaWebView.getWidgetState(callback: (Json?) -> Unit) {
+fun DeunaWidget.getWidgetState(callback: (Json?) -> Unit) {
     executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """

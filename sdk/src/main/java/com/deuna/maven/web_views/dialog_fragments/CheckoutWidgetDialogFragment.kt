@@ -22,8 +22,8 @@ class CheckoutWidgetDialogFragment(
         savedInstanceState: Bundle?
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        deunaWebView.bridge = CheckoutBridge(
-            deunaWebView = deunaWebView,
+        deunaWidget.bridge = CheckoutBridge(
+            deunaWidget = deunaWidget,
             callbacks = callbacks,
             closeEvents = closeEvents,
             onCloseByUser = {
@@ -34,17 +34,11 @@ class CheckoutWidgetDialogFragment(
                 callbacks.onClosed?.invoke(CloseAction.systemAction)
                 dismiss()
             },
-            onWebViewError = {
-                callbacks.onError?.invoke(PaymentWidgetErrors.initializationFailed)
-            },
-            onNoInternet = {
-                callbacks.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
-            },
         )
         return view
     }
 
     fun loadUrl(url: String) {
-        deunaWebView.loadUrl(url)
+        deunaWidget.loadUrl(url)
     }
 }

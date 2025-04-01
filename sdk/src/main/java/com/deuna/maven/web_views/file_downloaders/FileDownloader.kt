@@ -109,59 +109,6 @@ fun getProtocolAndDomain(urlString: String): String {
     }
 }
 
-// Function to download a PDF from an URL and save it to the device
-fun BaseWebViewActivity.downloadFile(urlString: String) {
-
-    runOnUiThread {
-        if (urlString.isEmpty()) {
-            return@runOnUiThread
-        }
-
-        var downloadUrl = urlString
-
-        if (!downloadUrl.startsWith("https://") && !downloadUrl.startsWith("http://")) {
-            downloadUrl = "${getProtocolAndDomain(webView.url ?: "")}$urlString"
-        }
-
-        // Attempt to get the file name and extension
-        val fileName = getFileNameFromUrl(downloadUrl)
-        val extension = downloadUrl.getFileExtension()
-
-        if (extension != null) {
-            startDownloadTask(
-                context = this,
-                downloadUrl = downloadUrl,
-                fileName = fileName,
-                mimeType = extension.mimeType
-            )
-            return@runOnUiThread
-        }
-
-
-        getMimeTypeFromUrl(downloadUrl) { mime ->
-
-            if (mime == null) {
-                Toast.makeText(this, "No se pudo descargar el archivo", Toast.LENGTH_SHORT)
-                    .show()
-                return@getMimeTypeFromUrl
-            }
-
-            val ext = FileExtension.fromMime(mime) ?: return@getMimeTypeFromUrl
-
-            startDownloadTask(
-                context = this,
-                downloadUrl = downloadUrl,
-                fileName = "$fileName.${ext.extension}",
-                mimeType = mime
-            )
-
-        }
-
-
-    }
-}
-
-
 fun BaseWebView.runOnUiThread(runnable: Runnable) {
     val ctx = context
     if (ctx is Activity) {

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.shared.Environment
 import com.deuna.sdkexample.shared.views.Separator
@@ -37,7 +38,8 @@ enum class WidgetToShow(val label: String) {
 
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    navController: NavHostController
 ) {
     // Retrieve the user token and order token states from the view model
     val userTokenState = viewModel.userToken
@@ -77,11 +79,14 @@ fun MainScreen(
                             showWidgetInModal(
                                 context = context,
                                 viewModel = viewModel,
-                                widgetToShow = widget
+                                widgetToShow = widget,
+                                navController = navController
                             )
                         }
 
-                        ViewMode.EMBEDDED -> {}
+                        ViewMode.EMBEDDED -> {
+                            navController.navigate("embedded/${orderTokenState.value}/${userTokenState.value}/${widget.name}")
+                        }
                     }
                 },
                 shape = RoundedCornerShape(8.dp),
@@ -106,6 +111,7 @@ fun MyScreenPreview() {
                 environment = Environment.SANDBOX,
                 publicApiKey = "FAKE_API_KEY"
             )
-        )
+        ),
+        navController = NavHostController(LocalContext.current)
     )
 }

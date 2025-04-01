@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.deuna.maven.R
-import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.DeunaWidget
 
 abstract class DeunaDialogFragment : BaseDialogFragment(){
 
-    val deunaWebView: DeunaWebView get() = baseWebView as DeunaWebView
+    val deunaWidget: DeunaWidget get() = baseWebView as DeunaWidget
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -22,9 +22,9 @@ abstract class DeunaDialogFragment : BaseDialogFragment(){
     }
 
     override fun onBackButtonPressed() {
-        if (!deunaWebView.closeEnabled) {
+        if (!deunaWidget.closeEnabled) {
             return
         }
-        deunaWebView.bridge?.onCloseByUser?.let { it() }
+        deunaWidget.bridge?.onCloseByUser?.let { it() }
     }
 }

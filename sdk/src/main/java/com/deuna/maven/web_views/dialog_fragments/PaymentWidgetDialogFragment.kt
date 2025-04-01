@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
 import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
-import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 
@@ -17,25 +16,16 @@ class PaymentWidgetDialogFragment(
 ) : DeunaDialogFragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        deunaWebView.bridge = PaymentWidgetBridge(
-            deunaWebView = deunaWebView,
+        deunaWidget.bridge = PaymentWidgetBridge(
+            deunaWidget = deunaWidget,
             callbacks = callbacks,
             onCloseByUser = {
                 callbacks.onClosed?.invoke(CloseAction.userAction)
                 dismiss()
             },
-            onWebViewError = {
-                callbacks.onError?.invoke(PaymentWidgetErrors.initializationFailed)
-            },
-            onNoInternet = {
-                callbacks.onError?.invoke(PaymentWidgetErrors.noInternetConnection)
-            }
-
         )
         baseWebView.loadUrl(url)
         return view

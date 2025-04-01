@@ -14,7 +14,7 @@ const val DEBUG_TAG = "👀 DeunaSDK"
 class MainViewModel(val deunaSDK: DeunaSDK) : ViewModel() {
 
     // State variables for order token and user token
-    val orderToken = mutableStateOf("481189d5-bf63-41e0-ae91-39f02286bd4b")
+    val orderToken = mutableStateOf("")
     val userToken = mutableStateOf("")
 
     val userTokenValue: String?

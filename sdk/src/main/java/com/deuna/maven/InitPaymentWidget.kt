@@ -8,9 +8,8 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
+import com.deuna.maven.shared.WidgetExperience
 import com.deuna.maven.shared.toBase64
-import com.deuna.maven.web_views.deuna.DeunaWebView
-import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.dialog_fragments.PaymentWidgetDialogFragment
 
 /**
@@ -42,10 +41,40 @@ fun DeunaSDK.initPaymentWidget(
         return
     }
 
+
+    val fragmentActivity = context.findFragmentActivity() ?: return
+
+    val paymentUrl = buildPaymentWidgetUrl(
+        orderToken = orderToken,
+        userToken = userToken,
+        styleFile = styleFile,
+        paymentMethods = paymentMethods,
+        checkoutModules = checkoutModules,
+        language = language,
+        widgetExperience = WidgetExperience.MODAL
+    )
+
+    dialogFragment = PaymentWidgetDialogFragment(url = paymentUrl, callbacks = callbacks)
+    dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
+}
+
+/**
+ * Build the payment widget url
+ */
+fun DeunaSDK.buildPaymentWidgetUrl(
+    orderToken: String,
+    userToken: String? = null,
+    styleFile: String? = null,
+    paymentMethods: List<Json> = emptyList(),
+    checkoutModules: List<Json> = emptyList(),
+    language: String? = null,
+    widgetExperience: WidgetExperience = WidgetExperience.EMBEDDED
+): String {
     val baseUrl = this.environment.paymentWidgetBaseUrl
 
     val queryParameters = mutableMapOf<String, String>()
     queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
+    queryParameters[QueryParameters.INT] = widgetExperience.value
 
     if (!language.isNullOrEmpty()) {
         queryParameters[QueryParameters.LANGUAGE] = language
@@ -73,15 +102,10 @@ fun DeunaSDK.initPaymentWidget(
 
     queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
 
-    val paymentUrl = Utils.buildUrl(
+    return Utils.buildUrl(
         baseUrl = "$baseUrl/now/$orderToken",
         queryParams = queryParameters,
     )
-
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
-    dialogFragment = PaymentWidgetDialogFragment(url = paymentUrl, callbacks = callbacks)
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
 }
 
 fun Context.findFragmentActivity(): FragmentActivity? {

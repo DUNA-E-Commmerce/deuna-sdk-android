@@ -3,7 +3,7 @@ package com.deuna.maven
 
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
-import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.deuna.extensions.setCustomStyle
 import com.deuna.maven.web_views.dialog_fragments.base.BaseDialogFragment
@@ -70,7 +70,7 @@ open class DeunaSDK(
      */
     fun setCustomStyle(data: Json) {
         val deunaWebView = dialogFragment?.baseWebView
-        if (deunaWebView is DeunaWebView) {
+        if (deunaWebView is DeunaWidget) {
             deunaWebView.setCustomStyle(data)
         }
     }
@@ -82,7 +82,7 @@ open class DeunaSDK(
      */
     fun refetchOrder(callback: (Json?) -> Unit) {
         val deunaWebView = dialogFragment?.baseWebView
-        if (deunaWebView is DeunaWebView) {
+        if (deunaWebView is DeunaWidget) {
             deunaWebView.refetchOrder(callback)
         }
     }

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.deuna.maven.element.domain.ElementsBridge
 import com.deuna.maven.element.domain.ElementsEvent
 import com.deuna.maven.shared.ElementsCallbacks
-import com.deuna.maven.shared.ElementsErrors
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 
@@ -23,18 +22,12 @@ class ElementsWidgetDialogFragment(
         savedInstanceState: Bundle?
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        deunaWebView.bridge = ElementsBridge(
-            deunaWebView = deunaWebView,
+        deunaWidget.bridge = ElementsBridge(
+            deunaWidget = deunaWidget,
             callbacks = callbacks,
             onCloseByUser = {
                 callbacks.onClosed?.invoke(CloseAction.userAction)
                 dismiss()
-            },
-            onWebViewError = {
-                callbacks.onError?.invoke(ElementsErrors.initializationFailed)
-            },
-            onNoInternet = {
-                callbacks.onError?.invoke(ElementsErrors.noInternetConnection)
             },
             closeEvents = closeEvents,
             onCloseByEvent = {

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <com.deuna.maven.web_views.deuna.DeunaWebView
+    <com.deuna.maven.web_views.deuna.DeunaWidget
         android:id="@+id/deuna_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

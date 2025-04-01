@@ -2,23 +2,20 @@ package com.deuna.maven.element.domain
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.shared.*
-import com.deuna.maven.web_views.deuna.DeunaWebView
+import com.deuna.maven.web_views.deuna.DeunaWidget
+import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")
 class ElementsBridge(
-    val deunaWebView: DeunaWebView,
+    val deunaWidget: DeunaWidget,
     val callbacks: ElementsCallbacks,
-    private val closeEvents: Set<ElementsEvent>,
-    val onCloseByEvent: () -> Unit,
-    onCloseByUser: () -> Unit,
-    onNoInternet: () -> Unit,
-    onWebViewError: () -> Unit
-) : WebViewBridge(
+    private val closeEvents: Set<ElementsEvent> = emptySet(),
+    val onCloseByEvent: VoidCallback? = null,
+    onCloseByUser: VoidCallback? = null,
+) : DeunaBridge(
     name = "android",
     onCloseByUser = onCloseByUser,
-    onNoInternet = onNoInternet,
-    onWebViewError = onWebViewError
 ) {
 
     @JavascriptInterface
@@ -27,50 +24,52 @@ class ElementsBridge(
     }
 
     override fun handleEvent(message: String) {
-        try {
-            val json = JSONObject(message).toMap()
+       deunaWidget.runOnUiThread {
+           try {
+               val json = JSONObject(message).toMap()
 
-            val type = json["type"] as? String
-            val data = json["data"] as? Json
+               val type = json["type"] as? String
+               val data = json["data"] as? Json
 
-            if (type == null || data == null) {
-                return
-            }
+               if (type == null || data == null) {
+                   return@runOnUiThread
+               }
 
-            val event = ElementsEvent.valueOf(type)
-            callbacks.onEventDispatch?.invoke(event, data)
+               val event = ElementsEvent.valueOf(type)
+               callbacks.onEventDispatch?.invoke(event, data)
 
-            when (event) {
+               when (event) {
 
-                ElementsEvent.vaultSaveSuccess -> {
-                    deunaWebView.closeSubWebView()
-                    callbacks.onSuccess?.invoke(data)
-                }
+                   ElementsEvent.vaultSaveSuccess -> {
+                       deunaWidget.closeSubWebView()
+                       callbacks.onSuccess?.invoke(data)
+                   }
 
-                ElementsEvent.vaultSaveError -> {
-                    deunaWebView.closeSubWebView()
-                    val error = ElementsError.fromJson(
-                        type = ElementsError.Type.VAULT_SAVE_ERROR,
-                        data = data
-                    )
-                    if (error != null) {
-                        callbacks.onError?.invoke(error)
-                    }
-                }
+                   ElementsEvent.vaultSaveError -> {
+                       deunaWidget.closeSubWebView()
+                       val error = ElementsError.fromJson(
+                           type = ElementsError.Type.VAULT_SAVE_ERROR,
+                           data = data
+                       )
+                       if (error != null) {
+                           callbacks.onError?.invoke(error)
+                       }
+                   }
 
-                ElementsEvent.vaultClosed -> {
-                    onCloseByUser()
-                }
+                   ElementsEvent.vaultClosed -> {
+                       onCloseByUser?.invoke()
+                   }
 
-                else -> {}
-            }
+                   else -> {}
+               }
 
-            if (closeEvents.contains(event)) {
-                onCloseByEvent()
-            }
-        } catch (_: IllegalArgumentException) {
-        } catch (e: Exception) {
-            DeunaLogs.debug("ElementsBridge JSONException: $e")
-        }
+               if (closeEvents.contains(event)) {
+                   onCloseByEvent?.invoke()
+               }
+           } catch (_: IllegalArgumentException) {
+           } catch (e: Exception) {
+               DeunaLogs.debug("ElementsBridge JSONException: $e")
+           }
+       }
     }
 }
