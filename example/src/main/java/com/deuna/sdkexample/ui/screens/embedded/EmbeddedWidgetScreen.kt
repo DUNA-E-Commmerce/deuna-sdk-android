@@ -18,18 +18,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.deuna.maven.DeunaSDK
-import com.deuna.maven.buildPaymentWidgetUrl
-import com.deuna.maven.checkout.domain.CheckoutBridge
-import com.deuna.maven.element.domain.ElementsBridge
-import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
-import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
+import com.deuna.maven.widgets.elements_widget.ElementsBridge
+import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
+import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.ElementsCallbacks
+import com.deuna.maven.shared.ElementsWidget
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.web_views.deuna.DeunaWidget
-import com.deuna.maven.web_views.deuna.extensions.isValid
 import com.deuna.maven.web_views.deuna.extensions.submit
+import com.deuna.maven.widgets.checkout_widget.buildCheckoutWidgetUrl
+import com.deuna.maven.widgets.elements_widget.buildElementsWidgetUrl
+import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.embedded.views.PayButton
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
@@ -75,12 +78,13 @@ fun EmbeddedWidgetScreen(
                 factory = { context ->
                     DeunaWidget(context).apply {
 
+                        // Hide the pay button in the embedded widget.
+                        // So you must call to the `submit` method to complete the transaction
                         this.hidePayButton = true
-                        var link = ""
 
                         when (widgetToShow) {
                             WidgetToShow.PAYMENT_WIDGET -> {
-                                link = deunaSDK.buildPaymentWidgetUrl(
+                                val url = deunaSDK.buildPaymentWidgetUrl(
                                     orderToken = orderToken,
                                     userToken = userToken
                                 )
@@ -93,12 +97,25 @@ fun EmbeddedWidgetScreen(
                                             Log.i(DEBUG_TAG, "✅ Success: $data")
                                             onSuccess(data)
                                         }
+                                        onError = { error ->
+                                            Log.e(DEBUG_TAG, "❌ Error: $error")
+                                        }
                                     },
                                     deunaWidget = this,
                                 )
+                                this.loadUrl(url)
                             }
 
                             WidgetToShow.VAULT_WIDGET -> {
+                                val url = deunaSDK.buildElementsWidgetUrl(
+                                    orderToken = orderToken,
+                                    userToken = userToken,
+                                    userInfo = UserInfo(
+                                        firstName = "Darwin",
+                                        lastName = "Morocho",
+                                        email = "dmorocho+10@deuna.com"
+                                    )
+                                )
                                 bridge = ElementsBridge(
                                     callbacks = ElementsCallbacks().apply {
                                         this.onSuccess = { data ->
@@ -109,6 +126,7 @@ fun EmbeddedWidgetScreen(
                                     },
                                     deunaWidget = this,
                                 )
+                                this.loadUrl(url)
                             }
 
                             WidgetToShow.CHECKOUT_WIDGET -> {
@@ -120,9 +138,32 @@ fun EmbeddedWidgetScreen(
                                     },
                                     deunaWidget = this,
                                 )
+                                deunaSDK.buildCheckoutWidgetUrl(
+                                    orderToken = orderToken,
+                                    userToken = userToken
+                                ) { error, url ->
+                                    error?.let {
+                                        Log.i(DEBUG_TAG, "Error: $error")
+                                    }
+                                    url?.let {
+                                        this.loadUrl(it)
+                                    }
+                                }
                             }
 
                             WidgetToShow.CLICK_TO_PAY_WIDGET -> {
+                                val url = deunaSDK.buildElementsWidgetUrl(
+                                    userInfo = UserInfo(
+                                        firstName = "Darwin",
+                                        lastName = "Morocho",
+                                        email = "dmorocho+10@deuna.com"
+                                    ),
+                                    types = listOf(
+                                        mapOf(
+                                            "name" to ElementsWidget.CLICK_TO_PAY
+                                        )
+                                    ),
+                                )
                                 bridge = ElementsBridge(
                                     callbacks = ElementsCallbacks().apply {
                                         this.onSuccess = { data ->
@@ -133,12 +174,8 @@ fun EmbeddedWidgetScreen(
                                     },
                                     deunaWidget = this,
                                 )
+                                this.loadUrl(url)
                             }
-                        }
-
-                        // Load the URL inside the DeunaWidget
-                        link.isNotEmpty().let {
-                            loadUrl(link)
                         }
 
                         deunaWidget.value = this

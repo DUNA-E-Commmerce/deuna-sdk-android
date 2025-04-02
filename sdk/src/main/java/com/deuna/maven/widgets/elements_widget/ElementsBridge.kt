@@ -1,4 +1,4 @@
-package com.deuna.maven.element.domain
+package com.deuna.maven.widgets.elements_widget
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.shared.*

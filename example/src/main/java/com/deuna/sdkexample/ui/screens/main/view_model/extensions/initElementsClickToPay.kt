@@ -3,7 +3,7 @@ package com.deuna.sdkexample.ui.screens.main.view_model.extensions
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.deuna.maven.element.domain.ElementsError
+import com.deuna.maven.widgets.elements_widget.ElementsError
 import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.ElementsWidget

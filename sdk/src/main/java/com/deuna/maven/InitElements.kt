@@ -1,10 +1,12 @@
 package com.deuna.maven
 
 import android.content.Context
-import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.web_views.dialog_fragments.ElementsWidgetDialogFragment
+import com.deuna.maven.shared.extensions.findFragmentActivity
+import com.deuna.maven.widgets.elements_widget.ElementsWidgetDialogFragment
+import com.deuna.maven.widgets.elements_widget.ElementsEvent
+import com.deuna.maven.widgets.elements_widget.buildElementsWidgetUrl
 import java.lang.IllegalStateException
 
 
@@ -50,59 +52,17 @@ fun DeunaSDK.initElements(
     orderToken: String? = null,
     widgetExperience: ElementsWidgetExperience? = null
 ) {
-    val baseUrl = this.environment.elementsBaseUrl
 
-    val queryParameters = mutableMapOf(
-        QueryParameters.MODE to QueryParameters.WIDGET,
-        QueryParameters.PUBLIC_API_KEY to publicApiKey
+    val elementUrl = buildElementsWidgetUrl(
+        userToken = userToken,
+        userInfo = userInfo,
+        styleFile = styleFile,
+        types = types,
+        language = language,
+        orderToken = orderToken,
+        widgetExperience = widgetExperience,
+        widgetIntegration = WidgetIntegration.MODAL,
     )
-
-    when {
-        !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN] = userToken
-        userInfo != null && userInfo.isValid() -> {
-            queryParameters.apply {
-                put(QueryParameters.FIRST_NAME, userInfo.firstName)
-                put(QueryParameters.LAST_NAME, userInfo.lastName)
-                put(QueryParameters.EMAIL, userInfo.email)
-            }
-        }
-
-        else -> {
-            DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO)
-            callbacks.onError?.invoke(ElementsErrors.missingUserTokenOrUserInfo)
-            return
-        }
-    }
-
-    if (!language.isNullOrEmpty()) {
-        queryParameters[QueryParameters.LANGUAGE] = language
-    }
-
-    if (!orderToken.isNullOrEmpty()) {
-        queryParameters[QueryParameters.ORDER_TOKEN] = orderToken
-    }
-
-    widgetExperience?.let {
-        it.userExperience.showSavedCardFlow?.let { value ->
-            queryParameters[QueryParameters.SHOW_SAVED_CARD_FLOW] = "$value"
-        }
-        it.userExperience.defaultCardFlow?.let { value ->
-            queryParameters[QueryParameters.DEFAULT_CARD_FLOW] = "$value"
-        }
-    }
-
-    styleFile?.let {
-        queryParameters[QueryParameters.CSS_FILE] = it // should be removed in future versions
-        queryParameters[QueryParameters.STYLE_FILE] = it
-    }
-
-    // Construct the base URL for elements and the URL string
-    // by default the VAULT widget is showed if the types list is empty
-    val widgetName =
-        types.firstOrNull()?.get(ElementsTypeKey.NAME)?.takeIf { it is String && it.isNotEmpty() }
-            ?: ElementsWidget.VAULT
-
-    val elementUrl = Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
 
     val fragmentActivity = context.findFragmentActivity() ?: return
 

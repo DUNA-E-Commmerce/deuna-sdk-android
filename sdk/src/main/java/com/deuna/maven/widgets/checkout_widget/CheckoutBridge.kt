@@ -1,4 +1,4 @@
-package com.deuna.maven.checkout.domain
+package com.deuna.maven.widgets.checkout_widget
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.shared.*

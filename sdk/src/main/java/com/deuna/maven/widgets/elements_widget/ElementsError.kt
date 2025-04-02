@@ -1,4 +1,4 @@
-package com.deuna.maven.element.domain
+package com.deuna.maven.widgets.elements_widget
 
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ErrorCodes

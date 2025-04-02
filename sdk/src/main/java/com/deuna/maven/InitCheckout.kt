@@ -1,13 +1,11 @@
 package com.deuna.maven
 
 import android.content.Context
-import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.client.sendOrder
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.web_views.dialog_fragments.CheckoutWidgetDialogFragment
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
+import com.deuna.maven.widgets.checkout_widget.buildCheckoutWidgetUrl
 
 /**
  * Launch the Checkout View
@@ -35,9 +33,6 @@ fun DeunaSDK.initCheckout(
         return
     }
 
-    val apiKey = this.publicApiKey
-    val baseUrl = this.environment.checkoutBaseUrl
-
 
     val fragmentActivity = context.findFragmentActivity() ?: return
 
@@ -47,13 +42,12 @@ fun DeunaSDK.initCheckout(
     )
     dialogFragment?.show(fragmentActivity.supportFragmentManager, "CheckoutWidgetDialogFragment")
 
-    CheckoutBuilder().getOrderLink(
-        baseUrl = baseUrl,
+    buildCheckoutWidgetUrl(
         orderToken = orderToken,
-        apiKey = apiKey,
         userToken = userToken,
         styleFile = styleFile,
-        language = language
+        language = language,
+        widgetIntegration = WidgetIntegration.MODAL
     ) { error, url ->
         if (error != null) {
             callbacks.onError?.invoke(error)
@@ -63,84 +57,5 @@ fun DeunaSDK.initCheckout(
                 fragment.loadUrl(url!!)
             }
         }
-    }
-}
-
-
-class CheckoutBuilder() {
-    /**
-     * Fetches the order details from the server using the provided credentials.
-     * Parses the response to extract the payment link and load it in the WebView.
-     */
-    fun getOrderLink(
-        baseUrl: String,
-        orderToken: String,
-        apiKey: String,
-        userToken: String?,
-        styleFile: String?,
-        language: String?,
-        completion: (error: PaymentsError?, url: String?) -> Unit
-    ) {
-        sendOrder(baseUrl, orderToken, apiKey, object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body() as? Map<*, *>
-                    val orderMap = responseBody?.get("order") as? Map<*, *>
-
-                    if (orderMap == null) {
-                        completion(PaymentWidgetErrors.linkCouldNotBeGenerated, null)
-                        return
-                    }
-
-                    val paymentLink = orderMap["payment_link"] as String?
-
-                    if (paymentLink.isNullOrEmpty()) {
-                        completion(PaymentWidgetErrors.linkCouldNotBeGenerated, null)
-                        return
-                    }
-
-                    val queryParameters = mutableMapOf<String, String>()
-                    queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
-
-                    if (userToken != null) {
-                        queryParameters[QueryParameters.USER_TOKEN] = userToken
-                    }
-
-                    if (styleFile != null) {
-                        queryParameters[QueryParameters.STYLE_FILE] = styleFile
-                    }
-
-                    if (!language.isNullOrEmpty()) {
-                        queryParameters[QueryParameters.LANGUAGE] = language
-                    }
-
-                    completion(
-                        null,
-                        Utils.buildUrl(baseUrl = paymentLink, queryParams = queryParameters)
-                    )
-                } else {
-                    // Handle missing order data
-                    completion(orderCouldNotBeRetrieved(), null)
-                }
-            }
-
-            override fun onFailure(call: Call<Any>, t: Throwable) {
-                completion(orderCouldNotBeRetrieved(), null)
-            }
-        })
-    }
-
-    /**
-     * This method is called when the order details are not found on the server.
-     * It invokes the onError callback with a CheckoutError of type ORDER_NOT_FOUND.
-     */
-    private fun orderCouldNotBeRetrieved(): PaymentsError {
-        return PaymentsError(
-            type = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED,
-            metadata = PaymentsError.Metadata(
-                code = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED.name,
-                message = PaymentsError.Type.ORDER_COULD_NOT_BE_RETRIEVED.message,
-            )
-        )
     }
 }

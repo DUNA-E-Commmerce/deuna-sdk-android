@@ -1,16 +1,13 @@
 package com.deuna.maven
 
 import android.content.Context
-import android.content.ContextWrapper
-import androidx.fragment.app.FragmentActivity
-import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
+import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
-import com.deuna.maven.shared.QueryParameters
-import com.deuna.maven.shared.Utils
-import com.deuna.maven.shared.WidgetExperience
-import com.deuna.maven.shared.toBase64
-import com.deuna.maven.web_views.dialog_fragments.PaymentWidgetDialogFragment
+import com.deuna.maven.shared.WidgetIntegration
+import com.deuna.maven.shared.extensions.findFragmentActivity
+import com.deuna.maven.widgets.payment_widget.PaymentWidgetDialogFragment
+import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
 
 /**
  * Launch the payment widget View
@@ -51,68 +48,10 @@ fun DeunaSDK.initPaymentWidget(
         paymentMethods = paymentMethods,
         checkoutModules = checkoutModules,
         language = language,
-        widgetExperience = WidgetExperience.MODAL
+        widgetIntegration = WidgetIntegration.MODAL
     )
 
     dialogFragment = PaymentWidgetDialogFragment(url = paymentUrl, callbacks = callbacks)
     dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
 }
 
-/**
- * Build the payment widget url
- */
-fun DeunaSDK.buildPaymentWidgetUrl(
-    orderToken: String,
-    userToken: String? = null,
-    styleFile: String? = null,
-    paymentMethods: List<Json> = emptyList(),
-    checkoutModules: List<Json> = emptyList(),
-    language: String? = null,
-    widgetExperience: WidgetExperience = WidgetExperience.EMBEDDED
-): String {
-    val baseUrl = this.environment.paymentWidgetBaseUrl
-
-    val queryParameters = mutableMapOf<String, String>()
-    queryParameters[QueryParameters.MODE] = QueryParameters.WIDGET
-    queryParameters[QueryParameters.INT] = widgetExperience.value
-
-    if (!language.isNullOrEmpty()) {
-        queryParameters[QueryParameters.LANGUAGE] = language
-    }
-
-    if (!userToken.isNullOrEmpty()) {
-        queryParameters[QueryParameters.USER_TOKEN] = userToken
-    }
-
-    if (!styleFile.isNullOrEmpty()) {
-        queryParameters[QueryParameters.STYLE_FILE] = styleFile
-    }
-
-    val xpropsB64 = mutableMapOf<String, Any>()
-    xpropsB64[QueryParameters.PUBLIC_API_KEY] = publicApiKey
-
-
-    if (paymentMethods.isNotEmpty()) {
-        xpropsB64[QueryParameters.PAYMENT_METHODS] = paymentMethods
-    }
-
-    if (checkoutModules.isNotEmpty()) {
-        xpropsB64[QueryParameters.CHECKOUT_MODULES] = checkoutModules
-    }
-
-    queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
-
-    return Utils.buildUrl(
-        baseUrl = "$baseUrl/now/$orderToken",
-        queryParams = queryParameters,
-    )
-}
-
-fun Context.findFragmentActivity(): FragmentActivity? {
-    var ctx = this
-    while (ctx is ContextWrapper) {
-        if (ctx is FragmentActivity) return ctx
-        ctx = ctx.baseContext
-    }
-    return null
-}

@@ -1,4 +1,4 @@
-package com.deuna.maven.element.domain
+package com.deuna.maven.widgets.elements_widget
 
 enum class ElementsEvent(val value: String) {
     vaultClosed("vaultClosed"),

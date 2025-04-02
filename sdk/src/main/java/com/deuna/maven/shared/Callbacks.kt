@@ -1,8 +1,9 @@
 package com.deuna.maven.shared
 
-import com.deuna.maven.checkout.domain.*
-import com.deuna.maven.element.domain.*
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
+import com.deuna.maven.widgets.elements_widget.ElementsError
+import com.deuna.maven.widgets.elements_widget.ElementsEvent
 
 typealias OnSuccess<S> = (S) -> Unit
 typealias OnClosed = (CloseAction) -> Unit

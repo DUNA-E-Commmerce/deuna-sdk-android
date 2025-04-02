@@ -3,10 +3,9 @@ package com.deuna.sdkexample.ui.screens.main.view_model.extensions
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.deuna.maven.checkout.domain.CheckoutEvent
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import com.deuna.maven.initCheckout
 import com.deuna.maven.shared.CheckoutCallbacks
-import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.sdkexample.shared.CheckoutResult

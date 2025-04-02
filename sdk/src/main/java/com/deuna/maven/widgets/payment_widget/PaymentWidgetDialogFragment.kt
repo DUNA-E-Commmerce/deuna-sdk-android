@@ -1,11 +1,9 @@
-package com.deuna.maven.web_views.dialog_fragments
+package com.deuna.maven.widgets.payment_widget
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.deuna.maven.payment_widget.domain.PaymentWidgetBridge
-import com.deuna.maven.payment_widget.domain.PaymentWidgetCallbacks
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 

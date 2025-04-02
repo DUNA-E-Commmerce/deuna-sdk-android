@@ -1,11 +1,9 @@
-package com.deuna.maven.web_views.dialog_fragments
+package com.deuna.maven.widgets.elements_widget
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.deuna.maven.element.domain.ElementsBridge
-import com.deuna.maven.element.domain.ElementsEvent
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment

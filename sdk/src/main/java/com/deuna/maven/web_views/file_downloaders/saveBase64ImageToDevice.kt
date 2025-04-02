@@ -7,6 +7,7 @@ import android.os.Environment
 import android.util.Base64
 import android.widget.Toast
 import com.deuna.maven.payment_widget.domain.*
+import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

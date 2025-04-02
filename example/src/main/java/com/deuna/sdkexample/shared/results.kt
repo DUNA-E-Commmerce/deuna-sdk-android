@@ -1,6 +1,6 @@
 package com.deuna.sdkexample.shared
 
-import com.deuna.maven.element.domain.ElementsError
+import com.deuna.maven.widgets.elements_widget.ElementsError
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 

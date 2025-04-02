@@ -1,6 +1,6 @@
-package com.deuna.maven.payment_widget.domain
+package com.deuna.maven.widgets.payment_widget
 
-import com.deuna.maven.checkout.domain.CheckoutEvent
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.OnClosed
 import com.deuna.maven.shared.PaymentsError
@@ -11,6 +11,8 @@ typealias OnError = (type: PaymentsError) -> Unit
 typealias OnCardBinDetected = (Json?) -> Unit
 typealias OnInstallmentSelected = (Json?) -> Unit
 typealias OnEventDispatch<S, E> = (E, S) -> Unit
+
+
 
 // Class defining the different callbacks that can be invoked by the payment widget
 class PaymentWidgetCallbacks {

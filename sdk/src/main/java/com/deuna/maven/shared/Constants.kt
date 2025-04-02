@@ -1,13 +1,13 @@
 package com.deuna.maven.shared
 
-import com.deuna.maven.element.domain.ElementsError
+import com.deuna.maven.widgets.elements_widget.ElementsError
 
 enum class ErrorCodes {
     INITIALIZATION_ERROR,
     UNKNOWN_ERROR
 }
 
-enum class WidgetExperience(val value: String) {
+enum class WidgetIntegration(val value: String) {
     MODAL("modal"),
     EMBEDDED("embedded");
 
