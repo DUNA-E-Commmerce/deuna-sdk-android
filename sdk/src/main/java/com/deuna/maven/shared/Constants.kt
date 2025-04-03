@@ -51,6 +51,7 @@ object QueryParameters {
     const val SHOW_SAVED_CARD_FLOW = "showSavedCardFlow"
     const val DEFAULT_CARD_FLOW = "defaultCardFlow"
     const val INT = "int"
+    const val BEHAVIOR = "behavior"
 }
 
 object PaymentsErrorMessages {

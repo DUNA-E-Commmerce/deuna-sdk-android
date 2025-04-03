@@ -28,7 +28,8 @@ fun DeunaSDK.initPaymentWidget(
     styleFile: String? = null,
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
-    language: String? = null
+    language: String? = null,
+    behavior: Json? = null,
 ) {
 
     if (orderToken.isEmpty()) {
@@ -48,6 +49,7 @@ fun DeunaSDK.initPaymentWidget(
         paymentMethods = paymentMethods,
         checkoutModules = checkoutModules,
         language = language,
+        behavior = behavior,
         widgetIntegration = WidgetIntegration.MODAL
     )
 

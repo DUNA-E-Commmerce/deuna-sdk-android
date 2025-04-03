@@ -17,6 +17,11 @@ class MainViewModel(val deunaSDK: DeunaSDK) : ViewModel() {
     val orderToken = mutableStateOf("")
     val userToken = mutableStateOf("")
 
+    val orderTokenValue: String?
+        get() {
+            return orderToken.value.ifEmpty { null }
+        }
+
     val userTokenValue: String?
         get() {
             return userToken.value.ifEmpty { null }

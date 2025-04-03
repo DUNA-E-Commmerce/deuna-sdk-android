@@ -22,6 +22,16 @@ fun MainViewModel.showPaymentWidget(
     deunaSDK.initPaymentWidget(
         context = context,
         orderToken = orderToken.value.trim(),
+//        behavior = mapOf(
+//            "paymentMethods" to mapOf(
+//                "creditCard" to mapOf(
+//                    "splitPayments" to mapOf(
+//                        "maxCards" to 2
+//                    ),
+//                    "flow" to "purchase"
+//                )
+//            )
+//        ),
         callbacks = PaymentWidgetCallbacks().apply {
             onSuccess = { order ->
                 deunaSDK.close()

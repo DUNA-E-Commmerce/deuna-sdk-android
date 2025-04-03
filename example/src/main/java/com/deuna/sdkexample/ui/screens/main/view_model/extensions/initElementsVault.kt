@@ -26,9 +26,20 @@ fun MainViewModel.saveCard(
     deunaSDK.initElements(
         context = context,
         userToken = userTokenValue,
+        orderToken = orderTokenValue,
         userInfo = if (userTokenValue == null) UserInfo(
             firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
         ) else null,
+//        behavior = mapOf(
+//            "paymentMethods" to mapOf(
+//                "creditCard" to mapOf(
+//                    "splitPayments" to mapOf(
+//                        "maxCards" to 2
+//                    ),
+//                    "flow" to "purchase"
+//                )
+//            )
+//        ),
         callbacks = ElementsCallbacks().apply {
             onSuccess = { response ->
                 deunaSDK.close()

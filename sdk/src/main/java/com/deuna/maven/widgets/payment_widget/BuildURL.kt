@@ -17,6 +17,7 @@ fun DeunaSDK.buildPaymentWidgetUrl(
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
     language: String? = null,
+    behavior: Json? = null,
     widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED
 ): String {
     val baseUrl = this.environment.paymentWidgetBaseUrl
@@ -48,6 +49,12 @@ fun DeunaSDK.buildPaymentWidgetUrl(
 
     if (checkoutModules.isNotEmpty()) {
         xpropsB64[QueryParameters.CHECKOUT_MODULES] = checkoutModules
+    }
+
+    behavior?.let {
+       if( it.keys.isNotEmpty() ) {
+           xpropsB64[QueryParameters.BEHAVIOR] = it
+       }
     }
 
     queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()

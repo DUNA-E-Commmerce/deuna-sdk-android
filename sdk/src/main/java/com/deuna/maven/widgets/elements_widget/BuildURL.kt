@@ -11,6 +11,7 @@ import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.shared.toBase64
 
 
 fun DeunaSDK.buildElementsWidgetUrl(
@@ -21,6 +22,7 @@ fun DeunaSDK.buildElementsWidgetUrl(
     language: String? = null,
     orderToken: String? = null,
     widgetExperience: ElementsWidgetExperience? = null,
+    behavior: Json? = null,
     widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED
 ): String {
     val baseUrl = this.environment.elementsBaseUrl
@@ -67,6 +69,18 @@ fun DeunaSDK.buildElementsWidgetUrl(
         queryParameters[QueryParameters.CSS_FILE] = it // should be removed in future versions
         queryParameters[QueryParameters.STYLE_FILE] = it
     }
+
+
+    val xpropsB64 = mutableMapOf<String, Any>()
+
+    behavior?.let {
+        if( it.keys.isNotEmpty() ) {
+            xpropsB64[QueryParameters.BEHAVIOR] = it
+        }
+    }
+
+    queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
+
 
     // Construct the base URL for elements and the URL string
     // by default the VAULT widget is showed if the types list is empty
