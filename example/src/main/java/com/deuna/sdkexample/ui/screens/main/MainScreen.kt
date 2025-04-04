@@ -1,7 +1,13 @@
 package com.deuna.sdkexample.ui.screens.main
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -30,6 +37,7 @@ enum class ViewMode(val label: String) {
 
 enum class WidgetToShow(val label: String) {
     PAYMENT_WIDGET("Payment Widget"),
+    NEXT_ACTION_WIDGET("Next Action Widget"),
     CHECKOUT_WIDGET("Checkout Widget"),
     VAULT_WIDGET("Vault Widget"),
     CLICK_TO_PAY_WIDGET("Click to Pay Widget"),
@@ -47,58 +55,69 @@ fun MainScreen(
 
     // Retrieve the Context from the composition's LocalContext
     val context = LocalContext.current
-
+    val focusManager = LocalFocusManager.current
     var selectedViewMode by remember { mutableStateOf(ViewMode.MODAL) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Inputs(
-            orderTokenState = orderTokenState,
-            userTokenState = userTokenState
-        )
-
-        Separator(20.dp)
-
-        ViewModePicker(
-            selectedViewMode = selectedViewMode
-        ) { selectedViewMode = it }
-
-        Separator(30.dp)
-
-        WidgetToShow.entries.forEach { widget ->
-            Button(
-                onClick = {
-                    when (selectedViewMode) {
-                        ViewMode.MODAL -> {
-                            showWidgetInModal(
-                                context = context,
-                                viewModel = viewModel,
-                                widgetToShow = widget,
-                                navController = navController
-                            )
-                        }
-
-                        ViewMode.EMBEDDED -> {
-                            navController.navigate("embedded/${orderTokenState.value}/${userTokenState.value}/${widget.name}")
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF007AFF)
-                )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
             ) {
-                Text(widget.label)
+                focusManager.clearFocus()
             }
-        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
+            Inputs(
+                orderTokenState = orderTokenState,
+                userTokenState = userTokenState
+            )
+
+            Separator(20.dp)
+
+            ViewModePicker(
+                selectedViewMode = selectedViewMode
+            ) { selectedViewMode = it }
+
+            Separator(30.dp)
+
+            WidgetToShow.entries.forEach { widget ->
+                Button(
+                    onClick = {
+                        when (selectedViewMode) {
+                            ViewMode.MODAL -> {
+                                showWidgetInModal(
+                                    context = context,
+                                    viewModel = viewModel,
+                                    widgetToShow = widget,
+                                    navController = navController
+                                )
+                            }
+
+                            ViewMode.EMBEDDED -> {
+                                navController.navigate("embedded/${orderTokenState.value}/${userTokenState.value}/${widget.name}")
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF007AFF)
+                    )
+                ) {
+                    Text(widget.label)
+                }
+            }
+
+        }
     }
 }
 

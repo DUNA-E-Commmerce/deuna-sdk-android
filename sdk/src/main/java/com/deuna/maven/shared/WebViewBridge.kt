@@ -2,9 +2,11 @@ package com.deuna.maven.shared
 
 import android.util.*
 import android.webkit.*
+import com.deuna.maven.web_views.deuna.DeunaWidget
 
 // Abstract class to handle communication between the WebView and the native Android code
 abstract class DeunaBridge(
+    val deunaWidget: DeunaWidget,
     val name: String,
     val onCloseByUser: VoidCallback?,
 ) {

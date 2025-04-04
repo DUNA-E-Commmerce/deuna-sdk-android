@@ -8,12 +8,13 @@ import org.json.*
 
 @Suppress("UNCHECKED_CAST")
 class CheckoutBridge(
-    val deunaWidget: DeunaWidget,
+    deunaWidget: DeunaWidget,
     val callbacks: CheckoutCallbacks,
     private val closeEvents: Set<CheckoutEvent> = emptySet(),
     val onCloseByEvent: VoidCallback? = null,
     onCloseByUser: VoidCallback? = null,
 ) : DeunaBridge(
+    deunaWidget = deunaWidget,
     name = "android",
     onCloseByUser = onCloseByUser,
 ) {

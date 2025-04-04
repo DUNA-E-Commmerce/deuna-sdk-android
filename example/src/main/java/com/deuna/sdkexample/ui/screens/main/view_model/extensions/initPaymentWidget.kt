@@ -124,5 +124,3 @@ fun MainViewModel.showPaymentWidget(
 //        )
     )
 }
-
-

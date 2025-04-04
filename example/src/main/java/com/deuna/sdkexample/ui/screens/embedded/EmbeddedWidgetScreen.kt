@@ -32,6 +32,9 @@ import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.deuna.extensions.submit
 import com.deuna.maven.widgets.checkout_widget.buildCheckoutWidgetUrl
 import com.deuna.maven.widgets.elements_widget.buildElementsWidgetUrl
+import com.deuna.maven.widgets.next_action.NextActionBridge
+import com.deuna.maven.widgets.next_action.NextActionCallbacks
+import com.deuna.maven.widgets.next_action.buildNextActionUrl
 import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.embedded.views.PayButton
@@ -170,6 +173,27 @@ fun EmbeddedWidgetScreen(
                                             val savedCard =
                                                 (data["metadata"] as Json)["createdCard"] as Json
                                             onSuccess(savedCard)
+                                        }
+                                    },
+                                    deunaWidget = this,
+                                )
+                                this.loadUrl(url)
+                            }
+
+                            WidgetToShow.NEXT_ACTION_WIDGET -> {
+                                val url = deunaSDK.buildNextActionUrl(
+                                    orderToken = orderToken
+                                )
+                                bridge = NextActionBridge(
+                                    callbacks = NextActionCallbacks().apply {
+                                        this.onSuccess = { data ->
+                                            onSuccess(data)
+                                        }
+                                        this.onError = { error ->
+                                            Log.e(DEBUG_TAG, "❌ Error: $error")
+                                        }
+                                        this.onEventDispatch = { event, data ->
+                                            Log.i(DEBUG_TAG, "Event: $event, Data: $data")
                                         }
                                     },
                                     deunaWidget = this,

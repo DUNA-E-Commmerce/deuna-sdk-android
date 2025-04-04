@@ -10,6 +10,7 @@ import com.deuna.sdkexample.shared.PaymentWidgetResult
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
 import com.deuna.sdkexample.ui.screens.main.view_model.MainViewModel
 import com.deuna.sdkexample.ui.screens.main.view_model.extensions.clickToPay
+import com.deuna.sdkexample.ui.screens.main.view_model.extensions.launchNextAction
 import com.deuna.sdkexample.ui.screens.main.view_model.extensions.saveCard
 import com.deuna.sdkexample.ui.screens.main.view_model.extensions.showCheckout
 import com.deuna.sdkexample.ui.screens.main.view_model.extensions.showPaymentWidget
@@ -25,6 +26,22 @@ fun showWidgetInModal(
     when (widgetToShow) {
         WidgetToShow.PAYMENT_WIDGET -> {
             viewModel.showPaymentWidget(context = context, completion = { result ->
+                when (result) {
+                    is PaymentWidgetResult.Canceled -> Log.d("PAYMENT", "Canceled")
+                    is PaymentWidgetResult.Error -> Log.d("PAYMENT", "Error")
+                    is PaymentWidgetResult.Success -> {
+                        Log.d("PAYMENT", "Success")
+                        val orderStr = Uri.encode(JSONObject(result.order).toString())
+                        navController.navigate(
+                            "payment-success/$orderStr"
+                        )
+                    }
+                }
+            })
+        }
+
+        WidgetToShow.NEXT_ACTION_WIDGET -> {
+            viewModel.launchNextAction(context = context, completion = { result ->
                 when (result) {
                     is PaymentWidgetResult.Canceled -> Log.d("PAYMENT", "Canceled")
                     is PaymentWidgetResult.Error -> Log.d("PAYMENT", "Error")

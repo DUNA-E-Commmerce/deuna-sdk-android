@@ -18,10 +18,11 @@ import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class PaymentWidgetBridge(
-    val deunaWidget: DeunaWidget,
+    deunaWidget: DeunaWidget,
     val callbacks: PaymentWidgetCallbacks,
     onCloseByUser: VoidCallback? = null,
 ) : DeunaBridge(
+    deunaWidget = deunaWidget,
     name = "android",
     onCloseByUser = onCloseByUser,
 ) {
