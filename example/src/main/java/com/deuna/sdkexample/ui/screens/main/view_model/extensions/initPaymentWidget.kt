@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.deuna.maven.initPaymentWidget
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentsError
+import com.deuna.maven.shared.WidgetBehavior
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import com.deuna.sdkexample.shared.PaymentWidgetResult
@@ -22,13 +23,12 @@ fun MainViewModel.showPaymentWidget(
     deunaSDK.initPaymentWidget(
         context = context,
         orderToken = orderToken.value.trim(),
-//        behavior = mapOf(
-//            "paymentMethods" to mapOf(
+//        behavior = WidgetBehavior(
+//            paymentMethods = mapOf(
 //                "creditCard" to mapOf(
 //                    "splitPayments" to mapOf(
 //                        "maxCards" to 2
 //                    ),
-//                    "flow" to "purchase"
 //                )
 //            )
 //        ),
@@ -116,11 +116,14 @@ fun MainViewModel.showPaymentWidget(
         },
         userToken = userTokenValue,
         styleFile = "YOUR_THEME_UUID", // optional
-//        paymentMethods = listOf(
-//            mapOf(
-//                "paymentMethod" to "voucher",
-//                "processors" to listOf("payu_oxxo_cash")
-//            )
-//        )
+        paymentMethods = listOf(
+            mapOf(
+                "paymentMethod" to "wallet",
+                "processors" to listOf("paypal_wallet"),
+                "configuration" to mapOf(
+                    "express" to true
+                )
+            )
+        )
     )
 }

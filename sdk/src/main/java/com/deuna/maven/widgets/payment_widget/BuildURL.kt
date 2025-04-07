@@ -4,6 +4,7 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.QueryParameters
 import com.deuna.maven.shared.Utils
+import com.deuna.maven.shared.WidgetBehavior
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.shared.toBase64
 
@@ -17,7 +18,7 @@ fun DeunaSDK.buildPaymentWidgetUrl(
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
     language: String? = null,
-    behavior: Json? = null,
+    behavior: WidgetBehavior? = null,
     widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED
 ): String {
     val baseUrl = this.environment.paymentWidgetBaseUrl
@@ -52,9 +53,15 @@ fun DeunaSDK.buildPaymentWidgetUrl(
     }
 
     behavior?.let {
-       if( it.keys.isNotEmpty() ) {
-           xpropsB64[QueryParameters.BEHAVIOR] = it
+        val map = mutableMapOf<String, Any>(
+        )
+       if( !it.paymentMethods.isNullOrEmpty() ) {
+          map[QueryParameters.PAYMENT_METHODS] = it.paymentMethods
        }
+
+        map.isNotEmpty().let {
+            xpropsB64[QueryParameters.BEHAVIOR] = map
+        }
     }
 
     queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
