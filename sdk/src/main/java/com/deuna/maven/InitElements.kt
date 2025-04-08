@@ -50,7 +50,7 @@ fun DeunaSDK.initElements(
     types: List<Json> = emptyList(),
     language: String? = null,
     orderToken: String? = null,
-    behavior: WidgetBehavior? = null,
+    behavior: Json? = null,
     widgetExperience: ElementsWidgetExperience? = null
 ) {
 

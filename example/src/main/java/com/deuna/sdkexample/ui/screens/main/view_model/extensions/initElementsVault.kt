@@ -7,7 +7,6 @@ import com.deuna.maven.ElementsWidgetExperience
 import com.deuna.maven.initElements
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
-import com.deuna.maven.shared.WidgetBehavior
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.sdkexample.shared.ElementsResult
@@ -31,8 +30,8 @@ fun MainViewModel.saveCard(
         userInfo = if (userTokenValue == null) UserInfo(
             firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
         ) else null,
-//        behavior = WidgetBehavior(
-//            paymentMethods = mapOf(
+//        behavior = mapOf(
+//            "paymentMethods" to mapOf(
 //                "creditCard" to mapOf(
 //                    "splitPayments" to mapOf(
 //                        "maxCards" to 2

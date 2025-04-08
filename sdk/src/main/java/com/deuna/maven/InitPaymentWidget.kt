@@ -4,7 +4,6 @@ import android.content.Context
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
-import com.deuna.maven.shared.WidgetBehavior
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetDialogFragment
@@ -30,7 +29,7 @@ fun DeunaSDK.initPaymentWidget(
     paymentMethods: List<Json> = emptyList(),
     checkoutModules: List<Json> = emptyList(),
     language: String? = null,
-    behavior: WidgetBehavior? = null,
+    behavior: Json? = null,
 ) {
 
     if (orderToken.isEmpty()) {
