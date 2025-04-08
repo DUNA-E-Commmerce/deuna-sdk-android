@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.deuna.maven.web_views.base.BaseWebView
 
-abstract class BaseDialogFragment : DialogFragment() {
+abstract class BaseDialogFragment(private val fullSize: Boolean = true) : DialogFragment() {
 
     lateinit var baseWebView: BaseWebView
 
@@ -14,7 +14,10 @@ abstract class BaseDialogFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Light_NoTitleBar)
+
+        if(fullSize){
+            setStyle(STYLE_NORMAL, android.R.style.Theme_Light_NoTitleBar)
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -27,10 +30,12 @@ abstract class BaseDialogFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
+        if(fullSize){
+            dialog?.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
     }
 
     override fun onDestroyView() {

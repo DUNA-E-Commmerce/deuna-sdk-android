@@ -26,6 +26,7 @@ import com.deuna.maven.shared.Environment
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.main.utils.showWidgetInModal
 import com.deuna.sdkexample.ui.screens.main.view_model.MainViewModel
+import com.deuna.sdkexample.ui.screens.main.view_model.extensions.generateFraudId
 import com.deuna.sdkexample.ui.screens.main.views.Inputs
 import com.deuna.sdkexample.ui.screens.main.views.ViewModePicker
 
@@ -52,6 +53,7 @@ fun MainScreen(
     // Retrieve the user token and order token states from the view model
     val userTokenState = viewModel.userToken
     val orderTokenState = viewModel.orderToken
+    val fraudId = viewModel.fraudId
 
     // Retrieve the Context from the composition's LocalContext
     val context = LocalContext.current
@@ -80,7 +82,25 @@ fun MainScreen(
                 orderTokenState = orderTokenState,
                 userTokenState = userTokenState
             )
+            Separator(10.dp)
 
+            Text("Fraud ID: ${fraudId.value}")
+
+
+
+            Separator(20.dp)
+            Button(
+                onClick = {
+                    viewModel.generateFraudId(context)
+                },
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF007AFF)
+                )
+            ) {
+                Text("Generate Fraud ID")
+            }
             Separator(20.dp)
 
             ViewModePicker(
@@ -88,6 +108,8 @@ fun MainScreen(
             ) { selectedViewMode = it }
 
             Separator(30.dp)
+
+
 
             WidgetToShow.entries.forEach { widget ->
                 Button(

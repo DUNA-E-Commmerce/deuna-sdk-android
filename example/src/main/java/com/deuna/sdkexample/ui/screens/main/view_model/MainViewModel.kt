@@ -16,6 +16,7 @@ class MainViewModel(val deunaSDK: DeunaSDK) : ViewModel() {
     // State variables for order token and user token
     val orderToken = mutableStateOf("")
     val userToken = mutableStateOf("")
+    val fraudId = mutableStateOf("")
 
     val orderTokenValue: String?
         get() {

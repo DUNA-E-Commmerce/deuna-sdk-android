@@ -3,7 +3,7 @@ package com.deuna.maven
 import android.content.Context
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.extensions.findFragmentActivity
-import com.deuna.maven.web_views.dialog_fragments.CheckoutWidgetDialogFragment
+import com.deuna.maven.widgets.checkout_widget.CheckoutWidgetDialogFragment
 import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import com.deuna.maven.widgets.checkout_widget.buildCheckoutWidgetUrl
 

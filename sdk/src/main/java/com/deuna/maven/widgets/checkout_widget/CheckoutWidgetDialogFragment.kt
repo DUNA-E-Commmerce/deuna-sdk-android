@@ -1,11 +1,9 @@
-package com.deuna.maven.web_views.dialog_fragments
+package com.deuna.maven.widgets.checkout_widget
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
-import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment

@@ -118,6 +118,15 @@ fun BaseWebView.runOnUiThread(runnable: Runnable) {
     }
 }
 
+fun WebViewController.runOnUiThread(runnable: Runnable) {
+    val ctx = context
+    if (ctx is Activity) {
+        ctx.runOnUiThread(runnable)
+    } else {
+        Handler(Looper.getMainLooper()).post(runnable)
+    }
+}
+
 
 fun BaseWebView.downloadFile(urlString: String) {
     runOnUiThread {

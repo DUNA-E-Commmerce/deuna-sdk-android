@@ -1,6 +1,5 @@
 package com.deuna.maven.web_views.deuna.extensions
 
-import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import org.json.JSONObject
@@ -16,7 +15,7 @@ fun DeunaWidget.buildResultFunction(requestId: Int, type: String): String {
 
 fun DeunaWidget.setCustomStyle(data: Json) {
     val dataAsJsonString = JSONObject(data).toString()
-    executeRemoteFunction(
+    controller?.executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
                  (function() {
@@ -32,7 +31,7 @@ fun DeunaWidget.setCustomStyle(data: Json) {
 }
 
 fun DeunaWidget.refetchOrder(callback: (Json?) -> Unit) {
-    executeRemoteFunction(
+    controller?.executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
                  (function() {
@@ -56,7 +55,7 @@ fun DeunaWidget.refetchOrder(callback: (Json?) -> Unit) {
 }
 
 fun DeunaWidget.isValid(callback: (Boolean) -> Unit) {
-    executeRemoteFunction(
+    controller?.executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
                 (function() {
@@ -77,7 +76,7 @@ fun DeunaWidget.isValid(callback: (Boolean) -> Unit) {
 }
 
 fun DeunaWidget.submit(callback: (SubmitResult) -> Unit) {
-    executeRemoteFunction(
+    controller?.executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
                 (function() {
@@ -104,7 +103,7 @@ fun DeunaWidget.submit(callback: (SubmitResult) -> Unit) {
 }
 
 fun DeunaWidget.getWidgetState(callback: (Json?) -> Unit) {
-    executeRemoteFunction(
+    controller?.executeRemoteFunction(
         jsBuilder = { requestId ->
             return@executeRemoteFunction """
             (function() {

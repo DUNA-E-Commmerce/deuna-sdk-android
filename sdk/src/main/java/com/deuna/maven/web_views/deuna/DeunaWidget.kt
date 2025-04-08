@@ -3,24 +3,20 @@ package com.deuna.maven.web_views.deuna
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.webkit.JavascriptInterface
 import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
 import com.deuna.maven.widgets.elements_widget.ElementsBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.shared.DeunaBridge
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsErrors
-import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.extensions.findFragmentActivity
-import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
-import org.json.JSONObject
 
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
@@ -31,8 +27,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     var closeEnabled = true
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
-    private val remoteFunctionsRequests = mutableMapOf<Int, (Json) -> Unit>()
-    private var remoteFunctionsRequestId = 0
     var bridge: DeunaBridge? = null
 
     // Hide the pay button
@@ -41,7 +35,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     override fun loadUrl(url: String, javascriptToInject: String?) {
-        webView.addJavascriptInterface(RemoteJsFunctionBridge(), "remoteJs")
         webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
         initialize()
 
@@ -170,41 +163,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     }
 
 
-    /**
-     * Build and execute a remote JS function
-     */
-    fun executeRemoteFunction(
-        jsBuilder: (requestId: Int) -> String, callback: (Json) -> Unit
-    ) {
-        runOnUiThread {
-            remoteFunctionsRequestId++
-            remoteFunctionsRequests[remoteFunctionsRequestId] = callback
-            webView.evaluateJavascript(jsBuilder(remoteFunctionsRequestId), null)
-        }
-    }
 
-
-    /**
-     * Js Bridge to listen the remote functions responses
-     */
-    inner class RemoteJsFunctionBridge {
-        @JavascriptInterface
-        fun onRequestResult(message: String) {
-            try {
-                val json = JSONObject(message).toMap()
-                val requestId = json["requestId"] as? Int
-                if (!remoteFunctionsRequests.contains(requestId)) {
-                    return
-                }
-
-                remoteFunctionsRequests[requestId]?.invoke(
-                    json["data"] as Json
-                )
-                remoteFunctionsRequests.remove(requestId)
-            } catch (e: Exception) {
-                DeunaLogs.error("RemoteJsFunctionBridge error: $e")
-            }
-        }
-    }
 
 }
