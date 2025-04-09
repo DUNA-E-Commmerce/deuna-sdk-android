@@ -26,3 +26,13 @@ enum class Environment(
         "https://pay.sandbox.deuna.io"
     )
 }
+
+
+fun Environment.value(): String {
+    return when (this) {
+        Environment.DEVELOPMENT -> "develop"
+        Environment.PRODUCTION -> "production"
+        Environment.STAGING -> "staging"
+        Environment.SANDBOX -> "sandbox"
+    }
+}

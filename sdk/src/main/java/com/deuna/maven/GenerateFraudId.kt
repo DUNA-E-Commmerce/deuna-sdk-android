@@ -6,6 +6,7 @@ import android.webkit.WebView
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.value
 import com.deuna.maven.web_views.base.WebViewController
 import org.json.JSONObject
 
@@ -92,7 +93,7 @@ class GenerateFraudId(
                        window.generateFraudId(
                          {
                             publicApiKey: "$publicApiKey",
-                            env: "${environment.name.lowercase()}",
+                            env: "${environment.value()}",
                             ${params?.let { "params: ${JSONObject(it)}" } ?: ""}
                          }
                        )
