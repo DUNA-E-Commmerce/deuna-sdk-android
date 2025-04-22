@@ -36,6 +36,9 @@ import com.deuna.maven.widgets.next_action.NextActionBridge
 import com.deuna.maven.widgets.next_action.NextActionCallbacks
 import com.deuna.maven.widgets.next_action.buildNextActionUrl
 import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
+import com.deuna.maven.widgets.voucher.VoucherBridge
+import com.deuna.maven.widgets.voucher.VoucherCallbacks
+import com.deuna.maven.widgets.voucher.buildVoucherUrl
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.embedded.views.PayButton
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
@@ -186,6 +189,27 @@ fun EmbeddedWidgetScreen(
                                 )
                                 bridge = NextActionBridge(
                                     callbacks = NextActionCallbacks().apply {
+                                        this.onSuccess = { data ->
+                                            onSuccess(data)
+                                        }
+                                        this.onError = { error ->
+                                            Log.e(DEBUG_TAG, "❌ Error: $error")
+                                        }
+                                        this.onEventDispatch = { event, data ->
+                                            Log.i(DEBUG_TAG, "Event: $event, Data: $data")
+                                        }
+                                    },
+                                    deunaWidget = this,
+                                )
+                                this.loadUrl(url)
+                            }
+
+                            WidgetToShow.VOUCHER_WIDGET -> {
+                                val url = deunaSDK.buildVoucherUrl(
+                                    orderToken = orderToken
+                                )
+                                bridge = VoucherBridge(
+                                    callbacks = VoucherCallbacks().apply {
                                         this.onSuccess = { data ->
                                             onSuccess(data)
                                         }
