@@ -1,13 +1,9 @@
 package com.deuna.sdkexample.ui.screens.main
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +35,7 @@ enum class ViewMode(val label: String) {
 enum class WidgetToShow(val label: String) {
     PAYMENT_WIDGET("Payment Widget"),
     NEXT_ACTION_WIDGET("Next Action Widget"),
+    VOUCHER_WIDGET("Voucher Widget"),
     CHECKOUT_WIDGET("Checkout Widget"),
     VAULT_WIDGET("Vault Widget"),
     CLICK_TO_PAY_WIDGET("Click to Pay Widget"),

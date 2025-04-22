@@ -1,3 +1,13 @@
+## [2.9.0]
+Added support for:
+
+- Embedded widgets.
+- Hide pay Button.
+- Generate fingerprint.
+- Next Action Widget.
+- Removed deprecated functions.
+- Updated example app.
+
 ## [2.4.0-beta.1]
 - Added support for the new payment widget. Check the implementation [here](https://docs.deuna.com/docs/integracion-payment-widget-android).
 

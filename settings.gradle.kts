@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "deuna-sdk-android"
-include(":sdk", ":example")
+//include(":sdk", ":example") // uncomment for local development
+include(":sdk") // comment for local development, use this for publishing
