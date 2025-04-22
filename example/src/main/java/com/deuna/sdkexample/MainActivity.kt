@@ -12,8 +12,8 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val deunaSDK = DeunaSDK(
-            environment = Environment.SANDBOX,
-            publicApiKey = "YOUR_PUBLIC_API_KEY"
+            environment = Environment.DEVELOPMENT,
+            publicApiKey = "8ba6d13e322e2c3d3763e4833616b0fa77522b366945c12f1083ebe52dbb03645e8fe7996d6550e6b1d298fd1ce8a6ee3ce4e67eaf50ad61d48211f14724"
         )
 
         setContent {

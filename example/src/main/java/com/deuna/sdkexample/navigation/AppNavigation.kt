@@ -67,7 +67,7 @@ fun AppNavigation(deunaSDK: DeunaSDK) {
                 onSuccess = { data ->
                     val jsonStr = Uri.encode(JSONObject(data).toString())
                     when (widgetToShow) {
-                        WidgetToShow.CHECKOUT_WIDGET, WidgetToShow.PAYMENT_WIDGET, WidgetToShow.NEXT_ACTION_WIDGET -> {
+                        WidgetToShow.CHECKOUT_WIDGET, WidgetToShow.PAYMENT_WIDGET, WidgetToShow.NEXT_ACTION_WIDGET, WidgetToShow.VOUCHER_WIDGET -> {
                             navController.navigate("payment-success/$jsonStr") {
                                 popUpTo(AppRoutes.EMBEDDED.route) {
                                     inclusive = true

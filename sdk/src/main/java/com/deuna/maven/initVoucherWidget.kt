@@ -12,7 +12,6 @@ import com.deuna.maven.widgets.voucher.buildVoucherUrl
 fun DeunaSDK.initVoucherWidget(
     context: Context,
     orderToken: String,
-    userToken: String? = null,
     callbacks: VoucherCallbacks,
     language: String? = null,
 ) {
@@ -28,7 +27,6 @@ fun DeunaSDK.initVoucherWidget(
 
     val paymentUrl = buildVoucherUrl(
         orderToken = orderToken,
-        userToken = userToken,
         language = language,
         widgetIntegration = WidgetIntegration.MODAL
     )
