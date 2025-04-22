@@ -4,18 +4,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
-        <activity
-            android:name=".web_views.widgets.CheckoutActivity"
-            android:exported="false" />
-        <activity
-            android:name=".web_views.widgets.ElementsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".web_views.widgets.PaymentWidgetActivity"
-            android:exported="false" />
-        <activity
-            android:name=".web_views.NewTabWebViewActivity"
-            android:exported="false" />
     </application>
 
 </manifest>
