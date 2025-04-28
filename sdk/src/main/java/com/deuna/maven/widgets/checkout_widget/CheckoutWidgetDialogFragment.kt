@@ -24,11 +24,9 @@ class CheckoutWidgetDialogFragment(
             callbacks = callbacks,
             closeEvents = closeEvents,
             onCloseByUser = {
-                callbacks.onClosed?.invoke(CloseAction.userAction)
                 dismiss()
             },
             onCloseByEvent = {
-                callbacks.onClosed?.invoke(CloseAction.systemAction)
                 dismiss()
             },
         )
@@ -37,5 +35,10 @@ class CheckoutWidgetDialogFragment(
 
     fun loadUrl(url: String) {
         deunaWidget.loadUrl(url)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks.onClosed?.invoke(deunaWidget.closeAction)
     }
 }

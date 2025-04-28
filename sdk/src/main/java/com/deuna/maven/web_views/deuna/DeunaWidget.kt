@@ -11,6 +11,7 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsErrors
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
@@ -31,6 +32,9 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     // Hide the pay button
     var hidePayButton = false
+
+    // Enum used to save what action closes the widget in modal
+    var closeAction = CloseAction.systemAction
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
@@ -161,8 +165,5 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         closeSubWebView()
         super.destroy()
     }
-
-
-
 
 }

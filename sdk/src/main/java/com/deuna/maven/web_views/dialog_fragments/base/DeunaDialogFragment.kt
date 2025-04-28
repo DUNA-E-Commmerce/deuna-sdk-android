@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.deuna.maven.R
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.deuna.DeunaWidget
 
 abstract class DeunaDialogFragment : BaseDialogFragment(){
@@ -25,6 +26,7 @@ abstract class DeunaDialogFragment : BaseDialogFragment(){
         if (!deunaWidget.closeEnabled) {
             return
         }
+        deunaWidget.closeAction = CloseAction.userAction
         deunaWidget.bridge?.onCloseByUser?.let { it() }
     }
 }

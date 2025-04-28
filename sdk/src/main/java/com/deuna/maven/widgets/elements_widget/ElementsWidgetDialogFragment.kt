@@ -24,16 +24,19 @@ class ElementsWidgetDialogFragment(
             deunaWidget = deunaWidget,
             callbacks = callbacks,
             onCloseByUser = {
-                callbacks.onClosed?.invoke(CloseAction.userAction)
                 dismiss()
             },
             closeEvents = closeEvents,
             onCloseByEvent = {
-                callbacks.onClosed?.invoke(CloseAction.systemAction)
                 dismiss()
             }
         )
         baseWebView.loadUrl(url)
         return view
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks.onClosed?.invoke(deunaWidget.closeAction)
     }
 }
