@@ -7,6 +7,7 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.VoidCallback
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.file_downloaders.downloadFile
@@ -68,7 +69,6 @@ class NextActionBridge(
                 when (event) {
                     CheckoutEvent.purchaseError -> {
                         deunaWidget.closeSubWebView()
-                        deunaWidget.updateCloseEnabled(true)
                         val error = PaymentsError.fromJson(
                             type = PaymentsError.Type.PAYMENT_ERROR, data = data
                         )
@@ -82,6 +82,7 @@ class NextActionBridge(
 
                     CheckoutEvent.paymentMethods3dsInitiated -> {}
                     CheckoutEvent.linkClose -> {
+                        deunaWidget.closeAction = CloseAction.userAction
                         onCloseByUser?.invoke()
                     }
 

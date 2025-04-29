@@ -2,6 +2,7 @@ package com.deuna.maven.widgets.elements_widget
 
 import android.webkit.JavascriptInterface
 import com.deuna.maven.shared.*
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import org.json.*
@@ -58,6 +59,7 @@ class ElementsBridge(
                     }
 
                     ElementsEvent.vaultClosed -> {
+                        deunaWidget.closeAction = CloseAction.userAction
                         onCloseByUser?.invoke()
                     }
 

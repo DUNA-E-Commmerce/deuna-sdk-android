@@ -20,11 +20,15 @@ class NextActionDialogFragment(
             deunaWidget = deunaWidget,
             callbacks = callbacks,
             onCloseByUser = {
-                callbacks.onClosed?.invoke(CloseAction.userAction)
                 dismiss()
             },
         )
         baseWebView.loadUrl(url)
         return view
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks.onClosed?.invoke(deunaWidget.closeAction)
     }
 }

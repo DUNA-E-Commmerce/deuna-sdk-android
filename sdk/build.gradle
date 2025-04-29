@@ -61,7 +61,7 @@ afterEvaluate {
                 from components.release
                 groupId 'com.github.deuna-developers'
                 artifactId 'deunasdk'
-                version '2.8.13'
+                version '2.9.2'
             }
         }
     }

@@ -7,6 +7,7 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.VoidCallback
+import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.file_downloaders.downloadFile
@@ -95,6 +96,10 @@ class PaymentWidgetBridge(
 
                   CheckoutEvent.paymentMethods3dsInitiated -> {}
                   CheckoutEvent.linkClose -> {
+                      if (!deunaWidget.closeEnabled) {
+                          return@runOnUiThread
+                      }
+                      deunaWidget.closeAction = CloseAction.userAction
                       onCloseByUser?.invoke()
                   }
 
