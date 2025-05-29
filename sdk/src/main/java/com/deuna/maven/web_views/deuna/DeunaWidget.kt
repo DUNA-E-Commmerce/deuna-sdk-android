@@ -3,12 +3,15 @@ package com.deuna.maven.web_views.deuna
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.util.JsonToken
 import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
 import com.deuna.maven.widgets.elements_widget.ElementsBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.shared.DeunaBridge
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsErrors
+import com.deuna.maven.shared.Environment
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
@@ -18,6 +21,15 @@ import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
+
+
+data class WidgetConfig(
+    val publicApiKey: String,
+    val environment: Environment,
+    val orderToken: String?,
+    val userToken: String?,
+    val behavior: Json?
+)
 
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
@@ -29,6 +41,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
     var bridge: DeunaBridge? = null
+    var widgetConfig: WidgetConfig? = null
 
     // Hide the pay button
     var hidePayButton = false
@@ -131,7 +144,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     // Check internet connection and initialize other components
     private fun initialize() {
         if (!NetworkUtils(context).hasInternet) {
-
             bridge?.let {
                 runOnUiThread {
                     when (it) {

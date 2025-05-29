@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 
 

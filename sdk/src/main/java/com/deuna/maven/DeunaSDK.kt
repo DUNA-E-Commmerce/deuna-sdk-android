@@ -21,9 +21,6 @@ open class DeunaSDK(
     val publicApiKey: String,
 ) {
 
-    val sdkInstanceId: Int
-        get() = hashCode()
-
     init {
         require(publicApiKey.isNotEmpty()) {
             "publicApiKey must not be empty"
