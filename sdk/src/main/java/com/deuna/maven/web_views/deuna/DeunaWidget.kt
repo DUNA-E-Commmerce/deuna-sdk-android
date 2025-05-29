@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.JsonToken
+import com.deuna.maven.DeunaSDK
 import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
 import com.deuna.maven.widgets.elements_widget.ElementsBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
@@ -17,10 +18,17 @@ import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.web_views.base.BaseWebView
+import com.deuna.maven.web_views.deuna.extensions.buildBridge
 import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
+import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
+import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
+import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
+import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
+import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
+import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 
 
 data class WidgetConfig(
@@ -31,6 +39,7 @@ data class WidgetConfig(
     val behavior: Json?
 )
 
+
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
@@ -40,19 +49,19 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     var closeEnabled = true
 
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
-    var bridge: DeunaBridge? = null
-    var widgetConfig: WidgetConfig? = null
 
-    // Hide the pay button
-    var hidePayButton = false
+    var widgetConfiguration: DeunaWidgetConfiguration? = null
 
     // Enum used to save what action closes the widget in modal
     var closeAction = CloseAction.systemAction
+
+    var bridge: DeunaBridge? = null
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     override fun loadUrl(url: String, javascriptToInject: String?) {
         webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
+        buildBridge()
         initialize()
 
         // Add JavascriptInterface
@@ -72,7 +81,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
          };
          
          window.xprops = {
-             hidePayButton: $hidePayButton,
+             hidePayButton: ${widgetConfiguration?.hidePayButton ?: false},
              onEventDispatch : function (event) {
                  android.postMessage(JSON.stringify(event));
              },

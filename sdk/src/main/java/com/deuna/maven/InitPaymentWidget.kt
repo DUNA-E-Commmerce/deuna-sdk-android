@@ -6,8 +6,8 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.shared.extensions.findFragmentActivity
+import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetDialogFragment
-import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
 
 /**
  * Launch the payment widget View
@@ -42,18 +42,20 @@ fun DeunaSDK.initPaymentWidget(
 
     val fragmentActivity = context.findFragmentActivity() ?: return
 
-    val paymentUrl = buildPaymentWidgetUrl(
-        orderToken = orderToken,
-        userToken = userToken,
-        styleFile = styleFile,
-        paymentMethods = paymentMethods,
-        checkoutModules = checkoutModules,
-        language = language,
-        behavior = behavior,
-        widgetIntegration = WidgetIntegration.MODAL
+    dialogFragment = PaymentWidgetDialogFragment(
+        widgetConfiguration = PaymentWidgetConfiguration(
+            sdkInstance = this,
+            orderToken = orderToken,
+            callbacks = callbacks,
+            userToken = userToken,
+            styleFile = styleFile,
+            paymentMethods = paymentMethods,
+            checkoutModules = checkoutModules,
+            language = language,
+            behavior = behavior,
+            widgetIntegration = WidgetIntegration.MODAL
+        )
     )
-
-    dialogFragment = PaymentWidgetDialogFragment(url = paymentUrl, callbacks = callbacks)
     dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
 }
 

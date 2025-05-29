@@ -7,8 +7,17 @@ import android.view.ViewGroup
 import com.deuna.maven.R
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.deuna.DeunaWidget
+import com.deuna.maven.web_views.deuna.extensions.build
+import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
+import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
+import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
+import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
+import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
+import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 
-abstract class DeunaDialogFragment : BaseDialogFragment(){
+abstract class DeunaDialogFragment(
+    val widgetConfiguration: DeunaWidgetConfiguration
+) : BaseDialogFragment() {
 
     val deunaWidget: DeunaWidget get() = baseWebView as DeunaWidget
 
@@ -19,6 +28,12 @@ abstract class DeunaDialogFragment : BaseDialogFragment(){
     ): View {
         val view = inflater.inflate(R.layout.deuna_webview_container, container, false)
         baseWebView = view.findViewById(R.id.deuna_webview)
+
+        deunaWidget.widgetConfiguration = widgetConfiguration
+        deunaWidget.widgetConfiguration?.onCloseByUser = {
+            dismiss()
+        }
+        deunaWidget.build()
         return view
     }
 
@@ -28,5 +43,30 @@ abstract class DeunaDialogFragment : BaseDialogFragment(){
         }
         deunaWidget.closeAction = CloseAction.userAction
         deunaWidget.bridge?.onCloseByUser?.let { it() }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        when (widgetConfiguration) {
+            is PaymentWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
+                deunaWidget.closeAction
+            )
+
+            is ElementsWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
+                deunaWidget.closeAction
+            )
+
+            is VoucherWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
+                deunaWidget.closeAction
+            )
+
+            is NextActionWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
+                deunaWidget.closeAction
+            )
+
+            is CheckoutWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
+                deunaWidget.closeAction
+            )
+        }
     }
 }

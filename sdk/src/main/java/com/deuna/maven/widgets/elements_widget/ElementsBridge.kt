@@ -11,8 +11,6 @@ import org.json.*
 class ElementsBridge(
     deunaWidget: DeunaWidget,
     val callbacks: ElementsCallbacks,
-    private val closeEvents: Set<ElementsEvent> = emptySet(),
-    val onCloseByEvent: VoidCallback? = null,
     onCloseByUser: VoidCallback? = null,
 ) : DeunaBridge(
     deunaWidget = deunaWidget,
@@ -64,10 +62,6 @@ class ElementsBridge(
                     }
 
                     else -> {}
-                }
-
-                if (closeEvents.contains(event)) {
-                    onCloseByEvent?.invoke()
                 }
             } catch (_: IllegalArgumentException) {
             } catch (e: Exception) {

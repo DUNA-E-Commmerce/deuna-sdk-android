@@ -1,11 +1,8 @@
 package com.deuna.maven.web_views.deuna.extensions
 
-import com.deuna.maven.DeunaSDK
-import com.deuna.maven.initPaymentWidget
-import com.deuna.maven.shared.Environment
+
 import com.deuna.maven.shared.Json
 import com.deuna.maven.web_views.deuna.DeunaWidget
-import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import org.json.JSONObject
 
 
@@ -82,12 +79,6 @@ fun DeunaWidget.isValid(callback: (Boolean) -> Unit) {
 }
 
 fun DeunaWidget.submit(callback: (SubmitResult) -> Unit) {
-
-    if (widgetConfig == null) {
-        executeSubmit(callback)
-        return
-    }
-
     submitStrategy(callback)
 }
 
