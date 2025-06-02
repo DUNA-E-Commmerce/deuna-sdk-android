@@ -31,15 +31,6 @@ import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
 import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 
 
-data class WidgetConfig(
-    val publicApiKey: String,
-    val environment: Environment,
-    val orderToken: String?,
-    val userToken: String?,
-    val behavior: Json?
-)
-
-
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
