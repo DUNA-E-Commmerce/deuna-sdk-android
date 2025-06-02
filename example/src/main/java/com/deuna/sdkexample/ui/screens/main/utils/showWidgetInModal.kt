@@ -103,7 +103,7 @@ fun showWidgetInModal(
                             Log.d("VAULT", "Success")
                             val savedCardStr = Uri.encode(JSONObject(result.savedCard).toString())
                             navController.navigate(
-                                "vault-success/$savedCardStr"
+                                "card-saved-success/$savedCardStr"
                             )
                         }
                     }
@@ -122,7 +122,7 @@ fun showWidgetInModal(
                             Log.d("CLICK_TO_PAY", "Success")
                             val savedCardStr = Uri.encode(JSONObject(result.savedCard).toString())
                             navController.navigate(
-                                "vault-success/$savedCardStr"
+                                "card-saved-success/$savedCardStr"
                             )
                         }
                     }

@@ -18,9 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.deuna.maven.DeunaSDK
-import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
-import com.deuna.maven.widgets.elements_widget.ElementsBridge
-import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.ElementsCallbacks
@@ -29,16 +26,16 @@ import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.web_views.deuna.DeunaWidget
+import com.deuna.maven.web_views.deuna.extensions.TWO_STEP_FLOW
+import com.deuna.maven.web_views.deuna.extensions.build
 import com.deuna.maven.web_views.deuna.extensions.submit
-import com.deuna.maven.widgets.checkout_widget.buildCheckoutWidgetUrl
-import com.deuna.maven.widgets.elements_widget.buildElementsWidgetUrl
-import com.deuna.maven.widgets.next_action.NextActionBridge
+import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
+import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
+import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
+import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
+import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 import com.deuna.maven.widgets.next_action.NextActionCallbacks
-import com.deuna.maven.widgets.next_action.buildNextActionUrl
-import com.deuna.maven.widgets.payment_widget.buildPaymentWidgetUrl
-import com.deuna.maven.widgets.voucher.VoucherBridge
 import com.deuna.maven.widgets.voucher.VoucherCallbacks
-import com.deuna.maven.widgets.voucher.buildVoucherUrl
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.embedded.views.PayButton
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
@@ -83,149 +80,126 @@ fun EmbeddedWidgetScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
                     DeunaWidget(context).apply {
-
-                        // Hide the pay button in the embedded widget.
-                        // So you must call to the `submit` method to complete the transaction
-                        this.hidePayButton = true
-
-                        when (widgetToShow) {
-                            WidgetToShow.PAYMENT_WIDGET -> {
-                                val url = deunaSDK.buildPaymentWidgetUrl(
-                                    orderToken = orderToken,
-                                    userToken = userToken
-                                )
-                                bridge = PaymentWidgetBridge(
-                                    callbacks = PaymentWidgetCallbacks().apply {
-                                        onEventDispatch = { event, data ->
-                                            Log.i(DEBUG_TAG, "Event: $event, Data: $data")
-                                        }
-                                        this.onSuccess = { data ->
-                                            Log.i(DEBUG_TAG, "✅ Success: $data")
-                                            onSuccess(data)
-                                        }
-                                        onError = { error ->
-                                            Log.e(DEBUG_TAG, "❌ Error: $error")
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                this.loadUrl(url)
-                            }
-
-                            WidgetToShow.VAULT_WIDGET -> {
-                                val url = deunaSDK.buildElementsWidgetUrl(
-                                    orderToken = orderToken,
-                                    userToken = userToken,
-                                    userInfo = UserInfo(
-                                        firstName = "Darwin",
-                                        lastName = "Morocho",
-                                        email = "dmorocho+10@deuna.com"
-                                    )
-                                )
-                                bridge = ElementsBridge(
-                                    callbacks = ElementsCallbacks().apply {
-                                        this.onSuccess = { data ->
-                                            val savedCard =
-                                                (data["metadata"] as Json)["createdCard"] as Json
-                                            onSuccess(savedCard)
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                this.loadUrl(url)
-                            }
-
-                            WidgetToShow.CHECKOUT_WIDGET -> {
-                                bridge = CheckoutBridge(
-                                    callbacks = CheckoutCallbacks().apply {
-                                        this.onSuccess = { data ->
-                                            onSuccess(data)
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                deunaSDK.buildCheckoutWidgetUrl(
-                                    orderToken = orderToken,
-                                    userToken = userToken
-                                ) { error, url ->
-                                    error?.let {
-                                        Log.i(DEBUG_TAG, "Error: $error")
-                                    }
-                                    url?.let {
-                                        this.loadUrl(it)
-                                    }
-                                }
-                            }
-
-                            WidgetToShow.CLICK_TO_PAY_WIDGET -> {
-                                val url = deunaSDK.buildElementsWidgetUrl(
-                                    userInfo = UserInfo(
-                                        firstName = "Darwin",
-                                        lastName = "Morocho",
-                                        email = "dmorocho+10@deuna.com"
-                                    ),
-                                    types = listOf(
-                                        mapOf(
-                                            "name" to ElementsWidget.CLICK_TO_PAY
+                        this.widgetConfiguration = when (widgetToShow) {
+                            WidgetToShow.PAYMENT_WIDGET -> PaymentWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                userToken = userToken,
+                                paymentMethods = listOf(
+                                    mapOf(
+                                        "paymentMethod" to "wallet",
+                                        "processors" to listOf("paypal_wallet"),
+                                        "configuration" to mapOf(
+                                            "express" to false,
+                                            "flowType" to mapOf("type" to TWO_STEP_FLOW)
                                         )
-                                    ),
-                                )
-                                bridge = ElementsBridge(
-                                    callbacks = ElementsCallbacks().apply {
-                                        this.onSuccess = { data ->
-                                            val savedCard =
-                                                (data["metadata"] as Json)["createdCard"] as Json
-                                            onSuccess(savedCard)
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                this.loadUrl(url)
-                            }
+                                    )
+                                ),
+                                callbacks = PaymentWidgetCallbacks().apply {
+                                    onEventDispatch = { event, data ->
+                                        Log.i(DEBUG_TAG, "Event: $event, Data: $data")
+                                    }
+                                    this.onSuccess = { data ->
+                                        Log.i(DEBUG_TAG, "✅ Success: $data")
+                                        onSuccess(data)
+                                    }
+                                    onError = { error ->
+                                        Log.e(DEBUG_TAG, "❌ Error: $error")
+                                    }
+                                },
+                            )
 
-                            WidgetToShow.NEXT_ACTION_WIDGET -> {
-                                val url = deunaSDK.buildNextActionUrl(
-                                    orderToken = orderToken
-                                )
-                                bridge = NextActionBridge(
-                                    callbacks = NextActionCallbacks().apply {
-                                        this.onSuccess = { data ->
-                                            onSuccess(data)
-                                        }
-                                        this.onError = { error ->
-                                            Log.e(DEBUG_TAG, "❌ Error: $error")
-                                        }
-                                        this.onEventDispatch = { event, data ->
-                                            Log.i(DEBUG_TAG, "Event: $event, Data: $data")
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                this.loadUrl(url)
-                            }
+                            WidgetToShow.VAULT_WIDGET -> ElementsWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                userToken = userToken,
+                                userInfo = UserInfo(
+                                    firstName = "Darwin",
+                                    lastName = "Morocho",
+                                    email = "dmorocho+10@deuna.com"
+                                ),
+                                callbacks = ElementsCallbacks().apply {
+                                    this.onSuccess = { data ->
+                                        val savedCard =
+                                            (data["metadata"] as Json)["createdCard"] as Json
+                                        onSuccess(savedCard)
+                                    }
+                                },
+                            )
 
-                            WidgetToShow.VOUCHER_WIDGET -> {
-                                val url = deunaSDK.buildVoucherUrl(
-                                    orderToken = orderToken
-                                )
-                                bridge = VoucherBridge(
-                                    callbacks = VoucherCallbacks().apply {
-                                        this.onSuccess = { data ->
-                                            onSuccess(data)
-                                        }
-                                        this.onError = { error ->
-                                            Log.e(DEBUG_TAG, "❌ Error: $error")
-                                        }
-                                        this.onEventDispatch = { event, data ->
-                                            Log.i(DEBUG_TAG, "Event: $event, Data: $data")
-                                        }
-                                    },
-                                    deunaWidget = this,
-                                )
-                                this.loadUrl(url)
-                            }
+                            WidgetToShow.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                userToken = userToken,
+                                callbacks = CheckoutCallbacks().apply {
+                                    this.onSuccess = { data ->
+                                        onSuccess(data)
+                                    }
+                                },
+                            )
+
+                            WidgetToShow.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                userToken = userToken,
+                                userInfo = UserInfo(
+                                    firstName = "Darwin",
+                                    lastName = "Morocho",
+                                    email = "dmorocho+10@deuna.com"
+                                ),
+                                types = listOf(
+                                    mapOf(
+                                        "name" to ElementsWidget.CLICK_TO_PAY
+                                    )
+                                ),
+                                callbacks = ElementsCallbacks().apply {
+                                    this.onSuccess = { data ->
+                                        val savedCard =
+                                            (data["metadata"] as Json)["createdCard"] as Json
+                                        onSuccess(savedCard)
+                                    }
+                                },
+                            )
+
+                            WidgetToShow.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                callbacks = NextActionCallbacks().apply {
+                                    this.onSuccess = { data ->
+                                        onSuccess(data)
+                                    }
+                                    this.onError = { error ->
+                                        Log.e(DEBUG_TAG, "❌ Error: $error")
+                                    }
+                                    this.onEventDispatch = { event, data ->
+                                        Log.i(DEBUG_TAG, "Event: $event, Data: $data")
+                                    }
+                                },
+                            )
+
+                            WidgetToShow.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
+                                sdkInstance = deunaSDK,
+                                hidePayButton = true, // Hide the pay button in the embedded widget
+                                orderToken = orderToken,
+                                callbacks = VoucherCallbacks().apply {
+                                    this.onSuccess = { data ->
+                                        onSuccess(data)
+                                    }
+                                    this.onError = { error ->
+                                        Log.e(DEBUG_TAG, "❌ Error: $error")
+                                    }
+                                    this.onEventDispatch = { event, data ->
+                                        Log.i(DEBUG_TAG, "Event: $event, Data: $data")
+                                    }
+                                },
+                            )
                         }
-
+                        this.build()
                         deunaWidget.value = this
                     }
                 }

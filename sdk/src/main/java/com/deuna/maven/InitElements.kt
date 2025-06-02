@@ -4,11 +4,10 @@ import android.content.Context
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.shared.extensions.findFragmentActivity
+import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
 import com.deuna.maven.widgets.elements_widget.ElementsWidgetDialogFragment
 import com.deuna.maven.widgets.elements_widget.ElementsEvent
-import com.deuna.maven.widgets.elements_widget.buildElementsWidgetUrl
 import java.lang.IllegalStateException
-
 
 class ElementsWidgetExperience(val userExperience: UserExperience) {
     class UserExperience(
@@ -23,7 +22,6 @@ class ElementsWidgetExperience(val userExperience: UserExperience) {
  * @param userToken The user token
  * @param context The application or activity context
  * @param callbacks An instance of CheckoutCallbacks to receive checkout event notifications.
- * @param closeEvents (Optional) An array of CheckoutEvent values specifying when to close the elements activity automatically.
  * @param userInfo: (Optional) The basic user information. Pass this parameter if the userToken parameter is null.
  * @param styleFile (Optional) An UUID provided by DEUNA. This applies if you want to set up a custom style file.
  * @param types (Optional) A list of the widgets to be rendered.
@@ -54,24 +52,22 @@ fun DeunaSDK.initElements(
     widgetExperience: ElementsWidgetExperience? = null
 ) {
 
-    val elementUrl = buildElementsWidgetUrl(
-        userToken = userToken,
-        userInfo = userInfo,
-        styleFile = styleFile,
-        types = types,
-        language = language,
-        orderToken = orderToken,
-        widgetExperience = widgetExperience,
-        behavior = behavior,
-        widgetIntegration = WidgetIntegration.MODAL,
-    )
-
     val fragmentActivity = context.findFragmentActivity() ?: return
 
     dialogFragment = ElementsWidgetDialogFragment(
-        url = elementUrl,
-        callbacks = callbacks,
-        closeEvents = closeEvents
+        widgetConfiguration = ElementsWidgetConfiguration(
+            sdkInstance = this,
+            callbacks = callbacks,
+            userToken = userToken,
+            userInfo = userInfo,
+            styleFile = styleFile,
+            types = types,
+            language = language,
+            orderToken = orderToken,
+            behavior = behavior,
+            widgetIntegration = WidgetIntegration.MODAL,
+            widgetExperience = widgetExperience
+        )
     )
     dialogFragment?.show(fragmentActivity.supportFragmentManager, "ElementsWidgetDialogFragment")
 }

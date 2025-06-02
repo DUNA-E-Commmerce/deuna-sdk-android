@@ -11,8 +11,6 @@ import org.json.*
 class CheckoutBridge(
     deunaWidget: DeunaWidget,
     val callbacks: CheckoutCallbacks,
-    private val closeEvents: Set<CheckoutEvent> = emptySet(),
-    val onCloseByEvent: VoidCallback? = null,
     onCloseByUser: VoidCallback? = null,
 ) : DeunaBridge(
     deunaWidget = deunaWidget,
@@ -73,10 +71,6 @@ class CheckoutBridge(
                     else -> {
                         DeunaLogs.debug("CheckoutBridge Unhandled event: $event")
                     }
-                }
-
-                if (closeEvents.contains(event)) {
-                    onCloseByEvent?.invoke()
                 }
             } catch (_: IllegalArgumentException) {
             } catch (e: JSONException) {

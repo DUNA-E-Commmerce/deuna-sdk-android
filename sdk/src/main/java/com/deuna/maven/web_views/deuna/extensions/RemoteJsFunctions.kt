@@ -1,9 +1,12 @@
 package com.deuna.maven.web_views.deuna.extensions
 
+
 import com.deuna.maven.shared.Json
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import org.json.JSONObject
 
+
+const val TWO_STEP_FLOW = "twoStep"
 
 fun DeunaWidget.buildResultFunction(requestId: Int, type: String): String {
     return """
@@ -76,30 +79,7 @@ fun DeunaWidget.isValid(callback: (Boolean) -> Unit) {
 }
 
 fun DeunaWidget.submit(callback: (SubmitResult) -> Unit) {
-    controller?.executeRemoteFunction(
-        jsBuilder = { requestId ->
-            return@executeRemoteFunction """
-                (function() {
-                    ${buildResultFunction(requestId = requestId, type = "submit")}
-                    if(typeof window.submit !== 'function'){
-                        sendResult({status:"error", message:"Error al procesar la solicitud." });
-                        return;
-                    }
-                    window.submit()
-                    .then(sendResult)
-                    .catch(error => sendResult({status:"error", message: error.message ?? "Error al procesar la solicitud." }));
-                })();
-            """.trimIndent()
-        },
-        callback = { json ->
-            callback(
-                SubmitResult(
-                    status = json["status"] as? String ?: "error",
-                    message = json["message"] as? String
-                )
-            )
-        }
-    )
+    submitStrategy(callback)
 }
 
 fun DeunaWidget.getWidgetState(callback: (Json?) -> Unit) {
