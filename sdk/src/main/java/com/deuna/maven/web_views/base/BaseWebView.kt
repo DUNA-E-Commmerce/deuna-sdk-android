@@ -44,14 +44,15 @@ open class BaseWebView(
             override fun onWebViewLoaded() {
                 webView.visibility = View.VISIBLE
                 loader.visibility = View.GONE
+                listener?.onWebViewLoaded()
             }
 
             override fun onWebViewError() {
                 listener?.onWebViewError()
             }
 
-            override fun onOpenInNewTab(url: String) {
-                listener?.onOpenInNewTab(url)
+            override fun onOpenExternalUrl(url: String) {
+                listener?.onOpenExternalUrl(url)
             }
 
             override fun onDownloadFile(url: String) {
@@ -69,7 +70,7 @@ open class BaseWebView(
     interface Listener {
         fun onWebViewLoaded()
         fun onWebViewError()
-        fun onOpenInNewTab(url: String)
+        fun onOpenExternalUrl(url: String)
         fun onDownloadFile(url: String)
     }
 

@@ -40,12 +40,15 @@ fun DeunaWidget.refetchOrder(callback: (Json?) -> Unit) {
                  (function() {
                     ${buildResultFunction(requestId = requestId, type = "refetchOrder")}
                        if(typeof window.deunaRefetchOrder !== 'function'){
+                           console.log("deunaRefetchOrder not found");
                            sendResult({ order:null });
                            return;
                        }
                           
                        window.deunaRefetchOrder()
-                       .then(sendResult)
+                       .then((order) => {
+                         sendResult({ order: order });
+                       })
                        .catch(error => sendResult({ order:null }));
                  })();
             """.trimIndent()

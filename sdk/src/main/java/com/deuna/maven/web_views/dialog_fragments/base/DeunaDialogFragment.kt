@@ -1,9 +1,12 @@
 package com.deuna.maven.web_views.dialog_fragments.base
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.deuna.maven.R
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.deuna.DeunaWidget
@@ -69,4 +72,10 @@ abstract class DeunaDialogFragment(
             )
         }
     }
+
+
+    private val chromeTabLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        }
+
 }

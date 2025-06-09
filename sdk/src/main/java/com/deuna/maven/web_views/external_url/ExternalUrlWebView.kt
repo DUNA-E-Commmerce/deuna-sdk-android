@@ -1,4 +1,4 @@
-package com.deuna.maven.web_views.new_tab
+package com.deuna.maven.web_views.external_url
 
 import android.content.Context
 import android.util.AttributeSet
@@ -9,12 +9,14 @@ import com.deuna.maven.web_views.file_downloaders.downloadFile
 
 
 @Suppress("UNCHECKED_CAST")
-class NewTabWebView(
+class ExternalUrlWebView(
     context: Context,
     attrs: AttributeSet? = null
 ) : BaseWebView(context, attrs) {
 
     var onRemoteCloseCalled: (() -> Unit)? = null
+
+
 
 
     init {
@@ -37,7 +39,7 @@ class NewTabWebView(
 
             override fun onWebViewError() {}
 
-            override fun onOpenInNewTab(url: String) {
+            override fun onOpenExternalUrl(url: String) {
                 loadUrl(url)
             }
 

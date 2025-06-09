@@ -45,7 +45,7 @@ class GenerateFraudId(
                 callback.invoke(null)
             }
 
-            override fun onOpenInNewTab(url: String) {}
+            override fun onOpenExternalUrl(url: String) {}
 
             override fun onDownloadFile(url: String) {}
 

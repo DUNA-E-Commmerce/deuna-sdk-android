@@ -6,22 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import com.deuna.maven.R
 import com.deuna.maven.web_views.dialog_fragments.base.BaseDialogFragment
-import com.deuna.maven.web_views.new_tab.NewTabWebView
+import com.deuna.maven.web_views.external_url.ExternalUrlWebView
 
-class NewTabDialogFragment(private val url: String, val onDialogDestroyed: () -> Unit) : BaseDialogFragment() {
+class ExternalUrlDialogFragment(private val url: String, val onDialogDestroyed: () -> Unit) : BaseDialogFragment() {
 
-    val newTabWebView: NewTabWebView
-        get() = baseWebView as NewTabWebView
+    val webView: ExternalUrlWebView
+        get() = baseWebView as ExternalUrlWebView
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.new_tab_webview_container, container, false)
+        val view = inflater.inflate(R.layout.external_url_webview_container, container, false)
         baseWebView = view.findViewById(R.id.new_tab_webview)
-        newTabWebView.loadUrl(url)
-        newTabWebView.onRemoteCloseCalled = { dismiss() }
+        webView.loadUrl(url)
+        webView.onRemoteCloseCalled = { dismiss() }
         return view
     }
 

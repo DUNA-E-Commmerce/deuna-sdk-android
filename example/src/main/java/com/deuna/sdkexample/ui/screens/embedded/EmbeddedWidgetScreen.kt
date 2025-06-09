@@ -86,23 +86,31 @@ fun EmbeddedWidgetScreen(
                                 hidePayButton = true, // Hide the pay button in the embedded widget
                                 orderToken = orderToken,
                                 userToken = userToken,
-                                paymentMethods = listOf(
-                                    mapOf(
-                                        "paymentMethod" to "wallet",
-                                        "processors" to listOf("paypal_wallet"),
-                                        "configuration" to mapOf(
-                                            "express" to false,
-                                            "flowType" to mapOf("type" to TWO_STEP_FLOW)
-                                        )
-                                    )
-                                ),
+//                                paymentMethods = listOf(
+//                                    mapOf(
+//                                        "paymentMethod" to "wallet",
+//                                        "processors" to listOf("paypal_wallet"),
+//                                        "configuration" to mapOf(
+//                                            "express" to false,
+//                                            "flowType" to mapOf("type" to TWO_STEP_FLOW)
+//                                        )
+//                                    )
+//                                ),
                                 callbacks = PaymentWidgetCallbacks().apply {
                                     onEventDispatch = { event, data ->
                                         Log.i(DEBUG_TAG, "Event: $event, Data: $data")
                                     }
                                     this.onSuccess = { data ->
-                                        Log.i(DEBUG_TAG, "✅ Success: $data")
-                                        onSuccess(data)
+
+
+                                        // (Recommended) Use waitUntilExternalUrlIsClosed to
+                                        // wait until the external url is closed
+                                        // This is useful when an external url is opened
+                                        // in a custom tab (For example, when you have MercadoPago enabled)
+                                        deunaWidget.value?.waitUntilExternalUrlIsClosed {
+                                            Log.i(DEBUG_TAG, "✅ Success: $data")
+                                            onSuccess(data)
+                                        }
                                     }
                                     onError = { error ->
                                         Log.e(DEBUG_TAG, "❌ Error: $error")
