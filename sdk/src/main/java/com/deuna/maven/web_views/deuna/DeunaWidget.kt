@@ -116,7 +116,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 externalUrlHelper.openUrl(
                     context = this@DeunaWidget.context,
                     url = url,
-                    browser = ExternalUrlBrowser.CUSTOM_TABS,
+                    browser = ExternalUrlBrowser.WEB_VIEW,
                 )
             }
 

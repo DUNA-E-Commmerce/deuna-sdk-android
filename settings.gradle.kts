@@ -15,5 +15,13 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "deuna-sdk-android"
-include(":sdk", ":example") // uncomment for local development
-//include(":sdk") // comment for local development, use this for publishing
+
+include(":sdk") // NOTE: Comment this for local development
+
+// NOTE: Uncomment the following lines to include examples for local development
+//include( "embedded-widgets")
+//include( "widgets-in-modal")
+//project(":embedded-widgets").projectDir = file("examples/embedded-widgets")
+//project(":widgets-in-modal").projectDir = file("examples/widgets-in-modal")
+
+
