@@ -49,7 +49,7 @@ class WebViewController(
 
                 val js = """
                      window.open = function(url, target, features) {
-                         local.openInNewTab(url);
+                         local.openExternalUrl(url);
                      };
                 """.trimIndent()
                 webView.evaluateJavascript(js, null)
@@ -101,7 +101,7 @@ class WebViewController(
                                 listener?.onDownloadFile(url)
                                 return
                             }
-                            listener?.onOpenInNewTab(url)
+                            listener?.onOpenExternalUrl(url)
                         }
 
                         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
@@ -109,7 +109,7 @@ class WebViewController(
                                 listener?.onDownloadFile(url)
                                 return
                             }
-                            listener?.onOpenInNewTab(url)
+                            listener?.onOpenExternalUrl(url)
                         }
                     }, newWebView)
                     newWebView.webViewClient = webViewClient
@@ -125,7 +125,7 @@ class WebViewController(
     interface Listener {
         fun onWebViewLoaded()
         fun onWebViewError()
-        fun onOpenInNewTab(url: String)
+        fun onOpenExternalUrl(url: String)
         fun onDownloadFile(url: String)
     }
 
@@ -135,12 +135,12 @@ class WebViewController(
      */
     inner class LocalBridge() {
         @JavascriptInterface
-        fun openInNewTab(url: String) {
+        fun openExternalUrl(url: String) {
             if (url.isFileDownloadUrl) {
                 listener?.onDownloadFile(url)
                 return
             }
-            listener?.onOpenInNewTab(url)
+            listener?.onOpenExternalUrl(url)
         }
     }
 

@@ -3,38 +3,31 @@ package com.deuna.maven.web_views.deuna
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.JsonToken
-import com.deuna.maven.DeunaSDK
+import androidx.activity.result.contract.ActivityResultContracts
 import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
 import com.deuna.maven.widgets.elements_widget.ElementsBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.shared.DeunaBridge
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsErrors
-import com.deuna.maven.shared.Environment
-import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.extensions.findFragmentActivity
+import com.deuna.maven.web_views.ExternalUrlBrowser
+import com.deuna.maven.web_views.ExternalUrlHelper
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.deuna.extensions.buildBridge
-import com.deuna.maven.web_views.dialog_fragments.NewTabDialogFragment
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
-import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
-import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
-import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
-import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
-import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 
 
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
-    private var newTabDialogFragment: NewTabDialogFragment? = null
+    val externalUrlHelper = ExternalUrlHelper()
 
     /// When this var is false the close feature is disabled
     var closeEnabled = true
@@ -47,6 +40,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     var closeAction = CloseAction.systemAction
 
     var bridge: DeunaBridge? = null
+
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
@@ -68,7 +62,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         };
          
          window.open = function(url, target, features) {
-            local.openInNewTab(url);
+            local.openExternalUrl(url);
          };
          
          window.xprops = {
@@ -118,19 +112,11 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 }
             }
 
-            override fun onOpenInNewTab(url: String) {
-                if (newTabDialogFragment != null) {
-                    return
-                }
-
-                val fragmentActivity = context.findFragmentActivity() ?: return
-
-                newTabDialogFragment = NewTabDialogFragment(url = url, onDialogDestroyed = {
-                    newTabDialogFragment = null
-                })
-                newTabDialogFragment?.show(
-                    fragmentActivity.supportFragmentManager,
-                    "NewTabDialogFragment+${System.currentTimeMillis()}"
+            override fun onOpenExternalUrl(url: String) {
+                externalUrlHelper.openUrl(
+                    context = this@DeunaWidget.context,
+                    url = url,
+                    browser = ExternalUrlBrowser.WEB_VIEW,
                 )
             }
 
@@ -169,13 +155,16 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     /// Closes the sub web view
     fun closeSubWebView() {
-        newTabDialogFragment?.dismiss()
-        newTabDialogFragment = null
+        externalUrlHelper.close()
     }
 
     override fun destroy() {
         closeSubWebView()
         super.destroy()
+    }
+
+    fun waitUntilExternalUrlIsClosed(callback: () -> Unit) {
+        externalUrlHelper.waitUntilChromeTabIsClosed(callback)
     }
 
 }
