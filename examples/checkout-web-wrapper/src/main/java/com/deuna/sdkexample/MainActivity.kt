@@ -15,7 +15,7 @@ class MainActivity: AppCompatActivity() {
 
         setContent {
             WebViewScreen(
-                url = "https://explore.dev.deuna.io"
+                url = "https://explore.deuna.io"
             )
         }
     }
