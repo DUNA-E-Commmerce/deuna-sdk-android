@@ -1,16 +1,12 @@
 package com.deuna.sdkexample.web_view
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import androidx.browser.customtabs.CustomTabsIntent
 import com.deuna.sdkexample.R
-import com.deuna.sdkexample.web_view_manager.WebViewController
 
 open class WebViewWrapper(
     context: Context,
@@ -24,6 +20,8 @@ open class WebViewWrapper(
     var loader: ProgressBar
 
     private var controller: WebViewController
+
+    var javascriptMessageListener: (javascriptMessage: JavascriptMessage) -> Unit = {}
 
     init {
         inflate(context, R.layout.webview_layout, this)
@@ -42,7 +40,11 @@ open class WebViewWrapper(
             }
 
             override fun onOpenExternalUrl(url: String) {
-                openInCustomChromeTab(url)
+                ExternalUrlHelper.openUrl(url)
+            }
+
+            override fun onJavascriptMessage(message: JavascriptMessage) {
+                javascriptMessageListener(message)
             }
         }
     }
@@ -50,19 +52,6 @@ open class WebViewWrapper(
 
     fun loadUrl(url: String) {
         controller.loadUrl(url)
-    }
-
-    private fun openInCustomChromeTab(url: String) {
-        try {
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setShowTitle(true)
-                .build()
-
-            customTabsIntent.launchUrl(context, Uri.parse(url))
-        } catch (e: Exception) {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            context.startActivity(intent)
-        }
     }
 
     fun dispose() {

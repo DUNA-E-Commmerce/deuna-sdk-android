@@ -1,27 +1,34 @@
-package com.deuna.sdkexample.web_view_manager
+package com.deuna.sdkexample.web_view
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Message
 import android.util.Log
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.deuna.sdkexample.extensions.toMap
+import org.json.JSONObject
 
 class WebViewController(
     private val context: Context,
     val webView: WebView,
 ) {
 
+    var loaded = false
+        private set
+
     interface Listener {
         fun onWebViewLoaded()
         fun onWebViewError()
         fun onOpenExternalUrl(url: String)
+        fun onJavascriptMessage(message: JavascriptMessage)
     }
 
-   var listener: Listener? = null
+    var listener: Listener? = null
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -30,6 +37,8 @@ class WebViewController(
             domStorageEnabled = true
             javaScriptEnabled = true
         }
+
+        webView.addJavascriptInterface(Bridge(), "deunaPayment")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -44,14 +53,11 @@ class WebViewController(
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
-                Log.d("WebViewController", "onPageFinished")
+                if (loaded) {
+                    return
+                }
                 listener?.onWebViewLoaded()
-                val js = """
-                     window.open = function(url, target, features) {
-                         local.openExternalUrl(url);
-                     };
-                """.trimIndent()
-                webView.evaluateJavascript(js, null)
+                loaded = true
             }
 
             override fun onReceivedError(
@@ -77,7 +83,7 @@ class WebViewController(
                             view: WebView,
                             request: WebResourceRequest
                         ): Boolean {
-                           listener?.onOpenExternalUrl(request.url.toString())
+                            listener?.onOpenExternalUrl(request.url.toString())
                             return true
                         }
                     }
@@ -90,5 +96,41 @@ class WebViewController(
         }
 
         webView.loadUrl(url)
+    }
+
+
+    inner class Bridge {
+        @JavascriptInterface
+        fun postMessage(jsonString: String) {
+            Log.d("WebViewBridge", "postMessage: $jsonString")
+            try {
+                val json = JSONObject(jsonString).toMap()
+                val callbackName = json["callbackName"] as? String ?: return
+                val widgetType = json["widgetType"] as? String ?: return
+                val payload = json["data"] as? Json ?: return
+
+                when (callbackName){
+                    "onSuccess" -> {
+                        listener?.onJavascriptMessage(
+                            JavascriptMessage.OnSuccess(payload, widgetType)
+                        )
+                    }
+                    "onError" -> {
+                        listener?.onJavascriptMessage(
+                            JavascriptMessage.OnError(payload, widgetType)
+                        )
+                    }
+                    "onEventDispatch" -> {
+                        listener?.onJavascriptMessage(
+                            JavascriptMessage.OnEventDispatch(payload, widgetType)
+                        )
+                    }
+                }
+
+
+            } catch (e: Exception) {
+                Log.e("WebViewBridge", "postMessage: $e")
+            }
+        }
     }
 }

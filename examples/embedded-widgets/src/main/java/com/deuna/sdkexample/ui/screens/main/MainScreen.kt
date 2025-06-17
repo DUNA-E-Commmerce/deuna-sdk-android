@@ -107,9 +107,11 @@ fun MainScreen(
                                 userToken = userToken,
                                 deunaSDK = deunaSDK,
                                 onPaymentSuccess = { data ->
-                                    deunaWidget.value?.destroy()
-                                    val jsonStr = Uri.encode(JSONObject(data).toString())
-                                    navController.navigate("payment-success/$jsonStr") {
+                                    deunaWidget.value?.waitUntilExternalUrlIsClosed {
+                                        deunaWidget.value?.destroy()
+                                        val jsonStr = Uri.encode(JSONObject(data).toString())
+                                        navController.navigate("payment-success/$jsonStr") {
+                                        }
                                     }
                                 },
                                 onSaveCardSuccess = { data ->

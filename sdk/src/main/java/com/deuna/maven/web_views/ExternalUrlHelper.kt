@@ -23,8 +23,10 @@ class ExternalUrlHelper {
     private var browser: ExternalUrlBrowser = ExternalUrlBrowser.WEB_VIEW
 
 
+
     companion object {
         private var listeners = mutableSetOf<() -> Unit>()
+        private var isChromeTabOpened = false
         private var chromeTabLauncher: ActivityResultLauncher<Intent>? = null
 
         /**
@@ -44,6 +46,7 @@ class ExternalUrlHelper {
                         listeners.remove(it)
                     }
                 }
+                isChromeTabOpened = false
             }
         }
     }
@@ -52,8 +55,10 @@ class ExternalUrlHelper {
     fun waitUntilChromeTabIsClosed(
         cb: () -> Unit
     ) {
-        if (browser == ExternalUrlBrowser.CUSTOM_TABS) {
+        if (isChromeTabOpened) {
             listeners.add(cb)
+        } else {
+            cb.invoke()
         }
     }
 
@@ -94,6 +99,7 @@ class ExternalUrlHelper {
                 chromeTabLauncher?.launch(intent) ?: run {
                     DeunaLogs.error("chromeTabLauncher is null - did you call registerForActivityResult()?")
                 }
+                isChromeTabOpened = true
             }
         }
     }
