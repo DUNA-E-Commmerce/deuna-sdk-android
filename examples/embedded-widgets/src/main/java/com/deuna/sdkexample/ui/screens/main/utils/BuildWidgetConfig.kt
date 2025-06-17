@@ -5,6 +5,7 @@ import com.deuna.maven.DeunaSDK
 import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
@@ -29,6 +30,7 @@ fun buildWidgetConfig(
     return when (widgetToShow) {
         WidgetToShow.PAYMENT_WIDGET -> PaymentWidgetConfiguration(
             orderToken = orderToken,
+            hidePayButton = true,
             userToken = userToken,
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = onPaymentSuccess
@@ -45,6 +47,7 @@ fun buildWidgetConfig(
 
         WidgetToShow.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
             orderToken = orderToken,
+            hidePayButton = true,
             callbacks = NextActionCallbacks().apply {
                 onSuccess = onPaymentSuccess
                 onError = {
@@ -57,6 +60,7 @@ fun buildWidgetConfig(
 
         WidgetToShow.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
             orderToken = orderToken,
+            hidePayButton = true,
             callbacks = VoucherCallbacks().apply {
                 onSuccess = onPaymentSuccess
                 onError = {
@@ -69,6 +73,7 @@ fun buildWidgetConfig(
 
         WidgetToShow.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
             orderToken = orderToken,
+            hidePayButton = true,
             userToken = userToken,
             callbacks = CheckoutCallbacks().apply {
                 onSuccess = onPaymentSuccess
@@ -82,8 +87,12 @@ fun buildWidgetConfig(
 
         WidgetToShow.VAULT_WIDGET -> ElementsWidgetConfiguration(
             userToken = userToken,
+            hidePayButton = true,
             orderToken = orderToken,
             sdkInstance = deunaSDK,
+            userInfo = if (userToken.isEmpty()) UserInfo(
+                firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
+            ) else null,
             callbacks = ElementsCallbacks().apply {
                 onSuccess = {
                     val cardData = (it["metadata"] as Json)["createdCard"] as Json
@@ -98,6 +107,7 @@ fun buildWidgetConfig(
 
         WidgetToShow.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
             userToken = userToken,
+            hidePayButton = true,
             orderToken = orderToken,
             sdkInstance = deunaSDK,
             callbacks = ElementsCallbacks().apply {
