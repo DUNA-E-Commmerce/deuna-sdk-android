@@ -18,6 +18,7 @@ import com.deuna.maven.web_views.ExternalUrlBrowser
 import com.deuna.maven.web_views.ExternalUrlHelper
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.deuna.extensions.buildBridge
+import com.deuna.maven.web_views.deuna.extensions.getExternalUrlBrowser
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
@@ -116,7 +117,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 externalUrlHelper.openUrl(
                     context = this@DeunaWidget.context,
                     url = url,
-                    browser = ExternalUrlBrowser.WEB_VIEW,
+                    browser = getExternalUrlBrowser(url),
                 )
             }
 
