@@ -4,6 +4,7 @@ package com.deuna.maven
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.VoidCallback
 import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.deuna.extensions.setCustomStyle
 import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
@@ -20,6 +21,8 @@ open class DeunaSDK(
     val environment: Environment,
     val publicApiKey: String,
 ) {
+
+    var dialogFragment: DeunaDialogFragment? = null
 
     init {
         require(publicApiKey.isNotEmpty()) {
@@ -81,14 +84,13 @@ open class DeunaSDK(
     /**
      * Close the active DEUNA widget
      */
-    fun close() {
+    fun close(voidCallback: VoidCallback? = null) {
         /**
          * When an external url is opened in a custom tab, we need to wait until the tab is closed
          */
         dialogFragment?.deunaWidget?.waitUntilExternalUrlIsClosed {
             dialogFragment?.dismiss()
+            voidCallback?.invoke()
         }
     }
-
-    var dialogFragment: DeunaDialogFragment? = null
 }
