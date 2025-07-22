@@ -28,8 +28,6 @@ import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
 
-    val externalUrlHelper = ExternalUrlHelper()
-
     /// When this var is false the close feature is disabled
     var closeEnabled = true
 
@@ -114,10 +112,13 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             }
 
             override fun onOpenExternalUrl(url: String) {
-                externalUrlHelper.openUrl(
+                ExternalUrlHelper.openUrl(
                     context = this@DeunaWidget.context,
                     url = url,
                     browser = getExternalUrlBrowser(url),
+                    onExternalUrlClosed = {
+                        closeEnabled = true
+                    }
                 )
             }
 
@@ -156,7 +157,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     /// Closes the sub web view
     fun closeSubWebView() {
-        externalUrlHelper.close()
+        ExternalUrlHelper.close()
     }
 
     override fun destroy() {
@@ -165,7 +166,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     }
 
     fun waitUntilExternalUrlIsClosed(callback: () -> Unit) {
-        externalUrlHelper.waitUntilChromeTabIsClosed(callback)
+        ExternalUrlHelper.waitUntilChromeTabIsClosed(callback)
     }
 
 }
