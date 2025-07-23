@@ -22,33 +22,25 @@ fun MainViewModel.showPaymentWidget(
     deunaSDK.initPaymentWidget(
         context = context,
         orderToken = orderToken.trim(),
-//        behavior = mapOf(
-//            "paymentMethods" to mapOf(
-//                "creditCard" to mapOf(
-//                    "splitPayments" to mapOf(
-//                        "maxCards" to 2
-//                    ),
-//                    "flow" to "purchase"
-//                )
-//            )
-//        ),
         callbacks = PaymentWidgetCallbacks().apply {
             onSuccess = { order ->
-                deunaSDK.close()
-                viewModelScope.launch {
-                    completion(
-                        PaymentWidgetResult.Success(
-                            order
+                deunaSDK.close {
+                    viewModelScope.launch {
+                        completion(
+                            PaymentWidgetResult.Success(
+                                order
+                            )
                         )
-                    )
+                    }
                 }
             }
             onError = { error ->
                 when (error.type) {
                     // The widget could not be loaded
                     PaymentsError.Type.INITIALIZATION_FAILED -> {
-                        deunaSDK.close()
-                        completion(PaymentWidgetResult.Error(error))
+                        deunaSDK.close {
+                            completion(PaymentWidgetResult.Error(error))
+                        }
                     }
 
                     // The payment was failed
@@ -118,8 +110,8 @@ fun MainViewModel.showPaymentWidget(
         styleFile = "YOUR_THEME_UUID", // optional
 //        paymentMethods = listOf(
 //            mapOf(
-//                "paymentMethod" to "voucher",
-//                "processors" to listOf("payu_oxxo_cash")
+//                "paymentMethod" to "wallet",
+//                "processors" to listOf("mercadopago_wallet")
 //            )
 //        )
     )

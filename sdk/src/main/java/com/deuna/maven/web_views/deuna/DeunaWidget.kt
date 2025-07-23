@@ -18,6 +18,7 @@ import com.deuna.maven.web_views.ExternalUrlBrowser
 import com.deuna.maven.web_views.ExternalUrlHelper
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.deuna.extensions.buildBridge
+import com.deuna.maven.web_views.deuna.extensions.getExternalUrlBrowser
 import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
@@ -26,8 +27,6 @@ import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
 
 @Suppress("UNCHECKED_CAST")
 class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(context, attrs) {
-
-    val externalUrlHelper = ExternalUrlHelper()
 
     /// When this var is false the close feature is disabled
     var closeEnabled = true
@@ -113,10 +112,13 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             }
 
             override fun onOpenExternalUrl(url: String) {
-                externalUrlHelper.openUrl(
+                ExternalUrlHelper.openUrl(
                     context = this@DeunaWidget.context,
                     url = url,
-                    browser = ExternalUrlBrowser.WEB_VIEW,
+                    browser = getExternalUrlBrowser(url),
+                    onExternalUrlClosed = {
+                        closeEnabled = true
+                    }
                 )
             }
 
@@ -155,7 +157,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     /// Closes the sub web view
     fun closeSubWebView() {
-        externalUrlHelper.close()
+        ExternalUrlHelper.close()
     }
 
     override fun destroy() {
@@ -164,7 +166,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     }
 
     fun waitUntilExternalUrlIsClosed(callback: () -> Unit) {
-        externalUrlHelper.waitUntilChromeTabIsClosed(callback)
+        ExternalUrlHelper.waitUntilChromeTabIsClosed(callback)
     }
 
 }

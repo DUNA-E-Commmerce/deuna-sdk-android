@@ -137,3 +137,8 @@ class ElementsErrors {
         )
     }
 }
+
+/*
+ * List of domains that must be opened in a custom tab
+ */
+val DOMAINS_MUST_BE_OPENED_IN_CUSTOM_TAB = listOf("mercadopago.com")

@@ -32,6 +32,12 @@ fun buildWidgetConfig(
             orderToken = orderToken,
             hidePayButton = true,
             userToken = userToken,
+//            paymentMethods = listOf(
+//                mapOf(
+//                    "paymentMethod" to "wallet",
+//                    "processors" to listOf("mercadopago_wallet")
+//                )
+//            ),
             callbacks = PaymentWidgetCallbacks().apply {
                 onSuccess = onPaymentSuccess
                 onError = {

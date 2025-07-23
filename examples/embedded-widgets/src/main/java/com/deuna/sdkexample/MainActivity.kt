@@ -15,6 +15,7 @@ class MainActivity: AppCompatActivity() {
         /**
          * Register for activity result callbacks, needed to wait until the custom chrome tab is closed
          */
+
         ExternalUrlHelper.registerForActivityResult(this)
 
         val deunaSDK = DeunaSDK(

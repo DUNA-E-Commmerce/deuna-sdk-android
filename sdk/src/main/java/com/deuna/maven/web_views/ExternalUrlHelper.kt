@@ -18,16 +18,14 @@ enum class ExternalUrlBrowser {
 
 
 class ExternalUrlHelper {
-
-    private var externalUrlDialog: ExternalUrlDialogFragment? = null
-    private var browser: ExternalUrlBrowser = ExternalUrlBrowser.WEB_VIEW
-
-
-
     companion object {
         private var listeners = mutableSetOf<() -> Unit>()
         private var isChromeTabOpened = false
         private var chromeTabLauncher: ActivityResultLauncher<Intent>? = null
+
+        private var externalUrlDialog: ExternalUrlDialogFragment? = null
+        private var browser: ExternalUrlBrowser = ExternalUrlBrowser.WEB_VIEW
+        private var onExternalUrlBrowserClosed: (() -> Unit)? = null
 
         /**
          * Registers an activity result launcher for custom tabs.
@@ -46,65 +44,73 @@ class ExternalUrlHelper {
                         listeners.remove(it)
                     }
                 }
+                if (onExternalUrlBrowserClosed != null && browser == ExternalUrlBrowser.CUSTOM_TABS) {
+                    onExternalUrlBrowserClosed?.invoke()
+                    onExternalUrlBrowserClosed = null
+                }
                 isChromeTabOpened = false
             }
         }
-    }
 
 
-    fun waitUntilChromeTabIsClosed(
-        cb: () -> Unit
-    ) {
-        if (isChromeTabOpened) {
-            listeners.add(cb)
-        } else {
-            cb.invoke()
-        }
-    }
-
-
-    fun openUrl(
-        context: Context,
-        url: String,
-        browser: ExternalUrlBrowser
-    ) {
-        if (url.isEmpty()) {
-            return
+        fun waitUntilChromeTabIsClosed(
+            cb: () -> Unit
+        ) {
+            if (isChromeTabOpened) {
+                listeners.add(cb)
+            } else {
+                cb.invoke()
+            }
         }
 
-        val fragmentActivity = context.findFragmentActivity() ?: return
 
-        this.browser = browser
-
-        when (browser) {
-            ExternalUrlBrowser.WEB_VIEW -> {
-                externalUrlDialog = ExternalUrlDialogFragment(
-                    url = url, onDialogDestroyed = {
-                        externalUrlDialog = null
-                    }
-                )
-                externalUrlDialog?.show(
-                    fragmentActivity.supportFragmentManager,
-                    "ExternalUrlDialogFragment+${System.currentTimeMillis()}"
-                )
+        fun openUrl(
+            context: Context,
+            url: String,
+            browser: ExternalUrlBrowser,
+            onExternalUrlClosed: () -> Unit
+        ) {
+            if (url.isEmpty()) {
                 return
             }
 
-            ExternalUrlBrowser.CUSTOM_TABS -> {
-                val customTabsIntent = CustomTabsIntent.Builder().build()
-                val intent = customTabsIntent.intent.apply {
-                    data = Uri.parse(url)
+            val fragmentActivity = context.findFragmentActivity() ?: return
+
+            this.browser = browser
+            this.onExternalUrlBrowserClosed = onExternalUrlClosed
+
+            when (browser) {
+                ExternalUrlBrowser.WEB_VIEW -> {
+                    externalUrlDialog = ExternalUrlDialogFragment(
+                        url = url, onDialogDestroyed = {
+                            externalUrlDialog = null
+                            this.onExternalUrlBrowserClosed?.invoke()
+                            this.onExternalUrlBrowserClosed = null
+                        }
+                    )
+                    externalUrlDialog?.show(
+                        fragmentActivity.supportFragmentManager,
+                        "ExternalUrlDialogFragment+${System.currentTimeMillis()}"
+                    )
+                    return
                 }
 
-                chromeTabLauncher?.launch(intent) ?: run {
-                    DeunaLogs.error("chromeTabLauncher is null - did you call registerForActivityResult()?")
+                ExternalUrlBrowser.CUSTOM_TABS -> {
+                    val customTabsIntent = CustomTabsIntent.Builder().build()
+                    val intent = customTabsIntent.intent.apply {
+                        data = Uri.parse(url)
+                    }
+
+                    chromeTabLauncher?.launch(intent) ?: run {
+                        DeunaLogs.error("chromeTabLauncher is null - did you call registerForActivityResult()?")
+                    }
+                    isChromeTabOpened = true
                 }
-                isChromeTabOpened = true
             }
         }
-    }
 
-    fun close() {
-        externalUrlDialog?.dismiss()
+        fun close() {
+            externalUrlDialog?.dismiss()
+        }
     }
 }
