@@ -27,9 +27,9 @@ fun MainViewModel.saveCard(
         context = context,
         userToken = userToken,
         orderToken = orderToken,
-        userInfo = if (userToken.isEmpty()) UserInfo(
-            firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
-        ) else null,
+        userInfo = UserInfo(
+            firstName = "Darwin", lastName = "Morocho", email = "3797270.qa@deuna.com"
+        ),
 //        behavior = mapOf(
 //            "paymentMethods" to mapOf(
 //                "creditCard" to mapOf(

@@ -41,20 +41,15 @@ class ElementsWidgetConfiguration(
                 QueryParameters.INT to widgetIntegration.value
             )
 
-            when {
-                !userToken.isNullOrEmpty() -> queryParameters[QueryParameters.USER_TOKEN] =
-                    userToken
+            if (!userToken.isNullOrEmpty()) {
+                queryParameters[QueryParameters.USER_TOKEN] = userToken
+            }
 
-                userInfo != null && userInfo.isValid() -> {
-                    queryParameters.apply {
-                        put(QueryParameters.FIRST_NAME, userInfo.firstName)
-                        put(QueryParameters.LAST_NAME, userInfo.lastName)
-                        put(QueryParameters.EMAIL, userInfo.email)
-                    }
-                }
-
-                else -> {
-                    DeunaLogs.error(ElementsErrorMessages.MISSING_USER_TOKEN_OR_USER_INFO)
+            if (userInfo != null && userInfo.isValid()) {
+                queryParameters.apply {
+                    put(QueryParameters.FIRST_NAME, userInfo.firstName)
+                    put(QueryParameters.LAST_NAME, userInfo.lastName)
+                    put(QueryParameters.EMAIL, userInfo.email)
                 }
             }
 
