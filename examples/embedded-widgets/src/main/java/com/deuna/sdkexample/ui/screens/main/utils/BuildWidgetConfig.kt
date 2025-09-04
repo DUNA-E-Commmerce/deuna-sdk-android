@@ -96,9 +96,9 @@ fun buildWidgetConfig(
             hidePayButton = true,
             orderToken = orderToken,
             sdkInstance = deunaSDK,
-            userInfo = if (userToken.isEmpty()) UserInfo(
+            userInfo = UserInfo(
                 firstName = "Darwin", lastName = "Morocho", email = "dmorocho@deuna.com"
-            ) else null,
+            ),
             callbacks = ElementsCallbacks().apply {
                 onSuccess = {
                     val cardData = (it["metadata"] as Json)["createdCard"] as Json
