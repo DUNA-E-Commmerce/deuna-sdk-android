@@ -1,0 +1,23 @@
+name: E2E Testing PreProduction (Playwright)
+
+on:
+  pull_request:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  e2e-tests:
+    uses: DUNA-E-Commmerce/github-actions/.github/workflows/e2e-preproduction-frontend.yml@main
+    with:
+        custom-environment-vars: |
+          {
+            "DOCKER_BUILDKIT": "1",
+            "PREPROD": "yes",
+            "VERSION": "1.0.0"
+          }
+    secrets: inherit
