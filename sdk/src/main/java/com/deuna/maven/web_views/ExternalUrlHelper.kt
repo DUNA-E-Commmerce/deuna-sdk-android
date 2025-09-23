@@ -74,24 +74,20 @@ class ExternalUrlHelper {
                 return
             }
 
-            val fragmentActivity = context.findFragmentActivity() ?: return
-
             this.browser = browser
             this.onExternalUrlBrowserClosed = onExternalUrlClosed
 
             when (browser) {
                 ExternalUrlBrowser.WEB_VIEW -> {
                     externalUrlDialog = ExternalUrlDialogFragment(
+                        context = context,
                         url = url, onDialogDestroyed = {
                             externalUrlDialog = null
                             this.onExternalUrlBrowserClosed?.invoke()
                             this.onExternalUrlBrowserClosed = null
                         }
                     )
-                    externalUrlDialog?.show(
-                        fragmentActivity.supportFragmentManager,
-                        "ExternalUrlDialogFragment+${System.currentTimeMillis()}"
-                    )
+                    externalUrlDialog?.show()
                     return
                 }
 

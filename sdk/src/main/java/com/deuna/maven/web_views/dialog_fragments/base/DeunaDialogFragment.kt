@@ -1,5 +1,6 @@
 package com.deuna.maven.web_views.dialog_fragments.base
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,26 +20,25 @@ import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
 import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 
 abstract class DeunaDialogFragment(
+    context: Context,
     val widgetConfiguration: DeunaWidgetConfiguration
-) : BaseDialogFragment() {
+) : BaseDialogFragment(context) {
 
     val deunaWidget: DeunaWidget get() = baseWebView as DeunaWidget
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val view = inflater.inflate(R.layout.deuna_webview_container, container, false)
-        baseWebView = view.findViewById(R.id.deuna_webview)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.deuna_webview_container)
+
+        baseWebView = findViewById(R.id.deuna_webview)
 
         deunaWidget.widgetConfiguration = widgetConfiguration
         deunaWidget.widgetConfiguration?.onCloseByUser = {
             dismiss()
         }
         deunaWidget.build()
-        return view
     }
+
 
     override fun onBackButtonPressed() {
         if (!deunaWidget.closeEnabled) {
@@ -48,8 +48,8 @@ abstract class DeunaDialogFragment(
         deunaWidget.bridge?.onCloseByUser?.let { it() }
     }
 
-    override fun onDetach() {
-        super.onDetach()
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
         when (widgetConfiguration) {
             is PaymentWidgetConfiguration -> widgetConfiguration.callbacks.onClosed?.invoke(
                 deunaWidget.closeAction
@@ -72,10 +72,5 @@ abstract class DeunaDialogFragment(
             )
         }
     }
-
-
-    private val chromeTabLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        }
 
 }

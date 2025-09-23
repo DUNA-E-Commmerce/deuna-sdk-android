@@ -107,12 +107,17 @@ fun MainViewModel.showPaymentWidget(
             }
         },
         userToken = userToken,
-        styleFile = "YOUR_THEME_UUID", // optional
-//        paymentMethods = listOf(
-//            mapOf(
-//                "paymentMethod" to "wallet",
-//                "processors" to listOf("mercadopago_wallet")
-//            )
-//        )
+        paymentMethods = listOf(
+            mapOf(
+                "paymentMethod" to "wallet",
+                "processors" to listOf("paypal_wallet"),
+                "configuration" to mapOf(
+                    "express" to true,
+                    "flowType" to mapOf(
+                        "type" to "twoStep"
+                    )
+                )
+            )
+        )
     )
 }

@@ -2,7 +2,6 @@ package com.deuna.maven
 
 import android.content.Context
 import com.deuna.maven.shared.*
-import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.checkout_widget.CheckoutWidgetDialogFragment
 import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 
@@ -30,9 +29,8 @@ fun DeunaSDK.initCheckout(
         return
     }
 
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
     dialogFragment = CheckoutWidgetDialogFragment(
+        context,
         widgetConfiguration = CheckoutWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -43,5 +41,5 @@ fun DeunaSDK.initCheckout(
             widgetIntegration = WidgetIntegration.MODAL
         )
     )
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "CheckoutWidgetDialogFragment")
+    dialogFragment?.show()
 }
