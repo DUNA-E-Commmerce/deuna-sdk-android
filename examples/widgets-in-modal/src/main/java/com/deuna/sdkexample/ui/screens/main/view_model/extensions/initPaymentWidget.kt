@@ -107,17 +107,17 @@ fun MainViewModel.showPaymentWidget(
             }
         },
         userToken = userToken,
-        paymentMethods = listOf(
-            mapOf(
-                "paymentMethod" to "wallet",
-                "processors" to listOf("paypal_wallet"),
-                "configuration" to mapOf(
-                    "express" to true,
-                    "flowType" to mapOf(
-                        "type" to "twoStep"
-                    )
-                )
-            )
-        )
+//        paymentMethods = listOf(
+//            mapOf(
+//                "paymentMethod" to "wallet",
+//                "processors" to listOf("paypal_wallet"),
+//                "configuration" to mapOf(
+//                    "express" to true,
+//                    "flowType" to mapOf(
+//                        "type" to "twoStep"
+//                    )
+//                )
+//            )
+//        )
     )
 }
