@@ -3,7 +3,6 @@ package com.deuna.maven
 import android.content.Context
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WidgetIntegration
-import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
 import com.deuna.maven.widgets.next_action.NextActionCallbacks
 import com.deuna.maven.widgets.next_action.NextActionDialogFragment
@@ -21,9 +20,8 @@ fun DeunaSDK.initNextAction(
         return
     }
 
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
     dialogFragment = NextActionDialogFragment(
+        context,
         widgetConfiguration = NextActionWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -32,5 +30,5 @@ fun DeunaSDK.initNextAction(
             callbacks = callbacks
         )
     )
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "NextActionDialogFragment")
+    dialogFragment?.show()
 }

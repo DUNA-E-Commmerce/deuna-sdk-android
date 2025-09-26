@@ -1,12 +1,15 @@
 package com.deuna.maven.web_views.dialog_fragments.base
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.DialogFragment.STYLE_NORMAL
 import com.deuna.maven.web_views.base.BaseWebView
 
-abstract class BaseDialogFragment(private val fullSize: Boolean = true) : DialogFragment() {
+abstract class BaseDialogFragment(context: Context, private val fullSize: Boolean = true) :
+    Dialog(context) {
 
     lateinit var baseWebView: BaseWebView
 
@@ -15,31 +18,30 @@ abstract class BaseDialogFragment(private val fullSize: Boolean = true) : Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if(fullSize){
-            setStyle(STYLE_NORMAL, android.R.style.Theme_Light_NoTitleBar)
-        }
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return object : Dialog(requireActivity()) {
-            override fun onBackPressed() {
-                onBackButtonPressed()
-            }
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        if(fullSize){
-            dialog?.window?.setLayout(
+        if (fullSize) {
+            window?.setLayout(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
     }
 
-    override fun onDestroyView() {
+    override fun onBackPressed() {
+        onBackButtonPressed()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (fullSize) {
+            window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+    }
+
+    override fun onStop() {
         baseWebView.destroy()
-        super.onDestroyView()
+        super.onStop()
     }
 }

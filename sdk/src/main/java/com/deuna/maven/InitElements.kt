@@ -3,7 +3,6 @@ package com.deuna.maven
 import android.content.Context
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
 import com.deuna.maven.widgets.elements_widget.ElementsWidgetDialogFragment
 import com.deuna.maven.widgets.elements_widget.ElementsEvent
@@ -52,9 +51,8 @@ fun DeunaSDK.initElements(
     widgetExperience: ElementsWidgetExperience? = null
 ) {
 
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
     dialogFragment = ElementsWidgetDialogFragment(
+        context,
         widgetConfiguration = ElementsWidgetConfiguration(
             sdkInstance = this,
             callbacks = callbacks,
@@ -69,7 +67,7 @@ fun DeunaSDK.initElements(
             widgetExperience = widgetExperience
         )
     )
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "ElementsWidgetDialogFragment")
+    dialogFragment?.show()
 }
 
 

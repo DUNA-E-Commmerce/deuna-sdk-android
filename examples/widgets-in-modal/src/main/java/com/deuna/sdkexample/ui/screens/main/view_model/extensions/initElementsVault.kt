@@ -58,7 +58,7 @@ fun MainViewModel.saveCard(
                 }
             }
             onClosed = { action ->
-                Log.e(DEBUG_TAG, "closeAction: $action")
+                Log.i(DEBUG_TAG, "closeAction: $action")
                 if (action == CloseAction.userAction) { // The operation was canceled
                     viewModelScope.launch {
                         completion(ElementsResult.Canceled)

@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent;
 import com.deuna.maven.shared.DeunaLogs
+import com.deuna.maven.shared.extensions.findComponentActivity
 import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.web_views.dialog_fragments.ExternalUrlDialogFragment
 
@@ -34,7 +35,13 @@ class ExternalUrlHelper {
         fun registerForActivityResult(
             context: Context
         ) {
-            val activity = context.findFragmentActivity() ?: return
+            val activity = context.findFragmentActivity() ?: context.findComponentActivity()
+
+            if (activity == null) {
+                DeunaLogs.error("FragmentActivity or ComponentActivity not found")
+                return
+            }
+
             chromeTabLauncher = activity.registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult()
             ) { _ ->
@@ -74,24 +81,20 @@ class ExternalUrlHelper {
                 return
             }
 
-            val fragmentActivity = context.findFragmentActivity() ?: return
-
             this.browser = browser
             this.onExternalUrlBrowserClosed = onExternalUrlClosed
 
             when (browser) {
                 ExternalUrlBrowser.WEB_VIEW -> {
                     externalUrlDialog = ExternalUrlDialogFragment(
+                        context = context,
                         url = url, onDialogDestroyed = {
                             externalUrlDialog = null
                             this.onExternalUrlBrowserClosed?.invoke()
                             this.onExternalUrlBrowserClosed = null
                         }
                     )
-                    externalUrlDialog?.show(
-                        fragmentActivity.supportFragmentManager,
-                        "ExternalUrlDialogFragment+${System.currentTimeMillis()}"
-                    )
+                    externalUrlDialog?.show()
                     return
                 }
 

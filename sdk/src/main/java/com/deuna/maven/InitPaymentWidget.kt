@@ -5,7 +5,6 @@ import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WidgetIntegration
-import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetDialogFragment
 
@@ -40,9 +39,8 @@ fun DeunaSDK.initPaymentWidget(
     }
 
 
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
     dialogFragment = PaymentWidgetDialogFragment(
+        context,
         widgetConfiguration = PaymentWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -56,6 +54,6 @@ fun DeunaSDK.initPaymentWidget(
             widgetIntegration = WidgetIntegration.MODAL
         )
     )
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "PaymentWidgetDialogFragment")
+    dialogFragment?.show()
 }
 

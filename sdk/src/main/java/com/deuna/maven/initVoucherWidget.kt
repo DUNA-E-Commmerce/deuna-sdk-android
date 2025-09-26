@@ -3,7 +3,6 @@ package com.deuna.maven
 import android.content.Context
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WidgetIntegration
-import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 import com.deuna.maven.widgets.voucher.VoucherCallbacks
 import com.deuna.maven.widgets.voucher.VoucherDialogFragment
@@ -22,9 +21,8 @@ fun DeunaSDK.initVoucherWidget(
         return
     }
 
-    val fragmentActivity = context.findFragmentActivity() ?: return
-
     dialogFragment = VoucherDialogFragment(
+        context,
         widgetConfiguration = VoucherWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -33,5 +31,5 @@ fun DeunaSDK.initVoucherWidget(
             widgetIntegration = WidgetIntegration.MODAL
         )
     )
-    dialogFragment?.show(fragmentActivity.supportFragmentManager, "VoucherDialogFragment")
+    dialogFragment?.show()
 }
