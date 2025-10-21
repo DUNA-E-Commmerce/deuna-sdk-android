@@ -64,8 +64,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 callback = { fraudId ->
                     deunaFraudId = fraudId ?: ""
 
-                    DeunaLogs.info("FraudId: $deunaFraudId")
-
                     if (isWebViewLoaded) {
                         webView.evaluateJavascript(
                             "window.getFraudId = function() { return '${deunaFraudId}'; };",
