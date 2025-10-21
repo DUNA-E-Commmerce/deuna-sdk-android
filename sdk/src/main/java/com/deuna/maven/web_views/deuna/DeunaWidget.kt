@@ -4,12 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import androidx.activity.result.contract.ActivityResultContracts
+import com.deuna.maven.DeunaSDK
+import com.deuna.maven.generateFraudId
 import com.deuna.maven.widgets.checkout_widget.CheckoutBridge
 import com.deuna.maven.widgets.elements_widget.ElementsBridge
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetBridge
 import com.deuna.maven.shared.DeunaBridge
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsErrors
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
@@ -31,6 +34,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     /// When this var is false the close feature is disabled
     var closeEnabled = true
 
+    var isWebViewLoaded = false
+
     val takeSnapshotBridge = TakeSnapshotBridge("paymentWidgetTakeSnapshotBridge")
 
     var widgetConfiguration: DeunaWidgetConfiguration? = null
@@ -40,10 +45,38 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     var bridge: DeunaBridge? = null
 
+    var deunaFraudId = ""
+
+    private var fraudCredentials: Json? = null
+
+    fun setFraudCredentials(fraudCredentials: Json?) {
+        this.fraudCredentials = fraudCredentials
+    }
+
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
-    override fun loadUrl(url: String, javascriptToInject: String?) {
+    fun launch(url: String, javascriptToInject: String? = null) {
+        fraudCredentials?.let {
+            widgetConfiguration?.sdkInstance?.generateFraudId(
+                context = context,
+                params = it,
+                callback = { fraudId ->
+                    deunaFraudId = fraudId ?: ""
+
+                    DeunaLogs.info("FraudId: $deunaFraudId")
+
+                    if (isWebViewLoaded) {
+                        webView.evaluateJavascript(
+                            "window.getFraudId = function() { return '${deunaFraudId}'; };",
+                            null
+                        )
+                    }
+                }
+            )
+        }
+
+
         webView.addJavascriptInterface(takeSnapshotBridge, takeSnapshotBridge.name)
         buildBridge()
         initialize()
@@ -54,8 +87,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             webView.addJavascriptInterface(it, it.name)
         }
 
-        super.loadUrl(
-            url, """
+        fun jsToInjectCallback(): String {
+            var js = """
         console.log = function(message) {
             android.consoleLog(message);
         };
@@ -86,14 +119,38 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
              },
              onSubmit: function(fn){
                 window.submit = fn;
+             },
+             getFraudId: function(){
+                if(typeof window.getFraudId === 'function'){
+                    console.log('👀CALLED getFraudId');
+                    return window.getFraudId();
+                }
+                return "";
              }
          };
             ${javascriptToInject ?: ""}
         """.trimIndent()
-        )
+
+
+            if (deunaFraudId.isNotEmpty()) {
+                js += """
+                window.getFraudId = function() {
+                    return '${deunaFraudId}';
+                };
+                """.trimIndent()
+            }
+            return js
+        }
+
+
+        super.loadUrl(
+            url
+        ) { return@loadUrl jsToInjectCallback() }
 
         listener = object : Listener {
-            override fun onWebViewLoaded() {}
+            override fun onWebViewLoaded() {
+                isWebViewLoaded = true
+            }
 
             override fun onWebViewError() {
                 bridge?.let {

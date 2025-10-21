@@ -22,7 +22,7 @@ class ExternalUrlDialogFragment(
         setContentView(R.layout.external_url_webview_container)
 
         baseWebView = findViewById(R.id.new_tab_webview)
-        webView.loadUrl(url)
+        webView.launch(url)
         webView.onRemoteCloseCalled = { dismiss() }
     }
 

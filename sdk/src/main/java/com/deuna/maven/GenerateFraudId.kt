@@ -10,6 +10,15 @@ import com.deuna.maven.shared.value
 import com.deuna.maven.web_views.base.WebViewController
 import org.json.JSONObject
 
+/* <<<<<<<<<<<<<<  ✨ Windsurf Command ⭐ >>>>>>>>>>>>>>>> */
+/**
+ * Generates a fraud ID for the given parameters.
+ *
+ * @param context The application or activity context
+ * @param params Optional JSON object containing additional parameters for the fraud ID generation.
+ * @param callback A callback function to be invoked when the fraud ID generation completes. The callback receives a `String?` object containing the fraud ID or `null` if the request fails.
+ */
+/* <<<<<<<<<<  b83a2374-da3c-4fcb-b677-6197827fd300  >>>>>>>>>>> */
 fun DeunaSDK.generateFraudId(
     context: Context,
     params: Json? = null,
@@ -53,9 +62,8 @@ class GenerateFraudId(
 
         controller?.webView?.addJavascriptInterface(ConsoleLogBridge(), "android")
 
-        controller?.loadUrl(
-            "https://cdn.stg.deuna.io/mobile-sdks/get_fraud_id.html",
-            """
+        controller?.loadUrl("https://cdn.stg.deuna.io/mobile-sdks/get_fraud_id.html") {
+            return@loadUrl """
             console.log = function(message) {
                 android.consoleLog(message);
             };
@@ -63,7 +71,7 @@ class GenerateFraudId(
                 android.consoleError(message);
             };
             """.trimIndent()
-        )
+        }
     }
 
 

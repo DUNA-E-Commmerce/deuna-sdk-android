@@ -30,7 +30,7 @@ class WebViewController(
 
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun loadUrl(url: String, javascriptToInject: String? = null) {
+    fun loadUrl(url: String, jsToInjectCallback: (() -> String)? = null) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
@@ -54,8 +54,8 @@ class WebViewController(
                 """.trimIndent()
                 webView.evaluateJavascript(js, null)
 
-                if (javascriptToInject != null) {
-                    webView.evaluateJavascript(javascriptToInject, null)
+                if (jsToInjectCallback != null) {
+                    webView.evaluateJavascript(jsToInjectCallback(), null)
                 }
                 listener?.onWebViewLoaded()
             }

@@ -29,6 +29,7 @@ fun DeunaSDK.initPaymentWidget(
     checkoutModules: List<Json> = emptyList(),
     language: String? = null,
     behavior: Json? = null,
+    fraudCredentials: Json? = null,
 ) {
 
     if (orderToken.isEmpty()) {
@@ -51,7 +52,8 @@ fun DeunaSDK.initPaymentWidget(
             checkoutModules = checkoutModules,
             language = language,
             behavior = behavior,
-            widgetIntegration = WidgetIntegration.MODAL
+            widgetIntegration = WidgetIntegration.MODAL,
+            fraudCredentials = fraudCredentials,
         )
     )
     dialogFragment?.show()

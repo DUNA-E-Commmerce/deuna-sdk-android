@@ -8,18 +8,23 @@ import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
  */
 fun DeunaWidget.build() {
     widgetConfiguration?.let {
+
+        it.fraudCredentials?.let { fraudCredentials ->
+            setFraudCredentials(fraudCredentials)
+        }
+
         when (it) {
             is CheckoutWidgetConfiguration -> {
                 it.getPaymentLink { error, _ ->
                     if (error != null) {
                         it.callbacks.onError?.invoke(error)
                     } else {
-                        loadUrl(it.link)
+                        launch(it.link)
                     }
                 }
             }
 
-            else -> loadUrl(it.link)
+            else -> launch(it.link)
         }
     }
 }

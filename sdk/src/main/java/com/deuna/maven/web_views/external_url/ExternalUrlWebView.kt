@@ -17,8 +17,6 @@ class ExternalUrlWebView(
     var onRemoteCloseCalled: (() -> Unit)? = null
 
 
-
-
     init {
         webView.addJavascriptInterface(LocalBridge(), "windowClose")
         listener = object : Listener {
@@ -50,14 +48,14 @@ class ExternalUrlWebView(
         }
     }
 
-    override fun loadUrl(url: String, javascriptToInject: String?) {
-        super.loadUrl(
-            url, javascriptToInject = """
+    fun launch(url: String) {
+        super.loadUrl(url) {
+            return@loadUrl """
             window.close = function() {
                windowClose.onCloseWindowCalled();
             };
             """.trimIndent()
-        )
+        }
     }
 
 
