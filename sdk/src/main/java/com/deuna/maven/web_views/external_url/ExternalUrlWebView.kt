@@ -38,7 +38,7 @@ class ExternalUrlWebView(
             override fun onWebViewError() {}
 
             override fun onOpenExternalUrl(url: String) {
-                loadUrl(url)
+                launch(url)
             }
 
             override fun onDownloadFile(url: String) {
