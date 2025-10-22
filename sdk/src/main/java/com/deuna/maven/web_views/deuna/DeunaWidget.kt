@@ -120,7 +120,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
              },
              getFraudId: function(){
                 if(typeof window.getFraudId === 'function'){
-                    console.log('👀CALLED getFraudId');
                     return window.getFraudId();
                 }
                 return "";
