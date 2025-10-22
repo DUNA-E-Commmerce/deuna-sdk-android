@@ -33,7 +33,6 @@ open class BaseWebView(
     var controller: WebViewController? = null
 
 
-
     init {
         inflate(context, R.layout.embedded_webview, this)
         val webView = findViewById<WebView>(R.id.embedded_web_view)
@@ -62,8 +61,8 @@ open class BaseWebView(
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    open fun loadUrl(url: String, javascriptToInject: String? = null) {
-        controller?.loadUrl(url, javascriptToInject)
+    fun loadUrl(url: String, jsToInjectCallback: (() -> String)? = null) {
+        controller?.loadUrl(url, jsToInjectCallback)
     }
 
 

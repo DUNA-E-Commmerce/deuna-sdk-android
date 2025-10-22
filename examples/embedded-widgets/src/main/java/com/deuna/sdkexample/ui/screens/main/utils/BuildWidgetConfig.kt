@@ -48,6 +48,11 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onEventDispatch event: $event")
                 }
             },
+            fraudCredentials = mapOf(
+                "RISKIFIED" to mapOf(
+                    "storeDomain" to "deuna.com"
+                )
+            ),
             sdkInstance = deunaSDK
         )
 

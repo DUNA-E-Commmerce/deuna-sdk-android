@@ -20,9 +20,11 @@ class PaymentWidgetConfiguration(
     val language: String? = null,
     val behavior: Json? = null,
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
+    fraudCredentials: Json? = null,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    fraudCredentials = fraudCredentials,
 ) {
 
     override val link: String

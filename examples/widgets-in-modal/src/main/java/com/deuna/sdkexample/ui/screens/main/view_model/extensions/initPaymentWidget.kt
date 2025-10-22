@@ -107,6 +107,11 @@ fun MainViewModel.showPaymentWidget(
             }
         },
         userToken = userToken,
+        fraudCredentials = mapOf(
+            "RISKIFIED" to mapOf(
+                "storeDomain" to "deuna.com"
+            )
+        ),
 //        paymentMethods = listOf(
 //            mapOf(
 //                "paymentMethod" to "wallet",
