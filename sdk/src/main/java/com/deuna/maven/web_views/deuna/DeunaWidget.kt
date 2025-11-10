@@ -166,14 +166,16 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             }
 
             override fun onOpenExternalUrl(url: String) {
-                ExternalUrlHelper.openUrl(
-                    context = this@DeunaWidget.context,
-                    url = url,
-                    browser = getExternalUrlBrowser(url),
-                    onExternalUrlClosed = {
-                        closeEnabled = true
-                    }
-                )
+                runOnUiThread {
+                    ExternalUrlHelper.openUrl(
+                        context = this@DeunaWidget.context,
+                        url = url,
+                        browser = getExternalUrlBrowser(url),
+                        onExternalUrlClosed = {
+                            closeEnabled = true
+                        }
+                    )
+                }
             }
 
             override fun onDownloadFile(url: String) {
