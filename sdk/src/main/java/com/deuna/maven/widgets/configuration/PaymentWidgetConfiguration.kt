@@ -31,7 +31,11 @@ class PaymentWidgetConfiguration(
 
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+            var baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.MODE to QueryParameters.WIDGET,
@@ -70,15 +74,9 @@ class PaymentWidgetConfiguration(
 
             queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
 
-            val baseLink = Utils.buildUrl(
+            return Utils.buildUrl(
                 baseUrl = "$baseUrl/now/$orderToken",
                 queryParams = queryParameters,
             )
-
-            if (domain != null) {
-                return overrideDomainLink(domain)
-            }
-
-            return baseLink
         }
 }

@@ -120,7 +120,12 @@ class CheckoutWidgetConfiguration(
                 queryParameters[QueryParameters.LANGUAGE] = language
             }
 
-            return Utils.buildUrl(baseUrl = paymentLink!!, queryParams = queryParameters)
+            var baseUrl = paymentLink!!
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
+
+            return Utils.buildUrl(baseUrl = baseUrl, queryParams = queryParameters)
         }
 }
 

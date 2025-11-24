@@ -20,19 +20,19 @@ sealed class DeunaWidgetConfiguration(
      * If the domain contains https:// or http://, it will replace the entire link.
      * Otherwise, it will only replace the domain part of the link.
      */
-    fun overrideDomainLink(domain: String): String {
+    fun overrideBaseUrl(baseUrl: String, replaceWith: String): String {
         try { // extract the domain from the link
-            val url = URL(link)
+            val url = URL(baseUrl)
 
-            // first check if domain contains https:// or http://
-            if (domain.startsWith("http://") || domain.startsWith("https://")) {
+            // first check if replaceWith contains https:// or http://
+            if (replaceWith.startsWith("http://") || replaceWith.startsWith("https://")) {
                 val originalHost = if (url.port != -1) {
                     "${url.host}:${url.port}"
                 } else {
                     url.host
                 }
 
-                return link.replace("${url.protocol}://$originalHost", domain)
+                return baseUrl.replace("${url.protocol}://$originalHost", replaceWith)
             }
 
             // For domain without protocol, preserve original protocol and port
@@ -42,10 +42,10 @@ sealed class DeunaWidgetConfiguration(
                 url.host
             }
 
-            return link.replace(originalHost, domain)
+            return baseUrl.replace(originalHost, replaceWith)
         } catch (e: Exception) {
             DeunaLogs.error(e.message ?: "")
-            return link
+            return baseUrl
         }
     }
 }

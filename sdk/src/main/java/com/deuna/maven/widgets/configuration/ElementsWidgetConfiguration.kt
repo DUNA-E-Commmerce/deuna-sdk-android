@@ -35,7 +35,11 @@ class ElementsWidgetConfiguration(
 ) {
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.elementsBaseUrl
+            var baseUrl = sdkInstance.environment.elementsBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.MODE to QueryParameters.WIDGET,

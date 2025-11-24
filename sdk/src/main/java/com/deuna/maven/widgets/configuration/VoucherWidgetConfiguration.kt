@@ -22,7 +22,11 @@ class VoucherWidgetConfiguration(
 ) {
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+            var baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.ORDER_TOKEN to orderToken,
