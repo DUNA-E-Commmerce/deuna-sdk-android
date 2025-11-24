@@ -12,6 +12,7 @@ fun DeunaSDK.initVoucherWidget(
     orderToken: String,
     callbacks: VoucherCallbacks,
     language: String? = null,
+    domain: String? = null,
 ) {
 
     if (orderToken.isEmpty()) {
@@ -28,7 +29,8 @@ fun DeunaSDK.initVoucherWidget(
             orderToken = orderToken,
             callbacks = callbacks,
             language = language,
-            widgetIntegration = WidgetIntegration.MODAL
+            widgetIntegration = WidgetIntegration.MODAL,
+            domain = domain,
         )
     )
     dialogFragment?.show()

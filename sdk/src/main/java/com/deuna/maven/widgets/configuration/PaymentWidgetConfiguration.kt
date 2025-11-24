@@ -11,6 +11,7 @@ import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 class PaymentWidgetConfiguration(
     sdkInstance: DeunaSDK,
     hidePayButton: Boolean = false,
+    domain: String? = null,
     val orderToken: String,
     val callbacks: PaymentWidgetCallbacks,
     val userToken: String? = null,
@@ -25,6 +26,7 @@ class PaymentWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
     fraudCredentials = fraudCredentials,
+    domain = domain,
 ) {
 
     override val link: String
@@ -68,9 +70,15 @@ class PaymentWidgetConfiguration(
 
             queryParameters[QueryParameters.XPROPS_B64] = xpropsB64.toBase64()
 
-            return Utils.buildUrl(
+            val baseLink = Utils.buildUrl(
                 baseUrl = "$baseUrl/now/$orderToken",
                 queryParams = queryParameters,
             )
+
+            if (domain != null) {
+                return overrideDomainLink(domain)
+            }
+
+            return baseLink
         }
 }

@@ -40,7 +40,6 @@ class ElementsWidgetExperience(val userExperience: UserExperience) {
 fun DeunaSDK.initElements(
     context: Context,
     callbacks: ElementsCallbacks,
-    closeEvents: Set<ElementsEvent> = emptySet(),
     userToken: String? = null,
     userInfo: UserInfo? = null,
     styleFile: String? = null,
@@ -48,7 +47,8 @@ fun DeunaSDK.initElements(
     language: String? = null,
     orderToken: String? = null,
     behavior: Json? = null,
-    widgetExperience: ElementsWidgetExperience? = null
+    widgetExperience: ElementsWidgetExperience? = null,
+    domain: String? = null,
 ) {
 
     dialogFragment = ElementsWidgetDialogFragment(
@@ -64,7 +64,8 @@ fun DeunaSDK.initElements(
             orderToken = orderToken,
             behavior = behavior,
             widgetIntegration = WidgetIntegration.MODAL,
-            widgetExperience = widgetExperience
+            widgetExperience = widgetExperience,
+            domain = domain,
         )
     )
     dialogFragment?.show()

@@ -20,7 +20,8 @@ fun DeunaSDK.initCheckout(
     callbacks: CheckoutCallbacks,
     userToken: String? = null,
     styleFile: String? = null,
-    language: String? = null
+    language: String? = null,
+    domain: String? = null,
 ) {
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
@@ -38,7 +39,8 @@ fun DeunaSDK.initCheckout(
             userToken = userToken,
             styleFile = styleFile,
             language = language,
-            widgetIntegration = WidgetIntegration.MODAL
+            widgetIntegration = WidgetIntegration.MODAL,
+            domain = domain,
         )
     )
     dialogFragment?.show()

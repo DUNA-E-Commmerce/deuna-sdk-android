@@ -16,6 +16,7 @@ import retrofit2.Response
 class CheckoutWidgetConfiguration(
     sdkInstance: DeunaSDK,
     hidePayButton: Boolean = false,
+    domain: String? = null,
     val orderToken: String,
     val callbacks: CheckoutCallbacks,
     val userToken: String? = null,
@@ -25,6 +26,7 @@ class CheckoutWidgetConfiguration(
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    domain = domain,
 ) {
 
     private var paymentLink: String? = null
