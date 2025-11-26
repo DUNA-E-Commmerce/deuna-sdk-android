@@ -12,6 +12,7 @@ fun DeunaSDK.initNextAction(
     orderToken: String,
     callbacks: NextActionCallbacks,
     language: String? = null,
+    domain: String? = null,
 ) {
     if (orderToken.isEmpty()) {
         callbacks.onError?.invoke(
@@ -27,7 +28,8 @@ fun DeunaSDK.initNextAction(
             orderToken = orderToken,
             language = language,
             widgetIntegration = WidgetIntegration.MODAL,
-            callbacks = callbacks
+            callbacks = callbacks,
+            domain = domain,
         )
     )
     dialogFragment?.show()

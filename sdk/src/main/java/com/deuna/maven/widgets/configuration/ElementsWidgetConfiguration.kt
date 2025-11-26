@@ -17,6 +17,7 @@ import com.deuna.maven.shared.toBase64
 class ElementsWidgetConfiguration(
     sdkInstance: DeunaSDK,
     hidePayButton: Boolean = false,
+    domain: String? = null,
     val callbacks: ElementsCallbacks,
     val userToken: String? = null,
     val userInfo: UserInfo? = null,
@@ -30,10 +31,15 @@ class ElementsWidgetConfiguration(
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    domain = domain,
 ) {
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.elementsBaseUrl
+            var baseUrl = sdkInstance.environment.elementsBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.MODE to QueryParameters.WIDGET,

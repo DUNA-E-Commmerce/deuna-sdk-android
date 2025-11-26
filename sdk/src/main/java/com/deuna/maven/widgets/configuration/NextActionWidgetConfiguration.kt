@@ -9,6 +9,7 @@ import com.deuna.maven.widgets.next_action.NextActionCallbacks
 class NextActionWidgetConfiguration(
     sdkInstance: DeunaSDK,
     hidePayButton: Boolean = false,
+    domain: String? = null,
     val orderToken: String,
     val callbacks: NextActionCallbacks,
     val language: String? = null,
@@ -16,10 +17,15 @@ class NextActionWidgetConfiguration(
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    domain = domain,
 ) {
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+            var baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.MODE to QueryParameters.WIDGET,

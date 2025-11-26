@@ -10,6 +10,7 @@ import com.deuna.maven.widgets.voucher.VoucherCallbacks
 class VoucherWidgetConfiguration(
     sdkInstance: DeunaSDK,
     hidePayButton: Boolean = false,
+    domain: String? = null,
     val orderToken: String,
     val callbacks: VoucherCallbacks,
     val language: String? = null,
@@ -17,10 +18,15 @@ class VoucherWidgetConfiguration(
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    domain = domain,
 ) {
     override val link: String
         get() {
-            val baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+            var baseUrl = sdkInstance.environment.paymentWidgetBaseUrl
+
+            domain?.let {
+                baseUrl = overrideBaseUrl(baseUrl, it)
+            }
 
             val queryParameters = mutableMapOf(
                 QueryParameters.ORDER_TOKEN to orderToken,
