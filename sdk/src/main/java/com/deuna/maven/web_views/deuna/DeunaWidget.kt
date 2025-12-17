@@ -174,16 +174,12 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                         return@runOnUiThread
                     }
 
-                    val externalBrowser = getExternalUrlBrowser(url)
-
-                    if (externalBrowser == ExternalUrlBrowser.WEB_VIEW) {
-                        externalUrl = url
-                    }
+                    externalUrl = url
 
                     ExternalUrlHelper.openUrl(
                         context = this@DeunaWidget.context,
                         url = url,
-                        browser = externalBrowser,
+                        browser = getExternalUrlBrowser(url),
                         onExternalUrlClosed = {
                             closeEnabled = true
                             externalUrl = null
