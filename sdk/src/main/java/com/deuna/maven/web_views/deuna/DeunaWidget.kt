@@ -47,6 +47,9 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     var deunaFraudId = ""
 
+    // Used to prevent opening the same url multiple times
+    var externalUrl: String? = null
+
     private var fraudCredentials: Json? = null
 
     fun setFraudCredentials(fraudCredentials: Json?) {
@@ -167,12 +170,23 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
             override fun onOpenExternalUrl(url: String) {
                 runOnUiThread {
+                    if (externalUrl == url) { // Prevent opening the same url multiple times
+                        return@runOnUiThread
+                    }
+
+                    val externalBrowser = getExternalUrlBrowser(url)
+
+                    if (externalBrowser == ExternalUrlBrowser.WEB_VIEW) {
+                        externalUrl = url
+                    }
+
                     ExternalUrlHelper.openUrl(
                         context = this@DeunaWidget.context,
                         url = url,
-                        browser = getExternalUrlBrowser(url),
+                        browser = externalBrowser,
                         onExternalUrlClosed = {
                             closeEnabled = true
+                            externalUrl = null
                         }
                     )
                 }
