@@ -1,14 +1,29 @@
 package com.deuna.sdkexample.integration
 
+import android.content.Intent
 import android.util.Log
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
+import com.deuna.sdkexample.MainActivity
 import com.deuna.sdkexample.integration.core.TestEnvironment
 import com.deuna.sdkexample.integration.data.dataSources.MerchantDataSource
 import com.deuna.sdkexample.integration.data.helpers.DeunanowOrderBuilder
+import com.deuna.sdkexample.integration.data.helpers.TokenizeOrderResponse
 import com.deuna.sdkexample.integration.domain.CountryCode
 import com.deuna.sdkexample.integration.domain.requests.StripeProcessorConfig
+import com.deuna.sdkexample.integration.helpers.TestEventObserver
+import com.deuna.sdkexample.integration.helpers.WebViewTestHelper
+import com.deuna.sdkexample.testing.TestEvent
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -25,13 +40,22 @@ class DeunaSDKIntegrationTest {
         private const val TAG = "DeunaSDKIntegrationTest"
     }
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     private val merchantDataSource = MerchantDataSource(Constants.env)
     private var orderToken: String? = null
     private var publicApiKey: String? = null
 
+    private lateinit var device: UiDevice
+    private lateinit var webViewHelper: WebViewTestHelper
+
     @Before
     fun setUp() {
         Log.d(TAG, "🚀 Starting test setup...")
+
+        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        webViewHelper = WebViewTestHelper(device)
 
         // 1. Create order request
         val orderRequest = DeunanowOrderBuilder.createOrder(country = Constants.country)
@@ -51,7 +75,7 @@ class DeunaSDKIntegrationTest {
         }
 
         // 3. Tokenize the order
-        val orderTokenResponse: com.deuna.sdkexample.integration.data.helpers.TokenizeOrderResponse
+        val orderTokenResponse: TokenizeOrderResponse
         try {
             orderTokenResponse = merchantDataSource.tokenizeOrderSync(
                 privateApiKey = setup.privateApiKey,
@@ -84,6 +108,15 @@ class DeunaSDKIntegrationTest {
         Log.d(TAG, "✅ Test setup completed - publicApiKey: $publicApiKey")
     }
 
+    private fun launchActivity(): ActivityScenario<MainActivity> {
+        val intent = Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java).apply {
+            putExtra(MainActivity.EXTRA_DEUNA_ENV, Constants.env.value)
+            putExtra(MainActivity.EXTRA_DEUNA_API_KEY, publicApiKey)
+            putExtra(MainActivity.EXTRA_ORDER_TOKEN, orderToken)
+        }
+        return ActivityScenario.launch(intent)
+    }
+
     @Test
     fun testPaymentWidgetSuccess() {
         Log.d(TAG, "🧪 Starting testPaymentWidgetSuccess - orderToken: $orderToken")
@@ -92,11 +125,88 @@ class DeunaSDKIntegrationTest {
         assert(orderToken != null) { "Order token should not be null" }
         assert(publicApiKey != null) { "Public API key should not be null" }
 
-        // TODO: Implement UI interaction with the app
-        // 1. Launch activity with environment variables
-        // 2. Enter order token in text field
-        // 3. Tap Show button
-        // 4. Interact with WebView form
-        // 5. Verify payment success
+        // Create waiter for the paymentMethodsEntered event BEFORE launching
+        val paymentMethodsWaiter = TestEventObserver.createWaiter(TestEvent.PAYMENT_METHODS_ENTERED)
+
+        // Launch the activity with the configured environment
+        val scenario = launchActivity()
+
+        // Wait for the app to be ready and tap "Show Widget" button
+        Thread.sleep(2000) // Wait for UI to settle
+
+        // Find and click the "Show Widget" button using UI Automator
+        val showButton = device.findObject(UiSelector().text("Show Widget"))
+        if (showButton.waitForExists(5000)) {
+            Log.d(TAG, "✅ Tapping Show Widget button")
+            showButton.click()
+        } else {
+            throw AssertionError("Show Widget button not found")
+        }
+
+        // Verify WebView appears
+        if (!webViewHelper.waitForWebView(15000)) {
+            throw AssertionError("WebView should open after tapping Show Widget")
+        }
+        Log.d(TAG, "✅ WebView appeared")
+
+        // Wait for the paymentMethodsEntered event before filling the form
+        if (!TestEventObserver.waitFor(paymentMethodsWaiter, timeoutSeconds = 30)) {
+            throw AssertionError("Timeout waiting for paymentMethodsEntered event")
+        }
+        Log.d(TAG, "✅ Received paymentMethodsEntered event")
+
+        // Fill card number
+        webViewHelper.fillTextField(
+            text = "4242424242424242",
+            placeholderContains = listOf("0000")
+        )
+
+        // Fill expiry date
+        webViewHelper.fillTextField(
+            text = "1228",
+            placeholderContains = listOf("YY", "MM")
+        )
+
+        // Fill CVV
+        webViewHelper.fillTextField(
+            text = "123",
+            placeholderContains = listOf("CVV", "CVC")
+        )
+
+        // Fill cardholder name
+        webViewHelper.fillTextField(
+            text = "Test User",
+            placeholderContains = listOf("Juan")
+        )
+
+        // Fill identity document (if required for MX)
+        webViewHelper.fillTextField(
+            text = "12345678",
+            placeholderContains = listOf("Documento")
+        )
+
+        // Dismiss keyboard
+        webViewHelper.dismissKeyboard()
+
+        // Scroll up to see pay button
+        webViewHelper.swipeUp()
+        Thread.sleep(2000)
+
+        // Tap pay button
+        webViewHelper.buttonTap(labelContains = listOf("Pagar", "Pay", "Continuar"))
+
+        // Verify PaymentSuccessView is displayed after payment completes
+        val paymentSuccessText = device.findObject(UiSelector().text("Payment Successful"))
+        if (!paymentSuccessText.waitForExists(20000)) {
+            Log.w(TAG, "⚠️ Payment Successful text not found, checking for alternative success indicators")
+            // Try alternative success indicators
+            val alternativeSuccess = device.findObject(UiSelector().textContains("Success"))
+            if (!alternativeSuccess.waitForExists(5000)) {
+                throw AssertionError("PaymentSuccessView should be displayed after successful payment")
+            }
+        }
+        Log.d(TAG, "✅ Payment successful!")
+
+        scenario.close()
     }
 }
