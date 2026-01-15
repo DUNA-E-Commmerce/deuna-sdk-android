@@ -1,7 +1,6 @@
 package com.deuna.sdkexample.integration.helpers
 
 import android.util.Log
-import android.view.KeyEvent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
@@ -19,164 +18,69 @@ class WebViewTestHelper(private val device: UiDevice) {
     }
 
     /**
-     * Fills a text field by finding the label and then the EditText below it.
-     * Uses visual coordinates to find the correct field.
+     * Fills a text field by finding the label and then the closest EditText below it.
      * @param text The text to enter into the field.
-     * @param labelContains List of possible label texts to match.
-     * @param timeout Timeout in milliseconds to wait for the element.
+     * @param label The label text to find.
+     * @param timeout Timeout in milliseconds.
      */
     fun fillTextFieldByLabel(
         text: String,
-        labelContains: List<String>,
+        label: String,
         timeout: Long = 10000
     ): Boolean {
-        Log.d(TAG, "🔍 Looking for field with label: $labelContains")
+        Log.d(TAG, "🔍 Looking for field with label: $label")
 
-        for (label in labelContains) {
-            // Find the label element
-            val labelElement = device.wait(
-                Until.findObject(By.textContains(label)),
-                timeout
-            )
+        val labelElement = device.wait(Until.findObject(By.textContains(label)), timeout)
+            ?: return false.also { Log.w(TAG, "⚠️ Label not found: $label") }
 
-            if (labelElement != null) {
-                Log.d(TAG, "✅ Found label: '$label' at y=${labelElement.visibleBounds.top}")
+        // Find the EditText closest below the label using coordinates
+        val labelBottom = labelElement.visibleBounds.bottom
+        val labelCenterX = labelElement.visibleBounds.centerX()
 
-                // Get all EditText elements
-                val allEditTexts = device.findObjects(By.clazz("android.widget.EditText"))
-                Log.d(TAG, "Found ${allEditTexts.size} EditText elements")
-
-                // Find the EditText that is closest below the label (by Y coordinate)
-                val labelBottom = labelElement.visibleBounds.bottom
-                val labelCenterX = labelElement.visibleBounds.centerX()
-
-                var closestEditText: UiObject2? = null
-                var closestDistance = Int.MAX_VALUE
-
-                for (editText in allEditTexts) {
-                    val editTextTop = editText.visibleBounds.top
-                    val editTextCenterX = editText.visibleBounds.centerX()
-
-                    // EditText must be below the label
-                    if (editTextTop >= labelBottom - 50) {
-                        val verticalDistance = editTextTop - labelBottom
-                        val horizontalDistance = kotlin.math.abs(editTextCenterX - labelCenterX)
-
-                        // Prefer EditTexts that are close vertically and horizontally aligned
-                        val totalDistance = verticalDistance + (horizontalDistance / 2)
-
-                        if (totalDistance < closestDistance) {
-                            closestDistance = totalDistance
-                            closestEditText = editText
-                        }
-                    }
-                }
-
-                if (closestEditText != null) {
-                    Log.d(TAG, "✅ Found EditText below label '$label' at y=${closestEditText.visibleBounds.top}, distance=$closestDistance")
-                    return enterTextInElement(closestEditText, text)
-                }
+        val editText = device.findObjects(By.clazz("android.widget.EditText"))
+            .filter { it.visibleBounds.top >= labelBottom - 50 }
+            .minByOrNull { editText ->
+                val verticalDist = editText.visibleBounds.top - labelBottom
+                val horizontalDist = kotlin.math.abs(editText.visibleBounds.centerX() - labelCenterX)
+                verticalDist + horizontalDist / 2
             }
-        }
+            ?: return false.also { Log.w(TAG, "⚠️ EditText not found for label: $label") }
 
-        Log.w(TAG, "⚠️ Could not find field with label: $labelContains")
-        return false
+        Log.d(TAG, "✅ Found EditText for '$label'")
+        return enterText(editText, text)
     }
 
-    private fun enterTextInElement(element: UiObject2, text: String): Boolean {
+    private fun enterText(element: UiObject2, text: String): Boolean {
         return try {
             element.click()
-            Thread.sleep(300) // Wait for focus
-
-            // Clear existing text
+            Thread.sleep(200)
             element.clear()
-            Thread.sleep(100)
-
-            // Enter new text
             element.text = text
-            Log.d(TAG, "✅ Entered text: $text")
-
-            Thread.sleep(200) // Wait for input to register
+            Log.d(TAG, "✅ Entered: $text")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to enter text: ${e.message}")
-            // Fallback: try using keyboard input
-            try {
-                element.click()
-                Thread.sleep(300)
-                device.pressKeyCode(KeyEvent.KEYCODE_MOVE_END)
-                repeat(50) { device.pressKeyCode(KeyEvent.KEYCODE_DEL) }
-                for (char in text) {
-                    device.pressKeyCode(getKeyCode(char))
-                }
-                Log.d(TAG, "✅ Entered text via keyboard: $text")
-                true
-            } catch (e2: Exception) {
-                Log.e(TAG, "❌ Keyboard fallback also failed: ${e2.message}")
-                false
-            }
-        }
-    }
-
-    private fun getKeyCode(char: Char): Int {
-        return when (char) {
-            in '0'..'9' -> KeyEvent.KEYCODE_0 + (char - '0')
-            in 'a'..'z' -> KeyEvent.KEYCODE_A + (char - 'a')
-            in 'A'..'Z' -> KeyEvent.KEYCODE_A + (char - 'A')
-            ' ' -> KeyEvent.KEYCODE_SPACE
-            else -> KeyEvent.KEYCODE_UNKNOWN
+            Log.e(TAG, "❌ Failed: ${e.message}")
+            false
         }
     }
 
     /**
      * Taps a button that contains specific label text.
-     * @param labelContains List of possible button labels to match.
-     * @param timeout Timeout in milliseconds to wait for the element.
+     * @param label The button label to find.
+     * @param timeout Timeout in milliseconds.
      */
-    fun buttonTap(
-        labelContains: List<String>,
-        timeout: Long = 5000
-    ): Boolean {
-        for (label in labelContains) {
-            // Try with text contains
-            var element = device.wait(
-                Until.findObject(By.textContains(label).clickable(true)),
-                timeout
-            )
+    fun buttonTap(label: String, timeout: Long = 5000): Boolean {
+        val element = device.wait(Until.findObject(By.textContains(label)), timeout)
+            ?: device.wait(Until.findObject(By.descContains(label)), timeout / 2)
 
-            if (element != null) {
-                Log.d(TAG, "✅ Found clickable element with text: $label")
-                element.click()
-                return true
-            }
-
-            // Try without clickable constraint (some WebView buttons aren't marked clickable)
-            element = device.wait(
-                Until.findObject(By.textContains(label)),
-                timeout / 2
-            )
-
-            if (element != null) {
-                Log.d(TAG, "✅ Found element with text: $label (clicking anyway)")
-                element.click()
-                return true
-            }
-
-            // Try by description
-            element = device.wait(
-                Until.findObject(By.descContains(label)),
-                timeout / 2
-            )
-
-            if (element != null) {
-                Log.d(TAG, "✅ Found element with description: $label")
-                element.click()
-                return true
-            }
+        return if (element != null) {
+            element.click()
+            Log.d(TAG, "✅ Tapped: $label")
+            true
+        } else {
+            Log.w(TAG, "⚠️ Button not found: $label")
+            false
         }
-
-        Log.w(TAG, "⚠️ Could not find button with labels: $labelContains")
-        return false
     }
 
     /**

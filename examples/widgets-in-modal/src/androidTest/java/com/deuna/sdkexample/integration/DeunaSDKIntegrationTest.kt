@@ -156,35 +156,12 @@ class DeunaSDKIntegrationTest {
         }
         Log.d(TAG, "✅ Received paymentMethodsEntered event")
 
-        // Fill card number (label: "Número de tarjeta")
-        webViewHelper.fillTextFieldByLabel(
-            text = "4242424242424242",
-            labelContains = listOf("Número de tarjeta")
-        )
-
-        // Fill expiry date (label: "Fecha expiración")
-        webViewHelper.fillTextFieldByLabel(
-            text = "1228",
-            labelContains = listOf("Fecha expiración")
-        )
-
-        // Fill CVV
-        webViewHelper.fillTextFieldByLabel(
-            text = "123",
-            labelContains = listOf("CVV")
-        )
-
-        // Fill cardholder name (label: "Nombre como aparece en la tarjeta")
-        webViewHelper.fillTextFieldByLabel(
-            text = "Test User",
-            labelContains = listOf("Nombre como aparece en la tarjeta")
-        )
-
-        // Fill RFC/Identity document (label: "Número de RFC")
-        webViewHelper.fillTextFieldByLabel(
-            text = "12345678",
-            labelContains = listOf("Número de RFC", "RFC")
-        )
+        // Fill form fields
+        webViewHelper.fillTextFieldByLabel("4242424242424242", "Número de tarjeta")
+        webViewHelper.fillTextFieldByLabel("1228", "Fecha expiración")
+        webViewHelper.fillTextFieldByLabel("123", "CVV")
+        webViewHelper.fillTextFieldByLabel("Test User", "Nombre como aparece en la tarjeta")
+        webViewHelper.fillTextFieldByLabel("12345678", "Número de RFC")
 
         // Dismiss keyboard
         webViewHelper.dismissKeyboard()
@@ -194,7 +171,7 @@ class DeunaSDKIntegrationTest {
         Thread.sleep(1000)
 
         // Tap pay button
-        webViewHelper.buttonTap(labelContains = listOf("Pagar"))
+        webViewHelper.buttonTap("Pagar")
 
         // Wait for PAYMENT_SUCCESS event instead of UI navigation (WebView may crash after payment)
         if (!TestEventObserver.waitFor(paymentSuccessWaiter, timeoutSeconds = 60)) {
