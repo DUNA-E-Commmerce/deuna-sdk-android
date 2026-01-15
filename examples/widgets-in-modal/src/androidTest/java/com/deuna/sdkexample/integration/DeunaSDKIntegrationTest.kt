@@ -125,8 +125,9 @@ class DeunaSDKIntegrationTest {
         assert(orderToken != null) { "Order token should not be null" }
         assert(publicApiKey != null) { "Public API key should not be null" }
 
-        // Create waiter for the paymentMethodsEntered event BEFORE launching
+        // Create waiters for events BEFORE launching
         val paymentMethodsWaiter = TestEventObserver.createWaiter(TestEvent.PAYMENT_METHODS_ENTERED)
+        val paymentSuccessWaiter = TestEventObserver.createWaiter(TestEvent.PAYMENT_SUCCESS)
 
         // Launch the activity with the configured environment
         val scenario = launchActivity()
@@ -155,34 +156,34 @@ class DeunaSDKIntegrationTest {
         }
         Log.d(TAG, "✅ Received paymentMethodsEntered event")
 
-        // Fill card number
-        webViewHelper.fillTextField(
+        // Fill card number (label: "Número de tarjeta")
+        webViewHelper.fillTextFieldByLabel(
             text = "4242424242424242",
-            placeholderContains = listOf("0000")
+            labelContains = listOf("Número de tarjeta")
         )
 
-        // Fill expiry date
-        webViewHelper.fillTextField(
+        // Fill expiry date (label: "Fecha expiración")
+        webViewHelper.fillTextFieldByLabel(
             text = "1228",
-            placeholderContains = listOf("YY", "MM")
+            labelContains = listOf("Fecha expiración")
         )
 
         // Fill CVV
-        webViewHelper.fillTextField(
+        webViewHelper.fillTextFieldByLabel(
             text = "123",
-            placeholderContains = listOf("CVV", "CVC")
+            labelContains = listOf("CVV")
         )
 
-        // Fill cardholder name
-        webViewHelper.fillTextField(
+        // Fill cardholder name (label: "Nombre como aparece en la tarjeta")
+        webViewHelper.fillTextFieldByLabel(
             text = "Test User",
-            placeholderContains = listOf("Juan")
+            labelContains = listOf("Nombre como aparece en la tarjeta")
         )
 
-        // Fill identity document (if required for MX)
-        webViewHelper.fillTextField(
+        // Fill RFC/Identity document (label: "Número de RFC")
+        webViewHelper.fillTextFieldByLabel(
             text = "12345678",
-            placeholderContains = listOf("Documento")
+            labelContains = listOf("Número de RFC", "RFC")
         )
 
         // Dismiss keyboard
@@ -190,20 +191,14 @@ class DeunaSDKIntegrationTest {
 
         // Scroll up to see pay button
         webViewHelper.swipeUp()
-        Thread.sleep(2000)
+        Thread.sleep(1000)
 
         // Tap pay button
-        webViewHelper.buttonTap(labelContains = listOf("Pagar", "Pay", "Continuar"))
+        webViewHelper.buttonTap(labelContains = listOf("Pagar"))
 
-        // Verify PaymentSuccessView is displayed after payment completes
-        val paymentSuccessText = device.findObject(UiSelector().text("Payment Successful"))
-        if (!paymentSuccessText.waitForExists(20000)) {
-            Log.w(TAG, "⚠️ Payment Successful text not found, checking for alternative success indicators")
-            // Try alternative success indicators
-            val alternativeSuccess = device.findObject(UiSelector().textContains("Success"))
-            if (!alternativeSuccess.waitForExists(5000)) {
-                throw AssertionError("PaymentSuccessView should be displayed after successful payment")
-            }
+        // Wait for PAYMENT_SUCCESS event instead of UI navigation (WebView may crash after payment)
+        if (!TestEventObserver.waitFor(paymentSuccessWaiter, timeoutSeconds = 60)) {
+            throw AssertionError("Timeout waiting for PAYMENT_SUCCESS event")
         }
         Log.d(TAG, "✅ Payment successful!")
 

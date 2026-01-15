@@ -7,6 +7,8 @@ import androidx.navigation.NavController
 import com.deuna.sdkexample.shared.CheckoutResult
 import com.deuna.sdkexample.shared.ElementsResult
 import com.deuna.sdkexample.shared.PaymentWidgetResult
+import com.deuna.sdkexample.testing.TestEvent
+import com.deuna.sdkexample.testing.TestEventBroadcaster
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
 import com.deuna.sdkexample.ui.screens.main.view_model.MainViewModel
 import com.deuna.sdkexample.ui.screens.main.view_model.extensions.clickToPay
@@ -29,9 +31,13 @@ fun showWidgetInModal(
             viewModel.showPaymentWidget(context = context, completion = { result ->
                 when (result) {
                     is PaymentWidgetResult.Canceled -> Log.d("PAYMENT", "Canceled")
-                    is PaymentWidgetResult.Error -> Log.d("PAYMENT", "Error")
+                    is PaymentWidgetResult.Error -> {
+                        Log.d("PAYMENT", "Error")
+                        TestEventBroadcaster.broadcast(TestEvent.PAYMENT_ERROR)
+                    }
                     is PaymentWidgetResult.Success -> {
                         Log.d("PAYMENT", "Success")
+                        TestEventBroadcaster.broadcast(TestEvent.PAYMENT_SUCCESS)
                         val orderStr = Uri.encode(JSONObject(result.order).toString())
                         navController.navigate(
                             "payment-success/$orderStr"
