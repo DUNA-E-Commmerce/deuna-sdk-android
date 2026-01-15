@@ -1,9 +1,10 @@
 name: Integration Tests
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/ENTP1-16826
+      - master
+      - main
 
 jobs:
   integration-tests:
