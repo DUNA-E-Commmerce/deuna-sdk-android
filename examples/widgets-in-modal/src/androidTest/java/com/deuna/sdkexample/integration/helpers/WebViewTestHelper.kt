@@ -19,52 +19,6 @@ class WebViewTestHelper(private val device: UiDevice) {
     }
 
     /**
-     * Fills a text field by finding it via placeholder/hint text.
-     * Works with WebView by using accessibility nodes.
-     * @param text The text to enter into the field.
-     * @param placeholderContains List of possible placeholder texts to match.
-     * @param timeout Timeout in milliseconds to wait for the element.
-     */
-    fun fillTextField(
-        text: String,
-        placeholderContains: List<String>,
-        timeout: Long = 10000
-    ): Boolean {
-        Log.d(TAG, "🔍 Looking for field with placeholders: $placeholderContains")
-
-        // First, log all available elements for debugging
-        logAvailableElements()
-
-        for (placeholder in placeholderContains) {
-            // Try using By selector with text contains (works better with WebView)
-            var element = device.wait(
-                Until.findObject(By.textContains(placeholder)),
-                timeout
-            )
-
-            if (element != null) {
-                Log.d(TAG, "✅ Found element with text containing: $placeholder")
-                return enterTextInElement(element, text)
-            }
-
-            // Try with description
-            element = device.wait(
-                Until.findObject(By.descContains(placeholder)),
-                timeout / 2
-            )
-
-            if (element != null) {
-                Log.d(TAG, "✅ Found element with description containing: $placeholder")
-                return enterTextInElement(element, text)
-            }
-
-        }
-
-        Log.w(TAG, "⚠️ Could not find field with placeholders: $placeholderContains")
-        return false
-    }
-
-    /**
      * Fills a text field by finding the label and then the EditText below it.
      * Uses visual coordinates to find the correct field.
      * @param text The text to enter into the field.
@@ -243,23 +197,6 @@ class WebViewTestHelper(private val device: UiDevice) {
     }
 
     /**
-     * Performs a swipe down gesture on the screen.
-     */
-    fun swipeDown() {
-        val displayHeight = device.displayHeight
-        val displayWidth = device.displayWidth
-
-        device.swipe(
-            displayWidth / 2,
-            displayHeight / 4,
-            displayWidth / 2,
-            displayHeight * 3 / 4,
-            10
-        )
-        Log.d(TAG, "✅ Performed swipe down")
-    }
-
-    /**
      * Dismisses the keyboard if it's visible.
      */
     fun dismissKeyboard() {
@@ -283,39 +220,5 @@ class WebViewTestHelper(private val device: UiDevice) {
             Log.w(TAG, "⚠️ WebView not found within timeout")
         }
         return exists
-    }
-
-    /**
-     * Logs all available UI elements for debugging.
-     */
-    fun logAvailableElements() {
-        Log.d(TAG, "=== Available UI Elements ===")
-
-        // Log all text elements
-        val textElements = device.findObjects(By.textStartsWith(""))
-        Log.d(TAG, "Text elements found: ${textElements.size}")
-        textElements.take(20).forEachIndexed { index, element ->
-            try {
-                Log.d(
-                    TAG,
-                    "  [$index] class=${element.className}, text='${element.text}', desc='${element.contentDescription}'"
-                )
-            } catch (e: Exception) {
-                Log.d(TAG, "  [$index] (unable to read)")
-            }
-        }
-
-        // Log focusable elements
-        val focusableElements = device.findObjects(By.focusable(true))
-        Log.d(TAG, "Focusable elements found: ${focusableElements.size}")
-        focusableElements.take(10).forEachIndexed { index, element ->
-            try {
-                Log.d(TAG, "  [$index] class=${element.className}, text='${element.text}'")
-            } catch (e: Exception) {
-                Log.d(TAG, "  [$index] (unable to read)")
-            }
-        }
-
-        Log.d(TAG, "=== End UI Elements ===")
     }
 }
