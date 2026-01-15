@@ -53,7 +53,7 @@ jobs:
           disable-animations: true
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Run integration tests
+      - name: Run integration tests with screen recording
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
@@ -61,8 +61,20 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          working-directory: examples/widgets-in-modal
-          script: ./gradlew connectedAndroidTest --info
+          script: |
+            # Start screen recording in background (max 3 minutes)
+            adb shell screenrecord --time-limit 180 /sdcard/test_recording.mp4 &
+            RECORD_PID=$!
+            
+            # Run the tests from root directory
+            ./gradlew :widgets-in-modal:connectedAndroidTest --info || true
+            
+            # Stop recording
+            kill $RECORD_PID 2>/dev/null || true
+            sleep 2
+            
+            # Pull the recording
+            adb pull /sdcard/test_recording.mp4 ./test_recording.mp4 || true
 
       - name: Upload test results
         if: always()
@@ -70,3 +82,10 @@ jobs:
         with:
           name: integration-test-results
           path: examples/widgets-in-modal/build/reports/androidTests/
+
+      - name: Upload screen recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screen-recording
+          path: test_recording.mp4
