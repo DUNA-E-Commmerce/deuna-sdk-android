@@ -8,7 +8,7 @@ on:
 
 jobs:
   integration-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
 
     steps:
       - name: Checkout
@@ -34,6 +34,16 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-
+
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -41,7 +51,9 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-api-31
+          key: avd-api-31-${{ runner.os }}
+          restore-keys: |
+            avd-api-31-
 
       - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -60,9 +72,9 @@ jobs:
           api-level: 31
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           disable-animations: true
-          script: ./gradlew :widgets-in-modal:connectedAndroidTest --info
+          script: ./gradlew :widgets-in-modal:connectedAndroidTest
 
       - name: Upload test results
         if: always()
