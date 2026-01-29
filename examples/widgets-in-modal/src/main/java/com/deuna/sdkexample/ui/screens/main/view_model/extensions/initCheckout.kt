@@ -24,6 +24,9 @@ fun MainViewModel.showCheckout(
     context: Context,
     completion: (CheckoutResult) -> Unit,
 ) {
+    // Get domain from environment variable for e2e-preproduction
+    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")
+    
     deunaSDK.initCheckout(
         context = context,
         orderToken = orderToken,
@@ -72,5 +75,6 @@ fun MainViewModel.showCheckout(
             }
         },
         userToken = userToken,
+        domain = customDomain  // ← Use checkout-base domain for e2e-preproduction
     )
 }

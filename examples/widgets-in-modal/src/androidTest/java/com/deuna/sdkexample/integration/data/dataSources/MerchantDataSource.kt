@@ -19,8 +19,11 @@ import com.deuna.sdkexample.integration.domain.responses.StoreResponse
 import org.json.JSONObject
 
 object AdminCredentials {
-    const val username = "developers@getduna.com"
-    const val password = "superadmin"
+    val username: String
+        get() = System.getenv("ADMIN_USERNAME") ?: "developers@getduna.com"
+
+    val password: String
+        get() = System.getenv("ADMIN_PASSWORD") ?: "superadmin"
 }
 
 class MerchantDataSource(env: TestEnvironment) {

@@ -28,7 +28,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 object Constants {
-    val env: TestEnvironment = TestEnvironment.STAGING // DEVELOPMENT, STAGING
+    // Use environment variable if set, otherwise default to STAGING
+    val env: TestEnvironment = TestEnvironment.fromEnvironment()
     val country: CountryCode = CountryCode.MX
 }
 
