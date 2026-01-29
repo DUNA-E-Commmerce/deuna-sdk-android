@@ -37,6 +37,21 @@ jobs:
           cp -r !(temp_dir) temp_dir/
           cp version.txt temp_dir/
           cp -r .github temp_dir/
+          
+          # Remove sensitive integration test code and create empty directory
+          rm -rf temp_dir/examples/widgets-in-modal/src/androidTest/*
+          mkdir -p temp_dir/examples/widgets-in-modal/src/androidTest
+          touch temp_dir/examples/widgets-in-modal/src/androidTest/.gitkeep
+          
+          # Remove Docker-related files (not needed in public repo)
+          rm -f temp_dir/examples/widgets-in-modal/Dockerfile
+          rm -f temp_dir/examples/widgets-in-modal/docker-compose.yml
+          rm -f temp_dir/examples/widgets-in-modal/run-android-tests.sh
+          rm -f temp_dir/examples/widgets-in-modal/README_DOCKER.md
+          rm -f temp_dir/examples/widgets-in-modal/repository-list-entry.json
+          rm -rf temp_dir/examples/widgets-in-modal/test-results
+          rm -f temp_dir/examples/widgets-in-modal/check-requirements.sh
+          
           cd temp_dir
           
           # Navigate to temp_dir and set up git

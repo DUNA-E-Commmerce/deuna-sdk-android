@@ -21,6 +21,10 @@ fun MainViewModel.clickToPay(
     context: Context,
     completion: (ElementsResult) -> Unit,
 ) {
+    // Get domain from environment variable for e2e-preproduction
+    // Elements uses elements-link, not checkout-base
+    val customDomain = System.getenv("DEUNA_ELEMENTS_LINK_DOMAIN")
+    
     deunaSDK.initElements(
         context = context,
         userInfo = UserInfo(
@@ -54,5 +58,6 @@ fun MainViewModel.clickToPay(
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
         },
+        domain = customDomain  // ← Use elements-link domain for e2e-preproduction
     )
 }
