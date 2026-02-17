@@ -2,6 +2,7 @@ package com.deuna.maven.widgets.configuration
 
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.shared.QueryParameters
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.Utils
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.widgets.next_action.NextActionCallbacks
@@ -14,9 +15,13 @@ class NextActionWidgetConfiguration(
     val callbacks: NextActionCallbacks,
     val language: String? = null,
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
+    fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    fraudCredentials = fraudCredentials,
+    customUserAgent = customUserAgent,
     domain = domain,
 ) {
     override val link: String
