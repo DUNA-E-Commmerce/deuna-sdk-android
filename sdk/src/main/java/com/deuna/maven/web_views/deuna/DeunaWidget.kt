@@ -26,6 +26,7 @@ import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
+import org.json.JSONObject
 
 
 @Suppress("UNCHECKED_CAST")
@@ -45,15 +46,31 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     var bridge: DeunaBridge? = null
 
-    var deunaFraudId = ""
+    var deunaFraudId: String? = null
 
     // Used to prevent opening the same url multiple times
     var externalUrl: String? = null
 
     private var fraudCredentials: Json? = null
+    private var customUserAgent: String? = null
 
     fun setFraudCredentials(fraudCredentials: Json?) {
         this.fraudCredentials = fraudCredentials
+    }
+
+    fun setCustomUserAgent(customUserAgent: String?) {
+        this.customUserAgent = customUserAgent
+    }
+
+    fun buildSuccessPayload(payload: Json): Json {
+        val enrichedPayload = payload.toMutableMap<String, Any>()
+        val userAgent = webView.settings.userAgentString
+        if (!userAgent.isNullOrBlank()) {
+            enrichedPayload["user_agent"] = userAgent
+        }
+        val fraudId = deunaFraudId
+        enrichedPayload["fraud_id"] = if (fraudId.isNullOrBlank()) JSONObject.NULL else fraudId
+        return enrichedPayload
     }
 
 
@@ -65,11 +82,11 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 context = context,
                 params = it,
                 callback = { fraudId ->
-                    deunaFraudId = fraudId ?: ""
+                    deunaFraudId = fraudId
 
                     if (isWebViewLoaded) {
                         webView.evaluateJavascript(
-                            "window.getFraudId = function() { return '${deunaFraudId}'; };",
+                            "window.getFraudId = function() { return '${deunaFraudId ?: ""}'; };",
                             null
                         )
                     }
@@ -86,6 +103,9 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         bridge?.let {
             DeunaLogs.info("Adding bridge ${it.name}")
             webView.addJavascriptInterface(it, it.name)
+        }
+        if (!customUserAgent.isNullOrBlank()) {
+            webView.settings.userAgentString = customUserAgent
         }
 
         fun jsToInjectCallback(): String {
@@ -132,10 +152,10 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         """.trimIndent()
 
 
-            if (deunaFraudId.isNotEmpty()) {
+            if (!deunaFraudId.isNullOrEmpty()) {
                 js += """
                 window.getFraudId = function() {
-                    return '${deunaFraudId}';
+                    return '$deunaFraudId';
                 };
                 """.trimIndent()
             }
