@@ -9,6 +9,7 @@ sealed class DeunaWidgetConfiguration(
     val sdkInstance: DeunaSDK,
     val hidePayButton: Boolean,
     val fraudCredentials: Json? = null,
+    val customUserAgent: String? = null,
     val domain: String? = null,
 ) {
     var onCloseByUser: (() -> Unit)? = null
