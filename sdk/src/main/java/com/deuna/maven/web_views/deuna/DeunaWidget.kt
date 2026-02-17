@@ -63,13 +63,13 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     }
 
     fun buildSuccessPayload(payload: Json): Json {
-        val enrichedPayload = payload.toMutableMap<String, Any>()
+        val enrichedPayload = payload.toMutableMap<String, Any?>()
         val userAgent = webView.settings.userAgentString
         if (!userAgent.isNullOrBlank()) {
             enrichedPayload["user_agent"] = userAgent
         }
         val fraudId = deunaFraudId
-        enrichedPayload["fraud_id"] = if (fraudId.isNullOrBlank()) JSONObject.NULL else fraudId
+        enrichedPayload["fraud_id"] = if (fraudId.isNullOrBlank()) null else fraudId
         return enrichedPayload
     }
 
