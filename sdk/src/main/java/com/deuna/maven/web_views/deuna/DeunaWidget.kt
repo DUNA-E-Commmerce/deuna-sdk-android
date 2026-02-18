@@ -48,8 +48,9 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     var deunaFraudId: String? = null
 
-    // Used to prevent opening the same url multiple times
-    var externalUrl: String? = null
+    // Stores automatic redirects already opened during this widget session
+    // to avoid reopening the same browser tab after returning via deep link.
+    private val openedAutomaticExternalUrls = mutableSetOf<String>()
 
     private var fraudCredentials: Json? = null
     private var customUserAgent: String? = null
@@ -77,6 +78,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     fun launch(url: String, javascriptToInject: String? = null) {
+        openedAutomaticExternalUrls.clear()
+
         fraudCredentials?.let {
             widgetConfiguration?.sdkInstance?.generateFraudId(
                 context = context,
@@ -188,13 +191,14 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 }
             }
 
-            override fun onOpenExternalUrl(url: String) {
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
                 runOnUiThread {
-                    if (externalUrl == url) { // Prevent opening the same url multiple times
-                        return@runOnUiThread
+                    if (!userInitiated) {
+                        if (openedAutomaticExternalUrls.contains(url)) {
+                            return@runOnUiThread
+                        }
+                        openedAutomaticExternalUrls.add(url)
                     }
-
-                    externalUrl = url
 
                     ExternalUrlHelper.openUrl(
                         context = this@DeunaWidget.context,
@@ -202,7 +206,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                         browser = getExternalUrlBrowser(url),
                         onExternalUrlClosed = {
                             closeEnabled = true
-                            externalUrl = null
                         }
                     )
                 }

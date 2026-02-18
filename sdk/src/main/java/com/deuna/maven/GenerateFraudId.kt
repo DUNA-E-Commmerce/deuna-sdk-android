@@ -52,7 +52,7 @@ class GenerateFraudId(
                 callback.invoke(null)
             }
 
-            override fun onOpenExternalUrl(url: String) {}
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {}
 
             override fun onDownloadFile(url: String) {}
 
