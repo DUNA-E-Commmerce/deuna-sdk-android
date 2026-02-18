@@ -117,10 +117,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             android.consoleLog(message);
         };
          
-         window.open = function(url, target, features) {
-            local.openExternalUrl(url);
-         };
-         
          window.xprops = {
              hidePayButton: ${widgetConfiguration?.hidePayButton ?: false},
              onEventDispatch : function (event) {
@@ -192,6 +188,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             }
 
             override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
+                DeunaLogs.info("Opening external url: $url, userInitiated: $userInitiated")
                 runOnUiThread {
                     if (!userInitiated) {
                         if (openedAutomaticExternalUrls.contains(url)) {

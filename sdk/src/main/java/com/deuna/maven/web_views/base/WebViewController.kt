@@ -48,9 +48,42 @@ class WebViewController(
                 pageLoaded = true
 
                 val js = """
-                     window.open = function(url, target, features) {
-                         local.openExternalUrl(url);
-                     };
+                    (function() {
+                        if (window.__deunaExternalUrlBridgeInstalled) {
+                            return;
+                        }
+                        window.__deunaExternalUrlBridgeInstalled = true;
+                        window.__deunaLastUserGestureAt = 0;
+
+                        var markUserGesture = function() {
+                            window.__deunaLastUserGestureAt = Date.now();
+                        };
+
+                        document.addEventListener("click", markUserGesture, true);
+                        document.addEventListener("touchstart", markUserGesture, true);
+                        document.addEventListener("keydown", markUserGesture, true);
+
+                        var originalOpen = window.open;
+                        window.open = function(url, target, features) {
+                            var hasRecentGesture =
+                                (Date.now() - (window.__deunaLastUserGestureAt || 0)) < 800;
+
+                            if (window.local && typeof window.local.openExternalUrlWithUserIntent === "function") {
+                                window.local.openExternalUrlWithUserIntent(String(url || ""), hasRecentGesture);
+                                return null;
+                            }
+
+                            if (window.local && typeof window.local.openExternalUrl === "function") {
+                                window.local.openExternalUrl(String(url || ""));
+                                return null;
+                            }
+
+                            if (typeof originalOpen === "function") {
+                                return originalOpen.call(window, url, target, features);
+                            }
+                            return null;
+                        };
+                    })();
                 """.trimIndent()
                 webView.evaluateJavascript(js, null)
 
@@ -136,11 +169,16 @@ class WebViewController(
     inner class LocalBridge() {
         @JavascriptInterface
         fun openExternalUrl(url: String) {
+            openExternalUrlWithUserIntent(url, false)
+        }
+
+        @JavascriptInterface
+        fun openExternalUrlWithUserIntent(url: String, userInitiated: Boolean) {
             if (url.isFileDownloadUrl) {
                 listener?.onDownloadFile(url)
                 return
             }
-            listener?.onOpenExternalUrl(url, userInitiated = false)
+            listener?.onOpenExternalUrl(url, userInitiated = userInitiated)
         }
     }
 
