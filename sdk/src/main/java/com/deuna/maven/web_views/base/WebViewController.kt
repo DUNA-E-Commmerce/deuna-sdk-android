@@ -101,7 +101,7 @@ class WebViewController(
                                 listener?.onDownloadFile(url)
                                 return
                             }
-                            listener?.onOpenExternalUrl(url)
+                            listener?.onOpenExternalUrl(url, userInitiated = true)
                         }
 
                         override fun onLoadUrl(webView: WebView, newWebView: WebView, url: String) {
@@ -109,7 +109,7 @@ class WebViewController(
                                 listener?.onDownloadFile(url)
                                 return
                             }
-                            listener?.onOpenExternalUrl(url)
+                            listener?.onOpenExternalUrl(url, userInitiated = true)
                         }
                     }, newWebView)
                     newWebView.webViewClient = webViewClient
@@ -125,7 +125,7 @@ class WebViewController(
     interface Listener {
         fun onWebViewLoaded()
         fun onWebViewError()
-        fun onOpenExternalUrl(url: String)
+        fun onOpenExternalUrl(url: String, userInitiated: Boolean)
         fun onDownloadFile(url: String)
     }
 
@@ -140,7 +140,7 @@ class WebViewController(
                 listener?.onDownloadFile(url)
                 return
             }
-            listener?.onOpenExternalUrl(url)
+            listener?.onOpenExternalUrl(url, userInitiated = false)
         }
     }
 
