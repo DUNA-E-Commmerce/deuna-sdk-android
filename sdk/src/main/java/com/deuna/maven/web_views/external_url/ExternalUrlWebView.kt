@@ -37,7 +37,7 @@ class ExternalUrlWebView(
 
             override fun onWebViewError() {}
 
-            override fun onOpenExternalUrl(url: String) {
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
                 launch(url)
             }
 

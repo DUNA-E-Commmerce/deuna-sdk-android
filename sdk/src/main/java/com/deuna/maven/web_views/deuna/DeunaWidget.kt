@@ -26,6 +26,7 @@ import com.deuna.maven.web_views.file_downloaders.TakeSnapshotBridge
 import com.deuna.maven.web_views.file_downloaders.downloadFile
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
+import org.json.JSONObject
 
 
 @Suppress("UNCHECKED_CAST")
@@ -45,31 +46,50 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     var bridge: DeunaBridge? = null
 
-    var deunaFraudId = ""
+    var deunaFraudId: String? = null
 
-    // Used to prevent opening the same url multiple times
-    var externalUrl: String? = null
+    // Stores automatic redirects already opened during this widget session
+    // to avoid reopening the same browser tab after returning via deep link.
+    private val openedAutomaticExternalUrls = mutableSetOf<String>()
 
     private var fraudCredentials: Json? = null
+    private var customUserAgent: String? = null
 
     fun setFraudCredentials(fraudCredentials: Json?) {
         this.fraudCredentials = fraudCredentials
+    }
+
+    fun setCustomUserAgent(customUserAgent: String?) {
+        this.customUserAgent = customUserAgent
+    }
+
+    fun buildSuccessPayload(payload: Json): Json {
+        val enrichedPayload = payload.toMutableMap<String, Any?>()
+        val userAgent = webView.settings.userAgentString
+        if (!userAgent.isNullOrBlank()) {
+            enrichedPayload["user_agent"] = userAgent
+        }
+        val fraudId = deunaFraudId
+        enrichedPayload["fraud_id"] = if (fraudId.isNullOrBlank()) null else fraudId
+        return enrichedPayload
     }
 
 
     // Load the URL in the WebView
     @SuppressLint("SetJavaScriptEnabled")
     fun launch(url: String, javascriptToInject: String? = null) {
+        openedAutomaticExternalUrls.clear()
+
         fraudCredentials?.let {
             widgetConfiguration?.sdkInstance?.generateFraudId(
                 context = context,
                 params = it,
                 callback = { fraudId ->
-                    deunaFraudId = fraudId ?: ""
+                    deunaFraudId = fraudId
 
                     if (isWebViewLoaded) {
                         webView.evaluateJavascript(
-                            "window.getFraudId = function() { return '${deunaFraudId}'; };",
+                            "window.getFraudId = function() { return '${deunaFraudId ?: ""}'; };",
                             null
                         )
                     }
@@ -87,16 +107,15 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             DeunaLogs.info("Adding bridge ${it.name}")
             webView.addJavascriptInterface(it, it.name)
         }
+        if (!customUserAgent.isNullOrBlank()) {
+            webView.settings.userAgentString = customUserAgent
+        }
 
         fun jsToInjectCallback(): String {
             var js = """
         console.log = function(message) {
             android.consoleLog(message);
         };
-         
-         window.open = function(url, target, features) {
-            local.openExternalUrl(url);
-         };
          
          window.xprops = {
              hidePayButton: ${widgetConfiguration?.hidePayButton ?: false},
@@ -132,10 +151,10 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         """.trimIndent()
 
 
-            if (deunaFraudId.isNotEmpty()) {
+            if (!deunaFraudId.isNullOrEmpty()) {
                 js += """
                 window.getFraudId = function() {
-                    return '${deunaFraudId}';
+                    return '$deunaFraudId';
                 };
                 """.trimIndent()
             }
@@ -168,13 +187,15 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 }
             }
 
-            override fun onOpenExternalUrl(url: String) {
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
+                DeunaLogs.info("Opening external url: $url, userInitiated: $userInitiated")
                 runOnUiThread {
-                    if (externalUrl == url) { // Prevent opening the same url multiple times
-                        return@runOnUiThread
+                    if (!userInitiated) {
+                        if (openedAutomaticExternalUrls.contains(url)) {
+                            return@runOnUiThread
+                        }
+                        openedAutomaticExternalUrls.add(url)
                     }
-
-                    externalUrl = url
 
                     ExternalUrlHelper.openUrl(
                         context = this@DeunaWidget.context,
@@ -182,7 +203,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                         browser = getExternalUrlBrowser(url),
                         onExternalUrlClosed = {
                             closeEnabled = true
-                            externalUrl = null
                         }
                     )
                 }

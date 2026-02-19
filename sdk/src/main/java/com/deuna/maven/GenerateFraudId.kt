@@ -10,7 +10,6 @@ import com.deuna.maven.shared.value
 import com.deuna.maven.web_views.base.WebViewController
 import org.json.JSONObject
 
-/* <<<<<<<<<<<<<<  ✨ Windsurf Command ⭐ >>>>>>>>>>>>>>>> */
 /**
  * Generates a fraud ID for the given parameters.
  *
@@ -18,7 +17,6 @@ import org.json.JSONObject
  * @param params Optional JSON object containing additional parameters for the fraud ID generation.
  * @param callback A callback function to be invoked when the fraud ID generation completes. The callback receives a `String?` object containing the fraud ID or `null` if the request fails.
  */
-/* <<<<<<<<<<  b83a2374-da3c-4fcb-b677-6197827fd300  >>>>>>>>>>> */
 fun DeunaSDK.generateFraudId(
     context: Context,
     params: Json? = null,
@@ -54,7 +52,7 @@ class GenerateFraudId(
                 callback.invoke(null)
             }
 
-            override fun onOpenExternalUrl(url: String) {}
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {}
 
             override fun onDownloadFile(url: String) {}
 

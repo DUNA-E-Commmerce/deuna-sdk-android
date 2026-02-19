@@ -32,6 +32,14 @@ fun showWidgetInModal(
                     is PaymentWidgetResult.Error -> Log.d("PAYMENT", "Error")
                     is PaymentWidgetResult.Success -> {
                         Log.d("PAYMENT", "Success")
+                        Log.d(
+                            "DeunaSDK: user_agent",
+                            result.order["user_agent"] as String? ?: "null"
+                        )
+                        Log.d(
+                            "DeunaSDK: fraud_id",
+                            result.order["fraud_id"] as String? ?: "null"
+                        )
                         val orderStr = Uri.encode(JSONObject(result.order).toString())
                         navController.navigate(
                             "payment-success/$orderStr"

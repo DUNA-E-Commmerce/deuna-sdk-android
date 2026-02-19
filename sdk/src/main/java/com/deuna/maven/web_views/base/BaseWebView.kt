@@ -50,8 +50,8 @@ open class BaseWebView(
                 listener?.onWebViewError()
             }
 
-            override fun onOpenExternalUrl(url: String) {
-                listener?.onOpenExternalUrl(url)
+            override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
+                listener?.onOpenExternalUrl(url, userInitiated)
             }
 
             override fun onDownloadFile(url: String) {
@@ -69,7 +69,7 @@ open class BaseWebView(
     interface Listener {
         fun onWebViewLoaded()
         fun onWebViewError()
-        fun onOpenExternalUrl(url: String)
+        fun onOpenExternalUrl(url: String, userInitiated: Boolean)
         fun onDownloadFile(url: String)
     }
 
