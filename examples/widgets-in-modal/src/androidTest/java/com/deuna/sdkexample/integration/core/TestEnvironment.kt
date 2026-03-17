@@ -30,4 +30,3 @@ enum class TestEnvironment(val value: String) {
         }
     }
 }
-}
