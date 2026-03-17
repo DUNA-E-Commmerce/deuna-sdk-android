@@ -8,6 +8,10 @@ adb wait-for-device
 rm -f "${STOP_FILE}"
 adb shell rm -f /sdcard/integration-tests-*.mp4 || true
 
+# Normalize emulator viewport to avoid tiny-screen layout differences in CI.
+adb shell wm size 1080x2400 || true
+adb shell wm density 420 || true
+
 # Record the emulator screen in rolling segments to avoid the hard time limit.
 (
   segment=1

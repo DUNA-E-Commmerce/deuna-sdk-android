@@ -61,6 +61,9 @@ jobs:
         with:
           api-level: 31
           arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 4096M
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
@@ -71,6 +74,9 @@ jobs:
         with:
           api-level: 31
           arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 4096M
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           disable-animations: true
