@@ -82,8 +82,8 @@ jobs:
           disable-animations: true
           script: bash .github/scripts/run-integration-tests-with-video.sh
 
-      - name: Upload failed test video
-        if: failure()
+      - name: Upload test video
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-video
