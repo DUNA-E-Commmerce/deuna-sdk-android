@@ -8,10 +8,8 @@ import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
  */
 fun DeunaWidget.build() {
     widgetConfiguration?.let {
-
-        it.fraudCredentials?.let { fraudCredentials ->
-            setFraudCredentials(fraudCredentials)
-        }
+        setFraudCredentials(it.fraudCredentials)
+        setCustomUserAgent(it.customUserAgent)
 
         when (it) {
             is CheckoutWidgetConfiguration -> {

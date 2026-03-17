@@ -48,6 +48,8 @@ fun DeunaSDK.initElements(
     orderToken: String? = null,
     behavior: Json? = null,
     widgetExperience: ElementsWidgetExperience? = null,
+    fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
     domain: String? = null,
 ) {
 
@@ -65,6 +67,8 @@ fun DeunaSDK.initElements(
             behavior = behavior,
             widgetIntegration = WidgetIntegration.MODAL,
             widgetExperience = widgetExperience,
+            fraudCredentials = fraudCredentials,
+            customUserAgent = customUserAgent,
             domain = domain,
         )
     )

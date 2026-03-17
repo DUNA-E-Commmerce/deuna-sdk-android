@@ -48,6 +48,14 @@ fun MainViewModel.saveCard(
             onSuccess = { response ->
                 deunaSDK.close()
                 viewModelScope.launch {
+                    Log.d(
+                        "✅ DeunaSDK: user_agent",
+                        response["user_agent"] as String? ?: "null"
+                    )
+                    Log.d(
+                        "✅ DeunaSDK: fraud_id",
+                        response["fraud_id"] as String? ?: "null"
+                    )
                     completion(
                         ElementsResult.Success(
                             (response["metadata"] as Json)["createdCard"] as Json

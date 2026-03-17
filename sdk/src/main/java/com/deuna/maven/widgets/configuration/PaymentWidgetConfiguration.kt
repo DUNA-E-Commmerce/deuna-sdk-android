@@ -22,10 +22,12 @@ class PaymentWidgetConfiguration(
     val behavior: Json? = null,
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
     fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
     fraudCredentials = fraudCredentials,
+    customUserAgent = customUserAgent,
     domain = domain,
 ) {
 

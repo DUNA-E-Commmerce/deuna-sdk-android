@@ -28,9 +28,13 @@ class ElementsWidgetConfiguration(
     val behavior: Json? = null,
     val widgetExperience: ElementsWidgetExperience? = null,
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
+    fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    fraudCredentials = fraudCredentials,
+    customUserAgent = customUserAgent,
     domain = domain,
 ) {
     override val link: String
@@ -104,4 +108,3 @@ class ElementsWidgetConfiguration(
             return Utils.buildUrl(baseUrl = "$baseUrl/$widgetName", queryParams = queryParameters)
         }
 }
-

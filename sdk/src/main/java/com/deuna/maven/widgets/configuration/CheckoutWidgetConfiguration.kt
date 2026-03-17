@@ -3,6 +3,7 @@ package com.deuna.maven.widgets.configuration
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.client.sendOrder
 import com.deuna.maven.shared.CheckoutCallbacks
+import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.QueryParameters
@@ -23,9 +24,13 @@ class CheckoutWidgetConfiguration(
     val styleFile: String? = null,
     val language: String? = null,
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
+    fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
+    fraudCredentials = fraudCredentials,
+    customUserAgent = customUserAgent,
     domain = domain,
 ) {
 

@@ -1,3 +1,3 @@
 package com.deuna.maven.shared
 
-typealias Json = Map<String, Any>
+typealias Json = Map<String, Any?>

@@ -21,6 +21,8 @@ fun DeunaSDK.initCheckout(
     userToken: String? = null,
     styleFile: String? = null,
     language: String? = null,
+    fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
     domain: String? = null,
 ) {
     if (orderToken.isEmpty()) {
@@ -40,6 +42,8 @@ fun DeunaSDK.initCheckout(
             styleFile = styleFile,
             language = language,
             widgetIntegration = WidgetIntegration.MODAL,
+            fraudCredentials = fraudCredentials,
+            customUserAgent = customUserAgent,
             domain = domain,
         )
     )

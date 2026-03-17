@@ -77,7 +77,8 @@ class NextActionBridge(
 
                     CheckoutEvent.purchase -> {
                         deunaWidget.closeSubWebView()
-                        callbacks.onSuccess?.invoke(data["order"] as Json)
+                        val order = data["order"] as? Json ?: return@runOnUiThread
+                        callbacks.onSuccess?.invoke(deunaWidget.buildSuccessPayload(order))
                     }
 
                     CheckoutEvent.paymentMethods3dsInitiated -> {}

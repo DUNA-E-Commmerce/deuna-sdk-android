@@ -42,7 +42,7 @@ class ElementsBridge(
 
                     ElementsEvent.vaultSaveSuccess -> {
                         deunaWidget.closeSubWebView()
-                        callbacks.onSuccess?.invoke(data)
+                        callbacks.onSuccess?.invoke(deunaWidget.buildSuccessPayload(data))
                     }
 
                     ElementsEvent.vaultSaveError -> {

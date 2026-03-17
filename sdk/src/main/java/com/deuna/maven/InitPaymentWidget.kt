@@ -30,6 +30,7 @@ fun DeunaSDK.initPaymentWidget(
     language: String? = null,
     behavior: Json? = null,
     fraudCredentials: Json? = null,
+    customUserAgent: String? = null,
     domain: String? = null,
 ) {
 
@@ -55,9 +56,9 @@ fun DeunaSDK.initPaymentWidget(
             behavior = behavior,
             widgetIntegration = WidgetIntegration.MODAL,
             fraudCredentials = fraudCredentials,
+            customUserAgent = customUserAgent,
             domain = domain,
         )
     )
     dialogFragment?.show()
 }
-
