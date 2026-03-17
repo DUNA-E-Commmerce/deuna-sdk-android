@@ -40,14 +40,15 @@ enum class WidgetToShow(val label: String) {
 @Composable
 fun MainScreen(
     deunaSDK: DeunaSDK,
-    navController: NavHostController
+    navController: NavHostController,
+    initialOrderToken: String? = null
 ) {
 
     // Retrieve the Context from the composition's LocalContext
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
-    var orderToken by remember { mutableStateOf("") }
+    var orderToken by remember { mutableStateOf(initialOrderToken ?: "") }
     var userToken by remember { mutableStateOf("") }
     var fraudId by remember { mutableStateOf("") }
     var widgetToShow by remember { mutableStateOf(WidgetToShow.PAYMENT_WIDGET) }

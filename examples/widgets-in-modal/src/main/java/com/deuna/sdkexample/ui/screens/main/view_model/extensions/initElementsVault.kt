@@ -23,6 +23,10 @@ fun MainViewModel.saveCard(
     context: Context,
     completion: (ElementsResult) -> Unit,
 ) {
+    // Get domain from environment variable for e2e-preproduction
+    // Elements uses elements-link, not checkout-base
+    val customDomain = System.getenv("DEUNA_ELEMENTS_LINK_DOMAIN")
+    
     deunaSDK.initElements(
         context = context,
         userToken = userToken,
@@ -82,11 +86,7 @@ fun MainViewModel.saveCard(
                 showSavedCardFlow = false, defaultCardFlow = false
             )
         ),
-        fraudCredentials = mapOf(
-            "RISKIFIED" to mapOf(
-                "storeDomain" to "deuna.com"
-            )
-        ),
+        domain = customDomain  // ← Use elements-link domain for e2e-preproduction
     )
 }
 
