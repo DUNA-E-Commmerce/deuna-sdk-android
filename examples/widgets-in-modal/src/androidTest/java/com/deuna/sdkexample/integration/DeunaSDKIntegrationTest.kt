@@ -162,7 +162,7 @@ class DeunaSDKIntegrationTest {
         webViewHelper.fillTextFieldByLabel("1228", "Fecha expiración")
         webViewHelper.fillTextFieldByLabel("123", "CVV")
         webViewHelper.fillTextFieldByLabel("Test User", "Nombre como aparece en la tarjeta")
-        webViewHelper.fillTextFieldByLabel("12345678", "Número de RFC")
+        webViewHelper.fillTextFieldByLabel("GODE561231GR8", "Número de RFC")
 
         // Dismiss keyboard
         webViewHelper.dismissKeyboard()
