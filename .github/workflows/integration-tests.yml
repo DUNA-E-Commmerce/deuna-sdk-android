@@ -75,7 +75,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             mkdir -p artifacts/test-videos
             STOP_FILE="/tmp/stop_screenrecord_segments"
 
