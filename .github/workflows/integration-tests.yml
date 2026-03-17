@@ -74,48 +74,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           disable-animations: true
-          script: |
-            set -eu
-            mkdir -p artifacts/test-videos
-            STOP_FILE="/tmp/stop_screenrecord_segments"
-
-            adb wait-for-device
-            rm -f "${STOP_FILE}"
-            adb shell rm -f /sdcard/integration-tests-*.mp4 || true
-
-            # Record screen in rolling segments to avoid screenrecord time limits.
-            (
-              SEGMENT=1
-              while true; do
-                VIDEO_REMOTE_PATH="/sdcard/integration-tests-${SEGMENT}.mp4"
-                adb shell rm -f "${VIDEO_REMOTE_PATH}" || true
-                adb shell "screenrecord --time-limit 170 --bit-rate 6000000 ${VIDEO_REMOTE_PATH}" >/dev/null 2>&1 || true
-                if [ -f "${STOP_FILE}" ]; then
-                  break
-                fi
-                SEGMENT=$((SEGMENT + 1))
-              done
-            ) &
-            SCREENRECORD_LOOP_PID=$!
-
-            set +e
-            ./gradlew :widgets-in-modal:connectedAndroidTest
-            TEST_EXIT_CODE=$?
-            set -e
-
-            # Stop recording and fetch videos regardless of test result.
-            touch "${STOP_FILE}"
-            adb shell pkill -INT screenrecord >/dev/null 2>&1 || true
-            wait "${SCREENRECORD_LOOP_PID}" || true
-
-            for SEGMENT in $(seq 1 30); do
-              VIDEO_REMOTE_PATH="/sdcard/integration-tests-${SEGMENT}.mp4"
-              VIDEO_LOCAL_PATH="artifacts/test-videos/integration-tests-${SEGMENT}.mp4"
-              adb pull "${VIDEO_REMOTE_PATH}" "${VIDEO_LOCAL_PATH}" >/dev/null 2>&1 || true
-              adb shell rm -f "${VIDEO_REMOTE_PATH}" || true
-            done
-
-            exit "${TEST_EXIT_CODE}"
+          script: bash .github/scripts/run-integration-tests-with-video.sh
 
       - name: Upload failed test video
         if: failure()
