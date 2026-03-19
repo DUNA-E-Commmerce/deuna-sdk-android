@@ -20,12 +20,15 @@
   "environment": {
     "DEUNA_API_ENDPOINT": "http://apigw:8080",
     "DEUNA_ENV": "preprod",
+    "DEUNA_CHECKOUT_BASE_DOMAIN": "http://checkout-base:5003",
+    "DEUNA_ELEMENTS_LINK_DOMAIN": "http://elements-link:3000",
+    "EMULATOR_WAIT_TIME": "300",
     "ADMIN_USERNAME": "developers@getduna.com",
     "ADMIN_PASSWORD": "superadmin",
     "ANDROID_HOME": "/opt/android-sdk",
     "ANDROID_SDK_ROOT": "/opt/android-sdk",
     "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
-    "EMULATOR_WAIT_TIME": "180"
+    "DOCKER_BUILD_CONTEXT": "./deuna-sdk-android"
   },
   "secrets_replace": [
     {
