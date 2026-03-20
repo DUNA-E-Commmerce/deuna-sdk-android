@@ -43,14 +43,18 @@ jobs:
           mkdir -p temp_dir/examples/widgets-in-modal/src/androidTest
           touch temp_dir/examples/widgets-in-modal/src/androidTest/.gitkeep
           
-          # Remove Docker-related files (not needed in public repo)
+          # Remove Docker, preprod and integration CI artifacts (not needed in public repo)
           rm -f temp_dir/examples/widgets-in-modal/Dockerfile
           rm -f temp_dir/examples/widgets-in-modal/docker-compose.yml
           rm -f temp_dir/examples/widgets-in-modal/run-android-tests.sh
           rm -f temp_dir/examples/widgets-in-modal/README_DOCKER.md
+          rm -f temp_dir/examples/widgets-in-modal/DOCKER_INTEGRATION.md
+          rm -f temp_dir/examples/widgets-in-modal/TESTING_GUIDE.md
           rm -f temp_dir/examples/widgets-in-modal/repository-list-entry.json
           rm -rf temp_dir/examples/widgets-in-modal/test-results
           rm -f temp_dir/examples/widgets-in-modal/check-requirements.sh
+          rm -f temp_dir/.github/workflows/integration-tests.yml
+          rm -f temp_dir/.github/scripts/run-integration-tests-with-video.sh
           
           cd temp_dir
           
