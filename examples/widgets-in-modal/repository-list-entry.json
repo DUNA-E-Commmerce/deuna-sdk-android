@@ -1,0 +1,40 @@
+{
+  "repo_name": "github.com/DUNA-E-Commmerce/deuna-sdk-android",
+  "docker_compose_file_path": "./examples/widgets-in-modal/",
+  "branch": "main",
+  "ecr_download": "no",
+  "modify_dc": "yes",
+  "proxy": "yes",
+  "depends_containers": [
+    "apigw",
+    "ema",
+    "merchant-auth-nginx",
+    "user-auth-nginx",
+    "payments-nginx",
+    "deuna-squid-nginx"
+  ],
+  "depends_volumes": [
+    "./android-test-reports/:/test-results/"
+  ],
+  "image_docker_replace": {},
+  "environment": {
+    "DEUNA_API_ENDPOINT": "http://apigw:8080",
+    "DEUNA_ENV": "preprod",
+    "ADMIN_USERNAME": "developers@getduna.com",
+    "ADMIN_PASSWORD": "superadmin",
+    "ANDROID_HOME": "/opt/android-sdk",
+    "ANDROID_SDK_ROOT": "/opt/android-sdk",
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "EMULATOR_WAIT_TIME": "180"
+  },
+  "secrets_replace": [
+    {
+      "DEUNA_API_ENDPOINT": "http://apigw:8080",
+      "ADMIN_USERNAME": "developers@getduna.com",
+      "ADMIN_PASSWORD": "superadmin"
+    }
+  ],
+  "command": {
+    "deuna-sdk-android-integration-tests": "/app/run-android-tests.sh"
+  }
+}

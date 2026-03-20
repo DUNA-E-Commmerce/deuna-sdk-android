@@ -22,7 +22,7 @@ enum class AppRoutes(val route: String) {
 
 
 @Composable
-fun AppNavigation(deunaSDK: DeunaSDK) {
+fun AppNavigation(deunaSDK: DeunaSDK, initialOrderToken: String? = null) {
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = "main") {
@@ -30,6 +30,7 @@ fun AppNavigation(deunaSDK: DeunaSDK) {
             MainScreen(
                 deunaSDK = deunaSDK,
                 navController = navController,
+                initialOrderToken = initialOrderToken,
             )
         }
 

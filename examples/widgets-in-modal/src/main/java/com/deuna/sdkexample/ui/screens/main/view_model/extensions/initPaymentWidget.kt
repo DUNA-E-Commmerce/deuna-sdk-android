@@ -8,7 +8,10 @@ import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.PaymentsError
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.shared.toMap
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import com.deuna.sdkexample.shared.PaymentWidgetResult
+import com.deuna.sdkexample.testing.TestEvent
+import com.deuna.sdkexample.testing.TestEventBroadcaster
 import com.deuna.sdkexample.ui.screens.main.view_model.DEBUG_TAG
 import com.deuna.sdkexample.ui.screens.main.view_model.MainViewModel
 import kotlinx.coroutines.launch
@@ -19,6 +22,9 @@ fun MainViewModel.showPaymentWidget(
     context: Context,
     completion: (PaymentWidgetResult) -> Unit,
 ) {
+    // Get domain from environment variable for e2e-preproduction
+    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")
+    
     deunaSDK.initPaymentWidget(
         context = context,
         orderToken = orderToken.trim(),
@@ -59,7 +65,6 @@ fun MainViewModel.showPaymentWidget(
                         completion(PaymentWidgetResult.Canceled)
                     }
                 }
-
             }
             onCardBinDetected = { cardBinMetadata ->
                 deunaSDK.setCustomStyle(
@@ -103,6 +108,9 @@ fun MainViewModel.showPaymentWidget(
                 Log.d(DEBUG_TAG, "onPaymentProcessing")
             }
             onEventDispatch = { event, data ->
+                if (event == CheckoutEvent.paymentMethodsEntered) {
+                    TestEventBroadcaster.broadcast(TestEvent.PAYMENT_METHODS_ENTERED)
+                }
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
         },
@@ -112,6 +120,7 @@ fun MainViewModel.showPaymentWidget(
                 "storeDomain" to "deuna.com"
             )
         ),
+        domain = customDomain  // ← Use checkout-base domain for e2e-preproduction
 //        paymentMethods = listOf(
 //            mapOf(
 //                "paymentMethod" to "wallet",
