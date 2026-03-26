@@ -46,10 +46,8 @@ class ExternalUrlHelper {
                 ActivityResultContracts.StartActivityForResult()
             ) { _ ->
                 if (!activity.isDestroyed) {
-                    listeners.forEach {
-                        it.invoke()
-                        listeners.remove(it)
-                    }
+                    listeners.toList().forEach { it.invoke() }
+                    listeners.clear()
                 }
                 if (onExternalUrlBrowserClosed != null && browser == ExternalUrlBrowser.CUSTOM_TABS) {
                     onExternalUrlBrowserClosed?.invoke()
@@ -104,9 +102,12 @@ class ExternalUrlHelper {
                         data = Uri.parse(url)
                     }
 
-                    chromeTabLauncher?.launch(intent) ?: run {
+                    if (chromeTabLauncher == null) {
                         DeunaLogs.error("chromeTabLauncher is null - did you call registerForActivityResult()?")
+                        isChromeTabOpened = false
+                        return
                     }
+                    chromeTabLauncher?.launch(intent)
                     isChromeTabOpened = true
                 }
             }
