@@ -224,6 +224,13 @@ class WebViewController(
 
 
     fun destroy() {
+        pause()
+
+        runCatching {
+            webView.removeJavascriptInterface("local")
+            webView.removeJavascriptInterface("remoteJs")
+        }
+
         // Remove the WebView from the view hierarchy
         (webView.parent as? ViewGroup)?.removeView(webView)
         // Stop loading and clear cache
@@ -233,5 +240,21 @@ class WebViewController(
 
         // Destroy the WebView
         webView.destroy()
+    }
+
+    fun pause() {
+        runOnUiThread {
+            runCatching {
+                webView.onPause()
+            }
+        }
+    }
+
+    fun resume() {
+        runOnUiThread {
+            runCatching {
+                webView.onResume()
+            }
+        }
     }
 }
