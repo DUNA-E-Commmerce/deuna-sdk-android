@@ -23,7 +23,7 @@ fun MainViewModel.showPaymentWidget(
     completion: (PaymentWidgetResult) -> Unit,
 ) {
     // Get domain from environment variable for e2e-preproduction
-    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")
+    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")?.takeIf { it.isNotBlank() }
     
     deunaSDK.initPaymentWidget(
         context = context,
