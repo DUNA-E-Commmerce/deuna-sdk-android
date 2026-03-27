@@ -10,7 +10,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.deuna.sdkexample.ui.screens.main.MainScreenTestTags
 
 
 @Composable
@@ -25,6 +27,7 @@ fun Inputs(
             value = orderToken,
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag(MainScreenTestTags.ORDER_TOKEN_INPUT)
                 .padding(0.dp),
             shape = RoundedCornerShape(12.dp),
             label = {
@@ -39,6 +42,7 @@ fun Inputs(
             value = userToken,
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag(MainScreenTestTags.USER_TOKEN_INPUT)
                 .padding(0.dp),
             shape = RoundedCornerShape(12.dp),
             label = {

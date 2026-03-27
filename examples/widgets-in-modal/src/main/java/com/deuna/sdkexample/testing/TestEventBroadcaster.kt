@@ -12,6 +12,8 @@ enum class TestEvent {
     PAYMENT_METHODS_ENTERED,
     PAYMENT_SUCCESS,
     PAYMENT_ERROR,
+    VAULT_SUCCESS,
+    VAULT_ERROR,
 }
 
 /**
