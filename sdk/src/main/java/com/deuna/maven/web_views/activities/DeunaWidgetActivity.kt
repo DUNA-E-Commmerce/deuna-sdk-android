@@ -1,6 +1,7 @@
 package com.deuna.maven.web_views.activities
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import com.deuna.maven.R
@@ -35,6 +36,11 @@ class DeunaWidgetActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Keep widget rendering off GPU to avoid WebView GL crashes on some providers/devices.
+        window.setFlags(
+            0,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        )
         setContentView(R.layout.deuna_webview_container)
 
         widgetConfigId = intent.getStringExtra(EXTRA_WIDGET_CONFIG_ID)
