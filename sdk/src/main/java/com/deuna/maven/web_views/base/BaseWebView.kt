@@ -47,6 +47,8 @@ open class BaseWebView(
             }
 
             override fun onWebViewError() {
+                webView.visibility = View.VISIBLE
+                loader.visibility = View.GONE
                 listener?.onWebViewError()
             }
 
@@ -78,6 +80,14 @@ open class BaseWebView(
      */
     open fun destroy() {
         controller?.destroy()
+    }
+
+    open fun pause() {
+        controller?.pause()
+    }
+
+    open fun resume() {
+        controller?.resume()
     }
 
 }
