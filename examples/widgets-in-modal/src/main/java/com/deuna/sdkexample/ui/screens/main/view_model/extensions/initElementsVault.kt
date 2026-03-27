@@ -26,7 +26,7 @@ fun MainViewModel.saveCard(
     // Get domain from environment variable for e2e-preproduction
     // Elements uses elements-link, not checkout-base
     val customDomain = System.getenv("DEUNA_ELEMENTS_LINK_DOMAIN")?.takeIf { it.isNotBlank() }
-    
+
     deunaSDK.initElements(
         context = context,
         userToken = userToken,
@@ -79,6 +79,12 @@ fun MainViewModel.saveCard(
             }
             onEventDispatch = { event, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
+            }
+            onInstallmentSelected = { metadata ->
+                if (metadata != null) {
+                    Log.d(DEBUG_TAG, "👀 onInstallmentSelected cardBin: ${metadata["cardBin"]}")
+                    Log.d(DEBUG_TAG, "👀 onInstallmentSelected installments: ${metadata["installments"]}")
+                }
             }
         },
         widgetExperience = ElementsWidgetExperience(
