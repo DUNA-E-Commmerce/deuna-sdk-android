@@ -1,8 +1,8 @@
 package com.deuna.maven
 
 import android.content.Context
+import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.shared.*
-import com.deuna.maven.widgets.checkout_widget.CheckoutWidgetDialogFragment
 import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 
 /**
@@ -32,8 +32,8 @@ fun DeunaSDK.initCheckout(
         return
     }
 
-    dialogFragment = CheckoutWidgetDialogFragment(
-        context,
+    DeunaWidgetModalLauncher.launch(
+        context = context,
         widgetConfiguration = CheckoutWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -45,7 +45,6 @@ fun DeunaSDK.initCheckout(
             fraudCredentials = fraudCredentials,
             customUserAgent = customUserAgent,
             domain = domain,
-        )
+        ),
     )
-    dialogFragment?.show()
 }
