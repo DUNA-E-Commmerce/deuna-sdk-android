@@ -62,6 +62,10 @@ class ElementsBridge(
                         onCloseByUser?.invoke()
                     }
 
+                    ElementsEvent.onInstallmentSelected -> {
+                        callbacks.onInstallmentSelected?.invoke(data["metadata"] as? Json)
+                    }
+
                     else -> {}
                 }
             } catch (_: IllegalArgumentException) {
