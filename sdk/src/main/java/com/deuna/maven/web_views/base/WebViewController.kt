@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Message
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -107,6 +108,18 @@ class WebViewController(
                 if (error != null) {
                     listener?.onWebViewError()
                 }
+            }
+
+            override fun onRenderProcessGone(
+                view: WebView?,
+                detail: RenderProcessGoneDetail?
+            ): Boolean {
+                DeunaLogs.error(
+                    "WebView render process gone. didCrash=${detail?.didCrash() == true}"
+                )
+                listener?.onWebViewError()
+                // We handled renderer crash to prevent an app-level crash loop.
+                return true
             }
         }
 
