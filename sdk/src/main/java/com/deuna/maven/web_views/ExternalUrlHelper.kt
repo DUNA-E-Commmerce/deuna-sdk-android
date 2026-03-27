@@ -61,7 +61,7 @@ class ExternalUrlHelper {
         fun waitUntilChromeTabIsClosed(
             cb: () -> Unit
         ) {
-            if (isChromeTabOpened) {
+            if (isChromeTabOpened && browser == ExternalUrlBrowser.CUSTOM_TABS) {
                 listeners.add(cb)
             } else {
                 cb.invoke()
@@ -84,10 +84,13 @@ class ExternalUrlHelper {
 
             when (browser) {
                 ExternalUrlBrowser.WEB_VIEW -> {
+                    // Defensive reset: this flow does not depend on Custom Tabs.
+                    isChromeTabOpened = false
                     externalUrlDialog = ExternalUrlDialogFragment(
                         context = context,
                         url = url, onDialogDestroyed = {
                             externalUrlDialog = null
+                            isChromeTabOpened = false
                             this.onExternalUrlBrowserClosed?.invoke()
                             this.onExternalUrlBrowserClosed = null
                         }
@@ -115,6 +118,8 @@ class ExternalUrlHelper {
 
         fun close() {
             externalUrlDialog?.dismiss()
+            // Defensive reset to avoid leaking stale state between flows.
+            isChromeTabOpened = false
         }
     }
 }

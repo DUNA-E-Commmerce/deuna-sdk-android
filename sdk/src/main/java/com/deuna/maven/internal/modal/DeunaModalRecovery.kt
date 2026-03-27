@@ -1,5 +1,7 @@
 package com.deuna.maven.internal.modal
 
+import android.os.Handler
+import android.os.Looper
 import com.deuna.maven.client.sendOrder
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.enums.CloseAction
@@ -13,6 +15,11 @@ import retrofit2.Callback
 import retrofit2.Response
 
 internal object DeunaModalRecovery {
+    private const val MAX_RECOVERY_ATTEMPTS = 12
+    private const val RECOVERY_RETRY_DELAY_MS = 3_000L
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val recoveryAttempts = mutableMapOf<String, Int>()
+
     fun tryRecoverSuccessOnSystemClose(
         widgetConfiguration: DeunaWidgetConfiguration,
         closeAction: CloseAction,
@@ -32,6 +39,21 @@ internal object DeunaModalRecovery {
             else -> null
         } ?: return
 
+        attemptRecovery(widgetConfiguration, orderToken)
+    }
+
+    private fun attemptRecovery(
+        widgetConfiguration: DeunaWidgetConfiguration,
+        orderToken: String,
+    ) {
+        if (widgetConfiguration.hasReportedSuccess) {
+            clearRecoveryState(orderToken)
+            return
+        }
+
+        val attempt = (recoveryAttempts[orderToken] ?: 0) + 1
+        recoveryAttempts[orderToken] = attempt
+
         sendOrder(
             baseUrl = widgetConfiguration.sdkInstance.environment.checkoutBaseUrl,
             orderToken = orderToken,
@@ -39,17 +61,26 @@ internal object DeunaModalRecovery {
             callback = object : Callback<Any> {
                 override fun onResponse(call: Call<Any>, response: Response<Any>) {
                     if (!response.isSuccessful) {
+                        retryIfNeeded(widgetConfiguration, orderToken, attempt)
                         return
                     }
 
-                    val body = response.body() as? Map<*, *> ?: return
-                    val order = body["order"] as? Map<*, *> ?: return
+                    val body = response.body() as? Map<*, *> ?: run {
+                        retryIfNeeded(widgetConfiguration, orderToken, attempt)
+                        return
+                    }
+                    val order = body["order"] as? Map<*, *> ?: run {
+                        retryIfNeeded(widgetConfiguration, orderToken, attempt)
+                        return
+                    }
                     val normalizedOrder = order.toJsonMap()
 
                     if (!isSuccessfulOrder(normalizedOrder)) {
+                        retryIfNeeded(widgetConfiguration, orderToken, attempt)
                         return
                     }
                     widgetConfiguration.hasReportedSuccess = true
+                    clearRecoveryState(orderToken)
 
                     when (widgetConfiguration) {
                         is PaymentWidgetConfiguration -> widgetConfiguration.callbacks.onSuccess?.invoke(
@@ -72,9 +103,31 @@ internal object DeunaModalRecovery {
                     }
                 }
 
-                override fun onFailure(call: Call<Any>, t: Throwable) = Unit
+                override fun onFailure(call: Call<Any>, t: Throwable) {
+                    retryIfNeeded(widgetConfiguration, orderToken, attempt)
+                }
             }
         )
+    }
+
+    private fun retryIfNeeded(
+        widgetConfiguration: DeunaWidgetConfiguration,
+        orderToken: String,
+        attempt: Int,
+    ) {
+        if (attempt >= MAX_RECOVERY_ATTEMPTS) {
+            clearRecoveryState(orderToken)
+            return
+        }
+
+        mainHandler.postDelayed(
+            { attemptRecovery(widgetConfiguration, orderToken) },
+            RECOVERY_RETRY_DELAY_MS
+        )
+    }
+
+    private fun clearRecoveryState(orderToken: String) {
+        recoveryAttempts.remove(orderToken)
     }
 
     private fun isSuccessfulOrder(order: Json): Boolean {
