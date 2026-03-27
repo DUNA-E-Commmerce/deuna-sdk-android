@@ -111,6 +111,12 @@ fun MainViewModel.showPaymentWidget(
                 if (event == CheckoutEvent.paymentMethodsEntered) {
                     TestEventBroadcaster.broadcast(TestEvent.PAYMENT_METHODS_ENTERED)
                 }
+                if (event == CheckoutEvent.purchase) {
+                    TestEventBroadcaster.broadcast(TestEvent.PAYMENT_PURCHASE)
+                }
+                if (event == CheckoutEvent.apmClickRedirect) {
+                    TestEventBroadcaster.broadcast(TestEvent.PAYMENT_APM_REDIRECT)
+                }
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
         },

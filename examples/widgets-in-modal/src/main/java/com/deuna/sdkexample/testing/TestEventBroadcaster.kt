@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit
  */
 enum class TestEvent {
     PAYMENT_METHODS_ENTERED,
+    PAYMENT_PURCHASE,
+    PAYMENT_APM_REDIRECT,
     PAYMENT_SUCCESS,
     PAYMENT_ERROR,
     VAULT_SUCCESS,

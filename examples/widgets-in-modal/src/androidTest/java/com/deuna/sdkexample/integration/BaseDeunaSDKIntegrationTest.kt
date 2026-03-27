@@ -36,8 +36,10 @@ abstract class BaseDeunaSDKIntegrationTest {
     protected lateinit var device: UiDevice
     protected lateinit var webViewHelper: WebViewTestHelper
 
+    protected open fun testCountry() = IntegrationTestConstants.country
+
     protected open fun paymentProcessorConfig(): BaseProcessor {
-        return StripeProcessorConfig.stripeProcessorAuthorize(country = IntegrationTestConstants.country)
+        return StripeProcessorConfig.stripeProcessorAuthorize(country = testCountry())
     }
 
     protected open fun render3dsStrategy(): String? = null
@@ -49,12 +51,12 @@ abstract class BaseDeunaSDKIntegrationTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         webViewHelper = WebViewTestHelper(device)
 
-        val orderRequest = DeunanowOrderBuilder.createOrder(country = IntegrationTestConstants.country)
+        val orderRequest = DeunanowOrderBuilder.createOrder(country = testCountry())
             ?: throw AssertionError("Failed to create order request")
         Log.d(tag, "✅ Order request created")
 
         val setup = try {
-            merchantDataSource.setupMerchantSync(country = IntegrationTestConstants.country)
+            merchantDataSource.setupMerchantSync(country = testCountry())
         } catch (e: Exception) {
             Log.e(tag, "❌ Merchant setup failed: $e")
             throw AssertionError("Merchant setup failed: $e")
