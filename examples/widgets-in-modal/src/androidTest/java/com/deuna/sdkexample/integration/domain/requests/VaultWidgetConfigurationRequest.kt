@@ -24,7 +24,7 @@ object VaultWidgetConfigurationRequest {
         })
     }
 
-    fun checkoutV2Configuration(): JSONObject = JSONObject().apply {
+    fun checkoutV2Configuration(render3dsStrategy: String? = null): JSONObject = JSONObject().apply {
         put("order_config", JSONObject().apply {
             put("notify_type", "async")
             put("payment_link", JSONObject().apply {
@@ -56,6 +56,7 @@ object VaultWidgetConfigurationRequest {
                 put("minor_units", JSONArray())
             })
             put("checkout_modules", JSONArray())
+            render3dsStrategy?.let { put("render_3ds_strategy", it) }
         })
     }
 

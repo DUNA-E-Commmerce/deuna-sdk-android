@@ -259,10 +259,11 @@ class MerchantDataSource(env: TestEnvironment) {
     @Throws(Exception::class)
     fun configureVaultWidgetSync(
         merchantId: String,
-        merchantToken: String
+        merchantToken: String,
+        render3dsStrategy: String? = null
     ) {
         configureCheckoutSync(merchantId, merchantToken)
-        configureCheckoutV2Sync(merchantId, merchantToken)
+        configureCheckoutV2Sync(merchantId, merchantToken, render3dsStrategy)
         createNetworkAndAssociateMerchantSync(merchantId, merchantToken)
     }
 
@@ -282,12 +283,13 @@ class MerchantDataSource(env: TestEnvironment) {
     @Throws(Exception::class)
     private fun configureCheckoutV2Sync(
         merchantId: String,
-        merchantToken: String
+        merchantToken: String,
+        render3dsStrategy: String? = null
     ) {
         httpClient.requestSync(
             path = "/checkout-config/merchants/$merchantId/configurations",
             method = HttpMethod.POST,
-            body = VaultWidgetConfigurationRequest.checkoutV2Configuration(),
+            body = VaultWidgetConfigurationRequest.checkoutV2Configuration(render3dsStrategy),
             headers = mapOf("Authorization" to "Bearer $merchantToken")
         )
     }

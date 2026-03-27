@@ -84,6 +84,37 @@ class WebViewTestHelper(private val device: UiDevice) {
     }
 
     /**
+     * Completes Stripe 3DS challenge by tapping COMPLETE in the challenge page.
+     * Returns true when the challenge view was detected and completed.
+     */
+    fun completeStripe3dsChallenge(timeout: Long = 30000): Boolean {
+        val challengeDetected =
+            device.wait(Until.findObject(By.textContains("3D Secure")), timeout / 2) != null ||
+                device.wait(Until.findObject(By.textContains("Complete a required action")), timeout / 2) != null
+
+        if (!challengeDetected) {
+            Log.w(TAG, "⚠️ Stripe 3DS challenge was not detected")
+            return false
+        }
+
+        repeat(6) { _ ->
+            val clicked = buttonTap("COMPLETE", timeout = 1500) ||
+                buttonTap("Complete", timeout = 1500) ||
+                buttonTap("AUTHORIZE", timeout = 1500) ||
+                buttonTap("Authorize", timeout = 1500)
+            if (clicked) {
+                Log.d(TAG, "✅ Completed Stripe 3DS challenge")
+                return true
+            }
+            swipeUp()
+            Thread.sleep(400)
+        }
+
+        Log.w(TAG, "⚠️ Could not tap COMPLETE on Stripe 3DS challenge")
+        return false
+    }
+
+    /**
      * Performs a swipe up gesture on the screen.
      */
     fun swipeUp() {

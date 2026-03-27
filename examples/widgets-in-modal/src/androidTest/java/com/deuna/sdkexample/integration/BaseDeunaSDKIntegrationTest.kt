@@ -14,6 +14,7 @@ import com.deuna.sdkexample.MainActivity
 import com.deuna.sdkexample.integration.data.dataSources.MerchantDataSource
 import com.deuna.sdkexample.integration.data.helpers.DeunanowOrderBuilder
 import com.deuna.sdkexample.integration.data.helpers.TokenizeOrderResponse
+import com.deuna.sdkexample.integration.domain.requests.BaseProcessor
 import com.deuna.sdkexample.integration.domain.requests.StripeProcessorConfig
 import com.deuna.sdkexample.integration.helpers.WebViewTestHelper
 import com.deuna.sdkexample.ui.screens.main.MainScreenTestTags
@@ -34,6 +35,12 @@ abstract class BaseDeunaSDKIntegrationTest {
 
     protected lateinit var device: UiDevice
     protected lateinit var webViewHelper: WebViewTestHelper
+
+    protected open fun paymentProcessorConfig(): BaseProcessor {
+        return StripeProcessorConfig.stripeProcessorAuthorize(country = IntegrationTestConstants.country)
+    }
+
+    protected open fun render3dsStrategy(): String? = null
 
     @Before
     fun setUp() {
@@ -57,7 +64,8 @@ abstract class BaseDeunaSDKIntegrationTest {
         try {
             merchantDataSource.configureVaultWidgetSync(
                 merchantId = setup.merchant.id,
-                merchantToken = setup.merchantToken
+                merchantToken = setup.merchantToken,
+                render3dsStrategy = render3dsStrategy()
             )
         } catch (e: Exception) {
             Log.e(tag, "❌ Vault widget merchant configuration failed: $e")
@@ -80,7 +88,7 @@ abstract class BaseDeunaSDKIntegrationTest {
             val processorId = merchantDataSource.createPaymentProcessorSync(
                 merchantId = setup.merchant.id,
                 merchantToken = setup.merchantToken,
-                processorData = StripeProcessorConfig.stripeProcessorAuthorize(country = IntegrationTestConstants.country)
+                processorData = paymentProcessorConfig()
             )
             Log.d(tag, "✅ Payment processor created - processorId: $processorId")
         } catch (e: Exception) {

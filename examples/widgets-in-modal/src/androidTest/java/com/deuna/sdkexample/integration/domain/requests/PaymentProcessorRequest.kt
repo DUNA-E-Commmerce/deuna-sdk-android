@@ -82,6 +82,15 @@ object StripeProcessorConfig {
         return stripeProcessor(country = country, automaticCapture = false)
     }
 
+    /**
+     * Stripe processor with 3DS enabled.
+     */
+    fun stripe3dsProcessor(country: CountryCode): StripeProcessor {
+        return stripeProcessor(country = country, automaticCapture = true).copy(
+            enable3dsAuthentication = true
+        )
+    }
+
     private fun getCurrencyForCountry(country: CountryCode): String {
         return when (country) {
             CountryCode.MX -> "MXN"
