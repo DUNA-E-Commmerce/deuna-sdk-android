@@ -25,8 +25,8 @@ fun MainViewModel.saveCard(
 ) {
     // Get domain from environment variable for e2e-preproduction
     // Elements uses elements-link, not checkout-base
-    val customDomain = System.getenv("DEUNA_ELEMENTS_LINK_DOMAIN")
-    
+    val customDomain = System.getenv("DEUNA_ELEMENTS_LINK_DOMAIN")?.takeIf { it.isNotBlank() }
+
     deunaSDK.initElements(
         context = context,
         userToken = userToken,
@@ -80,6 +80,20 @@ fun MainViewModel.saveCard(
             onEventDispatch = { event, data ->
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
+            onInstallmentSelected = { metadata ->
+                logElementsMetadata(
+                    eventName = "onInstallmentSelected",
+                    metadata = metadata,
+                    keys = listOf("cardBin", "installments")
+                )
+            }
+            onCardBinDetected = { metadata ->
+                logElementsMetadata(
+                    eventName = "onCardBinDetected",
+                    metadata = metadata,
+                    keys = listOf("cardBin", "cardBrand")
+                )
+            }
         },
         widgetExperience = ElementsWidgetExperience(
             userExperience = ElementsWidgetExperience.UserExperience(
@@ -90,4 +104,18 @@ fun MainViewModel.saveCard(
     )
 }
 
+private fun logElementsMetadata(
+    eventName: String,
+    metadata: Json?,
+    keys: List<String>
+) {
+    if (metadata.isNullOrEmpty()) {
+        Log.d(DEBUG_TAG, "$eventName metadata is null or empty")
+        return
+    }
 
+    val content = keys.joinToString(separator = ", ") { key ->
+        "$key=${metadata[key] ?: "null"}"
+    }
+    Log.d(DEBUG_TAG, "$eventName metadata: $content")
+}

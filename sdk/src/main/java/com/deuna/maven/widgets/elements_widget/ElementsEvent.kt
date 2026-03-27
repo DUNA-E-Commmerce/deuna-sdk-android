@@ -33,6 +33,7 @@ enum class ElementsEvent(val value: String) {
     paymentMethodsChangeCard("paymentMethodsChangeCard"),
     paymentMethodSplitPayments("paymentMethodSplitPayments"),
     vaultClickRedirect3DS("vaultClickRedirect3DS"),
+    onBinDetected("onBinDetected"),
     vaultClosed("vaultClosed"),
     vaultFailed("vaultFailed"),
     vaultProcessing("vaultProcessing"),

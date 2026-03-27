@@ -104,9 +104,13 @@ fun showWidgetInModal(
                 completion = { result ->
                     when (result) {
                         is ElementsResult.Canceled -> Log.d("VAULT", "Canceled")
-                        is ElementsResult.Error -> Log.d("VAULT", "Error")
+                        is ElementsResult.Error -> {
+                            Log.d("VAULT", "Error")
+                            TestEventBroadcaster.broadcast(TestEvent.VAULT_ERROR)
+                        }
                         is ElementsResult.Success -> {
                             Log.d("VAULT", "Success")
+                            TestEventBroadcaster.broadcast(TestEvent.VAULT_SUCCESS)
                             val savedCardStr = Uri.encode(JSONObject(result.savedCard).toString())
                             navController.navigate(
                                 "card-saved-success/$savedCardStr"

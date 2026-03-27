@@ -1,12 +1,12 @@
 package com.deuna.maven
 
 import android.content.Context
+import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.widgets.configuration.VoucherWidgetConfiguration
 import com.deuna.maven.widgets.voucher.VoucherCallbacks
-import com.deuna.maven.widgets.voucher.VoucherDialogFragment
 
 fun DeunaSDK.initVoucherWidget(
     context: Context,
@@ -25,8 +25,8 @@ fun DeunaSDK.initVoucherWidget(
         return
     }
 
-    dialogFragment = VoucherDialogFragment(
-        context,
+    DeunaWidgetModalLauncher.launch(
+        context = context,
         widgetConfiguration = VoucherWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -36,7 +36,6 @@ fun DeunaSDK.initVoucherWidget(
             fraudCredentials = fraudCredentials,
             customUserAgent = customUserAgent,
             domain = domain,
-        )
+        ),
     )
-    dialogFragment?.show()
 }

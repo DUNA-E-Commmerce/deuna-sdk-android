@@ -1,10 +1,10 @@
 package com.deuna.maven
 
 import android.content.Context
+import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
-import com.deuna.maven.widgets.elements_widget.ElementsWidgetDialogFragment
 import com.deuna.maven.widgets.elements_widget.ElementsEvent
 import java.lang.IllegalStateException
 
@@ -53,8 +53,8 @@ fun DeunaSDK.initElements(
     domain: String? = null,
 ) {
 
-    dialogFragment = ElementsWidgetDialogFragment(
-        context,
+    DeunaWidgetModalLauncher.launch(
+        context = context,
         widgetConfiguration = ElementsWidgetConfiguration(
             sdkInstance = this,
             callbacks = callbacks,
@@ -70,9 +70,8 @@ fun DeunaSDK.initElements(
             fraudCredentials = fraudCredentials,
             customUserAgent = customUserAgent,
             domain = domain,
-        )
+        ),
     )
-    dialogFragment?.show()
 }
 
 

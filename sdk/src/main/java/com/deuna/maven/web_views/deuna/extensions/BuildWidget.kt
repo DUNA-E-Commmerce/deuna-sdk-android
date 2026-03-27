@@ -16,6 +16,7 @@ fun DeunaWidget.build() {
                 it.getPaymentLink { error, _ ->
                     if (error != null) {
                         it.callbacks.onError?.invoke(error)
+                        it.onCloseByUser?.invoke()
                     } else {
                         launch(it.link)
                     }

@@ -6,6 +6,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
+import kotlin.math.max
 
 /**
  * Helper class for interacting with WebView elements during UI tests.
@@ -70,17 +71,90 @@ class WebViewTestHelper(private val device: UiDevice) {
      * @param timeout Timeout in milliseconds.
      */
     fun buttonTap(label: String, timeout: Long = 5000): Boolean {
-        val element = device.wait(Until.findObject(By.textContains(label)), timeout)
-            ?: device.wait(Until.findObject(By.descContains(label)), timeout / 2)
+        val deadline = System.currentTimeMillis() + timeout
+        while (System.currentTimeMillis() < deadline) {
+            val remaining = max(250L, deadline - System.currentTimeMillis())
+            device.wait(Until.findObject(By.textContains(label)), minOf(1000L, remaining))
 
-        return if (element != null) {
-            element.click()
-            Log.d(TAG, "✅ Tapped: $label")
-            true
-        } else {
-            Log.w(TAG, "⚠️ Button not found: $label")
-            false
+            val textMatches = device.findObjects(By.textContains(label))
+            val descMatches = device.findObjects(By.descContains(label))
+            val candidates = (textMatches + descMatches)
+                .distinctBy { it.hashCode() }
+                .sortedByDescending { scoreCandidate(it) }
+
+            candidates.firstNotNullOfOrNull { candidate ->
+                clickCandidate(candidate, label)
+            }?.let { return true }
+
+            Thread.sleep(200)
         }
+
+        Log.w(TAG, "⚠️ Button not found: $label")
+        return false
+    }
+
+    private fun scoreCandidate(candidate: UiObject2): Int {
+        var score = 0
+        if (candidate.isClickable) score += 4
+        if (candidate.className == "android.widget.Button") score += 3
+        if (candidate.className == "android.view.View") score += 1
+        if (candidate.visibleBounds.height() > 36) score += 1
+        return score
+    }
+
+    private fun clickCandidate(candidate: UiObject2, label: String): Boolean? {
+        return try {
+            if (candidate.isClickable) {
+                candidate.click()
+                Log.d(TAG, "✅ Tapped: $label")
+                true
+            } else {
+                var parent = candidate.parent
+                while (parent != null) {
+                    if (parent.isClickable) {
+                        parent.click()
+                        Log.d(TAG, "✅ Tapped via parent: $label")
+                        return true
+                    }
+                    parent = parent.parent
+                }
+                null
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "⚠️ Failed tapping candidate for '$label': ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Completes Stripe 3DS challenge by tapping COMPLETE in the challenge page.
+     * Returns true when the challenge view was detected and completed.
+     */
+    fun completeStripe3dsChallenge(timeout: Long = 30000): Boolean {
+        val challengeDetected =
+            device.wait(Until.findObject(By.textContains("3D Secure")), timeout / 2) != null ||
+                device.wait(Until.findObject(By.textContains("Complete a required action")), timeout / 2) != null
+
+        if (!challengeDetected) {
+            Log.w(TAG, "⚠️ Stripe 3DS challenge was not detected")
+            return false
+        }
+
+        repeat(6) { _ ->
+            val clicked = buttonTap("COMPLETE", timeout = 1500) ||
+                buttonTap("Complete", timeout = 1500) ||
+                buttonTap("AUTHORIZE", timeout = 1500) ||
+                buttonTap("Authorize", timeout = 1500)
+            if (clicked) {
+                Log.d(TAG, "✅ Completed Stripe 3DS challenge")
+                return true
+            }
+            swipeUp()
+            Thread.sleep(400)
+        }
+
+        Log.w(TAG, "⚠️ Could not tap COMPLETE on Stripe 3DS challenge")
+        return false
     }
 
     /**

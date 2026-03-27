@@ -10,6 +10,8 @@ typealias OnClosed = (CloseAction) -> Unit
 typealias OnEventDispatch<S, E> = (E, S) -> Unit
 typealias OnError<Error> = (Error) -> Unit
 typealias VoidCallback = () -> Unit
+typealias OnInstallmentSelected = (Json?) -> Unit
+typealias OnCardBinDetected = (Json?) -> Unit
 
 open class BaseCallbacks<SuccessData, EventData, Error> {
     var onSuccess: OnSuccess<SuccessData>? = null
@@ -27,4 +29,7 @@ open class BaseCallbacks<SuccessData, EventData, Error> {
 
 class CheckoutCallbacks : BaseCallbacks<Json, CheckoutEvent, PaymentsError>() {}
 
-class ElementsCallbacks : BaseCallbacks<Json, ElementsEvent, ElementsError>() {}
+class ElementsCallbacks : BaseCallbacks<Json, ElementsEvent, ElementsError>() {
+    var onInstallmentSelected: OnInstallmentSelected? = null
+    var onCardBinDetected: OnCardBinDetected? = null
+}

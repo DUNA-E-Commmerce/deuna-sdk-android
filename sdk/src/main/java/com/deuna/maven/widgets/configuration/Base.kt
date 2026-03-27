@@ -13,6 +13,8 @@ sealed class DeunaWidgetConfiguration(
     val domain: String? = null,
 ) {
     var onCloseByUser: (() -> Unit)? = null
+    @Volatile
+    internal var hasReportedSuccess: Boolean = false
     abstract val link: String
 
 

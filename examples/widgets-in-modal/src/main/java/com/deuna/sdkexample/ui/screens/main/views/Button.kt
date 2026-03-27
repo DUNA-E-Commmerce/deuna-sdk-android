@@ -13,12 +13,13 @@ import androidx.compose.ui.unit.dp
 fun DeunaButton(
     text: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     backgroundColor: Color = Color(0xFF007AFF)
 ) {
     androidx.compose.material3.Button(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor
         )

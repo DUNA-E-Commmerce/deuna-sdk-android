@@ -12,6 +12,7 @@ import com.deuna.sdkexample.integration.domain.requests.CreateMerchantApplicatio
 import com.deuna.sdkexample.integration.domain.requests.CreateStoreRequest
 import com.deuna.sdkexample.integration.domain.requests.LoginRequest
 import com.deuna.sdkexample.integration.domain.requests.PaymentProcessorResponse
+import com.deuna.sdkexample.integration.domain.requests.VaultWidgetConfigurationRequest
 import com.deuna.sdkexample.integration.domain.responses.MerchantApplicationResponse
 import com.deuna.sdkexample.integration.domain.responses.MerchantLoginResponse
 import com.deuna.sdkexample.integration.domain.responses.MerchantResponse
@@ -247,5 +248,73 @@ class MerchantDataSource(env: TestEnvironment) {
 
         val processorResponse = PaymentProcessorResponse.fromJson(response)
         return processorResponse.data.id
+    }
+
+    /**
+     * Applies the same merchant pre-configuration used by Playwright's configureVaultWidget():
+     * 1) checkout config
+     * 2) checkout v2 config (order_config + elements_config + widgets_general_config)
+     * 3) create network and associate merchant
+     */
+    @Throws(Exception::class)
+    fun configureVaultWidgetSync(
+        merchantId: String,
+        merchantToken: String,
+        render3dsStrategy: String? = null
+    ) {
+        configureCheckoutSync(merchantId, merchantToken)
+        configureCheckoutV2Sync(merchantId, merchantToken, render3dsStrategy)
+        createNetworkAndAssociateMerchantSync(merchantId, merchantToken)
+    }
+
+    @Throws(Exception::class)
+    private fun configureCheckoutSync(
+        merchantId: String,
+        merchantToken: String
+    ) {
+        httpClient.requestSync(
+            path = "/checkout/$merchantId/configuration",
+            method = HttpMethod.POST,
+            body = VaultWidgetConfigurationRequest.checkoutConfiguration(),
+            headers = mapOf("Authorization" to "Bearer $merchantToken")
+        )
+    }
+
+    @Throws(Exception::class)
+    private fun configureCheckoutV2Sync(
+        merchantId: String,
+        merchantToken: String,
+        render3dsStrategy: String? = null
+    ) {
+        httpClient.requestSync(
+            path = "/checkout-config/merchants/$merchantId/configurations",
+            method = HttpMethod.POST,
+            body = VaultWidgetConfigurationRequest.checkoutV2Configuration(render3dsStrategy),
+            headers = mapOf("Authorization" to "Bearer $merchantToken")
+        )
+    }
+
+    @Throws(Exception::class)
+    private fun createNetworkAndAssociateMerchantSync(
+        merchantId: String,
+        merchantToken: String
+    ) {
+        val createNetworkResponse = httpClient.requestSync(
+            path = "/users/networks",
+            method = HttpMethod.POST,
+            body = VaultWidgetConfigurationRequest.createNetworkRequestBody(),
+            headers = mapOf("Authorization" to "Bearer $merchantToken")
+        )
+
+        val networkId = createNetworkResponse.optString("id")
+        if (networkId.isBlank()) {
+            throw IllegalStateException("Network creation response does not contain id")
+        }
+
+        httpClient.requestSync(
+            path = "/users/networks/$networkId/merchants/$merchantId",
+            method = HttpMethod.POST,
+            headers = mapOf("Authorization" to "Bearer $merchantToken")
+        )
     }
 }

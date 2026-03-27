@@ -55,7 +55,7 @@ class MainActivity: AppCompatActivity() {
         return when (envString.lowercase()) {
             "development" -> Environment.DEVELOPMENT
             "production" -> Environment.PRODUCTION
-            "staging" -> Environment.STAGING
+            "staging", "preprod" -> Environment.STAGING
             "sandbox" -> Environment.SANDBOX
             else -> null
         }

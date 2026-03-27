@@ -1,13 +1,12 @@
 package com.deuna.maven
 
 
-import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.VoidCallback
+import com.deuna.maven.internal.modal.DeunaModalHost
 import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.deuna.extensions.setCustomStyle
-import com.deuna.maven.web_views.dialog_fragments.base.DeunaDialogFragment
 import java.lang.IllegalStateException
 
 
@@ -22,7 +21,7 @@ open class DeunaSDK(
     val publicApiKey: String,
 ) {
 
-    var dialogFragment: DeunaDialogFragment? = null
+    private var modalHost: DeunaModalHost? = null
 
     init {
         require(publicApiKey.isNotEmpty()) {
@@ -69,7 +68,7 @@ open class DeunaSDK(
      * @param data The JSON data to update the payment widget UI
      */
     fun setCustomStyle(data: Json) {
-        dialogFragment?.deunaWidget?.setCustomStyle(data)
+        modalHost?.deunaWidget?.setCustomStyle(data)
     }
 
     /**
@@ -78,19 +77,37 @@ open class DeunaSDK(
      * @param callback A callback function to be invoked when the request completes. The callback receives a `Json` object containing the order data or `null` if the request fails.
      */
     fun refetchOrder(callback: (Json?) -> Unit) {
-        dialogFragment?.deunaWidget?.refetchOrder(callback)
+        modalHost?.deunaWidget?.refetchOrder(callback)
     }
 
     /**
      * Close the active DEUNA widget
      */
     fun close(voidCallback: VoidCallback? = null) {
+        val currentHost = modalHost
+        val currentWidget = currentHost?.deunaWidget
+
+        if (currentWidget == null) {
+            voidCallback?.invoke()
+            return
+        }
+
         /**
          * When an external url is opened in a custom tab, we need to wait until the tab is closed
          */
-        dialogFragment?.deunaWidget?.waitUntilExternalUrlIsClosed {
-            dialogFragment?.dismiss()
+        currentWidget.waitUntilExternalUrlIsClosed {
+            currentHost.dismiss()
             voidCallback?.invoke()
+        }
+    }
+
+    internal fun bindModalHost(host: DeunaModalHost) {
+        modalHost = host
+    }
+
+    internal fun unbindModalHost(host: DeunaModalHost) {
+        if (modalHost === host) {
+            modalHost = null
         }
     }
 }

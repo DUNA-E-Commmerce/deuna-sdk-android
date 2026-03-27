@@ -42,6 +42,7 @@ class CheckoutBridge(
                     CheckoutEvent.purchase -> {
                         deunaWidget.closeSubWebView()
                         val order = data["order"] as? Json ?: return@runOnUiThread
+                        deunaWidget.widgetConfiguration?.hasReportedSuccess = true
                         callbacks.onSuccess?.invoke(deunaWidget.buildSuccessPayload(order))
                     }
 

@@ -1,12 +1,12 @@
 package com.deuna.maven
 
 import android.content.Context
+import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.widgets.configuration.NextActionWidgetConfiguration
 import com.deuna.maven.widgets.next_action.NextActionCallbacks
-import com.deuna.maven.widgets.next_action.NextActionDialogFragment
 
 fun DeunaSDK.initNextAction(
     context: Context,
@@ -24,8 +24,8 @@ fun DeunaSDK.initNextAction(
         return
     }
 
-    dialogFragment = NextActionDialogFragment(
-        context,
+    DeunaWidgetModalLauncher.launch(
+        context = context,
         widgetConfiguration = NextActionWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -35,7 +35,6 @@ fun DeunaSDK.initNextAction(
             fraudCredentials = fraudCredentials,
             customUserAgent = customUserAgent,
             domain = domain,
-        )
+        ),
     )
-    dialogFragment?.show()
 }
