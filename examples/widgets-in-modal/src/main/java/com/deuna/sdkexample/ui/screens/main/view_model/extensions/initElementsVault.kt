@@ -81,10 +81,18 @@ fun MainViewModel.saveCard(
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }
             onInstallmentSelected = { metadata ->
-                if (metadata != null) {
-                    Log.d(DEBUG_TAG, "👀 onInstallmentSelected cardBin: ${metadata["cardBin"]}")
-                    Log.d(DEBUG_TAG, "👀 onInstallmentSelected installments: ${metadata["installments"]}")
-                }
+                logElementsMetadata(
+                    eventName = "onInstallmentSelected",
+                    metadata = metadata,
+                    keys = listOf("cardBin", "installments")
+                )
+            }
+            onCardBinDetected = { metadata ->
+                logElementsMetadata(
+                    eventName = "onCardBinDetected",
+                    metadata = metadata,
+                    keys = listOf("cardBin", "cardBrand")
+                )
             }
         },
         widgetExperience = ElementsWidgetExperience(
@@ -96,3 +104,18 @@ fun MainViewModel.saveCard(
     )
 }
 
+private fun logElementsMetadata(
+    eventName: String,
+    metadata: Json?,
+    keys: List<String>
+) {
+    if (metadata.isNullOrEmpty()) {
+        Log.d(DEBUG_TAG, "$eventName metadata is null or empty")
+        return
+    }
+
+    val content = keys.joinToString(separator = ", ") { key ->
+        "$key=${metadata[key] ?: "null"}"
+    }
+    Log.d(DEBUG_TAG, "$eventName metadata: $content")
+}
