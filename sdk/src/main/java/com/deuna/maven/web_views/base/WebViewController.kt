@@ -23,6 +23,8 @@ class WebViewController(
 ) {
     var listener: Listener? = null
     var pageLoaded = false
+    @Volatile
+    private var destroyed = false
 
 
     private val remoteFunctionsRequests = mutableMapOf<Int, (Json) -> Unit>()
@@ -224,6 +226,11 @@ class WebViewController(
 
 
     fun destroy() {
+        if (destroyed) {
+            return
+        }
+        destroyed = true
+
         pause()
 
         runCatching {
@@ -231,19 +238,28 @@ class WebViewController(
             webView.removeJavascriptInterface("remoteJs")
         }
 
-        // Remove the WebView from the view hierarchy
-        (webView.parent as? ViewGroup)?.removeView(webView)
-        // Stop loading and clear cache
-        webView.stopLoading()
-        webView.clearHistory()
-        webView.clearCache(true)
+        runCatching {
+            // Remove the WebView from the view hierarchy
+            (webView.parent as? ViewGroup)?.removeView(webView)
+        }
 
-        // Destroy the WebView
-        webView.destroy()
+        runCatching {
+            // Stop loading and clear cache
+            webView.stopLoading()
+            webView.clearHistory()
+            webView.clearCache(true)
+        }
+
+        runCatching {
+            // Destroy the WebView
+            webView.destroy()
+        }
     }
 
     fun pause() {
+        if (destroyed) return
         runOnUiThread {
+            if (destroyed) return@runOnUiThread
             runCatching {
                 webView.onPause()
             }
@@ -251,7 +267,9 @@ class WebViewController(
     }
 
     fun resume() {
+        if (destroyed) return
         runOnUiThread {
+            if (destroyed) return@runOnUiThread
             runCatching {
                 webView.onResume()
             }
