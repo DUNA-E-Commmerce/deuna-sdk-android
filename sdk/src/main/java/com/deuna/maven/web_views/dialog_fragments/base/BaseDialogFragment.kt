@@ -38,10 +38,22 @@ abstract class BaseDialogFragment(context: Context, private val fullSize: Boolea
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
+        if (::baseWebView.isInitialized) {
+            baseWebView.resume()
+        }
     }
 
     override fun onStop() {
-        baseWebView.destroy()
+        if (::baseWebView.isInitialized) {
+            baseWebView.pause()
+        }
         super.onStop()
+    }
+
+    override fun onDetachedFromWindow() {
+        if (::baseWebView.isInitialized) {
+            baseWebView.destroy()
+        }
+        super.onDetachedFromWindow()
     }
 }
