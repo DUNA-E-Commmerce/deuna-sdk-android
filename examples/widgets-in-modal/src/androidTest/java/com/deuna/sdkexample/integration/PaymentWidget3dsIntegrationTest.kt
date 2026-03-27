@@ -53,7 +53,7 @@ class PaymentWidget3dsIntegrationTest : BaseDeunaSDKIntegrationTest() {
         Log.d(tag, "✅ Received paymentMethodsEntered event")
 
         webViewHelper.fillTextFieldByLabel("4000000000003220", "Número de tarjeta")
-        webViewHelper.fillTextFieldByLabel("1228", "Fecha expiración")
+        webViewHelper.fillTextFieldByLabel("1230", "Fecha expiración")
         webViewHelper.fillTextFieldByLabel("123", "CVV")
         webViewHelper.fillTextFieldByLabel("Test User", "Nombre como aparece en la tarjeta")
         fillIdentityDocumentOrFail(flowName = "Payment 3DS")

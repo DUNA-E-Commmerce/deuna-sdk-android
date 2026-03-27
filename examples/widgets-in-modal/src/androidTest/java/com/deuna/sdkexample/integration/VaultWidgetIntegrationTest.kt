@@ -51,7 +51,7 @@ class VaultWidgetIntegrationTest : BaseDeunaSDKIntegrationTest() {
         Thread.sleep(4000)
 
         webViewHelper.fillTextFieldByLabel("4242424242424242", "Número de tarjeta")
-        webViewHelper.fillTextFieldByLabel("1228", "Fecha expiración")
+        webViewHelper.fillTextFieldByLabel("1230", "Fecha expiración")
         webViewHelper.fillTextFieldByLabel("123", "CVV")
         webViewHelper.fillTextFieldByLabel("Test User", "Nombre como aparece en la tarjeta")
         fillIdentityDocumentOrFail(flowName = "Vault")
