@@ -13,6 +13,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -95,6 +96,7 @@ fun MainScreen(
 
                     },
                     text = "Show Widget",
+                    modifier = Modifier.testTag(MainScreenTestTags.SHOW_WIDGET_BUTTON),
                     backgroundColor = Color(0xFF007AFF)
                 )
             }

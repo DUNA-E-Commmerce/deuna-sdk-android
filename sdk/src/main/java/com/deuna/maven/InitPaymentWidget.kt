@@ -1,12 +1,12 @@
 package com.deuna.maven
 
 import android.content.Context
+import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.widgets.payment_widget.PaymentWidgetCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.WidgetIntegration
 import com.deuna.maven.widgets.configuration.PaymentWidgetConfiguration
-import com.deuna.maven.widgets.payment_widget.PaymentWidgetDialogFragment
 
 /**
  * Launch the payment widget View
@@ -42,8 +42,8 @@ fun DeunaSDK.initPaymentWidget(
     }
 
 
-    dialogFragment = PaymentWidgetDialogFragment(
-        context,
+    DeunaWidgetModalLauncher.launch(
+        context = context,
         widgetConfiguration = PaymentWidgetConfiguration(
             sdkInstance = this,
             orderToken = orderToken,
@@ -58,7 +58,6 @@ fun DeunaSDK.initPaymentWidget(
             fraudCredentials = fraudCredentials,
             customUserAgent = customUserAgent,
             domain = domain,
-        )
+        ),
     )
-    dialogFragment?.show()
 }

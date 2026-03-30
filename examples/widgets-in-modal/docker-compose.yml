@@ -1,7 +1,7 @@
 services:
   deuna-sdk-android-integration-tests:
     build:
-      context: ../../
+      context: ${DOCKER_BUILD_CONTEXT:-../../}
       dockerfile: examples/widgets-in-modal/Dockerfile
     container_name: deuna-sdk-android-tests
     hostname: deuna-sdk-android-tests

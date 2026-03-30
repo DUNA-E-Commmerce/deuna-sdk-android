@@ -23,7 +23,7 @@ fun MainViewModel.showPaymentWidget(
     completion: (PaymentWidgetResult) -> Unit,
 ) {
     // Get domain from environment variable for e2e-preproduction
-    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")
+    val customDomain = System.getenv("DEUNA_CHECKOUT_BASE_DOMAIN")?.takeIf { it.isNotBlank() }
     
     deunaSDK.initPaymentWidget(
         context = context,
@@ -110,6 +110,12 @@ fun MainViewModel.showPaymentWidget(
             onEventDispatch = { event, data ->
                 if (event == CheckoutEvent.paymentMethodsEntered) {
                     TestEventBroadcaster.broadcast(TestEvent.PAYMENT_METHODS_ENTERED)
+                }
+                if (event == CheckoutEvent.purchase) {
+                    TestEventBroadcaster.broadcast(TestEvent.PAYMENT_PURCHASE)
+                }
+                if (event == CheckoutEvent.apmClickRedirect) {
+                    TestEventBroadcaster.broadcast(TestEvent.PAYMENT_APM_REDIRECT)
                 }
                 Log.d(DEBUG_TAG, "onEventDispatch ${event.name}: $data")
             }

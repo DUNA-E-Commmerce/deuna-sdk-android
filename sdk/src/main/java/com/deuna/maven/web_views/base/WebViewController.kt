@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Message
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -23,6 +24,8 @@ class WebViewController(
 ) {
     var listener: Listener? = null
     var pageLoaded = false
+    @Volatile
+    private var destroyed = false
 
 
     private val remoteFunctionsRequests = mutableMapOf<Int, (Json) -> Unit>()
@@ -105,6 +108,18 @@ class WebViewController(
                 if (error != null) {
                     listener?.onWebViewError()
                 }
+            }
+
+            override fun onRenderProcessGone(
+                view: WebView?,
+                detail: RenderProcessGoneDetail?
+            ): Boolean {
+                DeunaLogs.error(
+                    "WebView render process gone. didCrash=${detail?.didCrash() == true}"
+                )
+                listener?.onWebViewError()
+                // We handled renderer crash to prevent an app-level crash loop.
+                return true
             }
         }
 
@@ -224,14 +239,53 @@ class WebViewController(
 
 
     fun destroy() {
-        // Remove the WebView from the view hierarchy
-        (webView.parent as? ViewGroup)?.removeView(webView)
-        // Stop loading and clear cache
-        webView.stopLoading()
-        webView.clearHistory()
-        webView.clearCache(true)
+        if (destroyed) {
+            return
+        }
+        destroyed = true
 
-        // Destroy the WebView
-        webView.destroy()
+        pause()
+
+        runCatching {
+            webView.removeJavascriptInterface("local")
+            webView.removeJavascriptInterface("remoteJs")
+        }
+
+        runCatching {
+            // Remove the WebView from the view hierarchy
+            (webView.parent as? ViewGroup)?.removeView(webView)
+        }
+
+        runCatching {
+            // Stop loading and clear cache
+            webView.stopLoading()
+            webView.clearHistory()
+            webView.clearCache(true)
+        }
+
+        runCatching {
+            // Destroy the WebView
+            webView.destroy()
+        }
+    }
+
+    fun pause() {
+        if (destroyed) return
+        runOnUiThread {
+            if (destroyed) return@runOnUiThread
+            runCatching {
+                webView.onPause()
+            }
+        }
+    }
+
+    fun resume() {
+        if (destroyed) return
+        runOnUiThread {
+            if (destroyed) return@runOnUiThread
+            runCatching {
+                webView.onResume()
+            }
+        }
     }
 }

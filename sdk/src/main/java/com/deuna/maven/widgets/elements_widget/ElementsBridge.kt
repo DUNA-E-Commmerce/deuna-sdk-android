@@ -5,6 +5,7 @@ import com.deuna.maven.shared.*
 import com.deuna.maven.shared.enums.CloseAction
 import com.deuna.maven.web_views.deuna.DeunaWidget
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
+import com.deuna.maven.widgets.checkout_widget.CheckoutEvent
 import org.json.*
 
 @Suppress("UNCHECKED_CAST")
@@ -40,8 +41,13 @@ class ElementsBridge(
 
                 when (event) {
 
+                    ElementsEvent.onBinDetected -> {
+                        handleCardBinDetected(data["metadata"] as? Json)
+                    }
+
                     ElementsEvent.vaultSaveSuccess -> {
                         deunaWidget.closeSubWebView()
+                        deunaWidget.widgetConfiguration?.hasReportedSuccess = true
                         callbacks.onSuccess?.invoke(deunaWidget.buildSuccessPayload(data))
                     }
 
@@ -61,6 +67,10 @@ class ElementsBridge(
                         onCloseByUser?.invoke()
                     }
 
+                    ElementsEvent.onInstallmentSelected -> {
+                        callbacks.onInstallmentSelected?.invoke(data["metadata"] as? Json)
+                    }
+
                     else -> {}
                 }
             } catch (_: IllegalArgumentException) {
@@ -68,5 +78,10 @@ class ElementsBridge(
                 DeunaLogs.debug("ElementsBridge JSONException: $e")
             }
         }
+    }
+
+
+    private fun handleCardBinDetected(metadata: Json?) {
+        callbacks.onCardBinDetected?.invoke(metadata)
     }
 }

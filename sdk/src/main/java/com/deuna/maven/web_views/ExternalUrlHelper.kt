@@ -46,10 +46,8 @@ class ExternalUrlHelper {
                 ActivityResultContracts.StartActivityForResult()
             ) { _ ->
                 if (!activity.isDestroyed) {
-                    listeners.forEach {
-                        it.invoke()
-                        listeners.remove(it)
-                    }
+                    listeners.toList().forEach { it.invoke() }
+                    listeners.clear()
                 }
                 if (onExternalUrlBrowserClosed != null && browser == ExternalUrlBrowser.CUSTOM_TABS) {
                     onExternalUrlBrowserClosed?.invoke()
@@ -63,7 +61,7 @@ class ExternalUrlHelper {
         fun waitUntilChromeTabIsClosed(
             cb: () -> Unit
         ) {
-            if (isChromeTabOpened) {
+            if (isChromeTabOpened && browser == ExternalUrlBrowser.CUSTOM_TABS) {
                 listeners.add(cb)
             } else {
                 cb.invoke()
@@ -86,10 +84,13 @@ class ExternalUrlHelper {
 
             when (browser) {
                 ExternalUrlBrowser.WEB_VIEW -> {
+                    // Defensive reset: this flow does not depend on Custom Tabs.
+                    isChromeTabOpened = false
                     externalUrlDialog = ExternalUrlDialogFragment(
                         context = context,
                         url = url, onDialogDestroyed = {
                             externalUrlDialog = null
+                            isChromeTabOpened = false
                             this.onExternalUrlBrowserClosed?.invoke()
                             this.onExternalUrlBrowserClosed = null
                         }
@@ -104,9 +105,12 @@ class ExternalUrlHelper {
                         data = Uri.parse(url)
                     }
 
-                    chromeTabLauncher?.launch(intent) ?: run {
+                    if (chromeTabLauncher == null) {
                         DeunaLogs.error("chromeTabLauncher is null - did you call registerForActivityResult()?")
+                        isChromeTabOpened = false
+                        return
                     }
+                    chromeTabLauncher?.launch(intent)
                     isChromeTabOpened = true
                 }
             }
@@ -114,6 +118,8 @@ class ExternalUrlHelper {
 
         fun close() {
             externalUrlDialog?.dismiss()
+            // Defensive reset to avoid leaking stale state between flows.
+            isChromeTabOpened = false
         }
     }
 }

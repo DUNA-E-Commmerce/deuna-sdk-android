@@ -2,10 +2,13 @@ package com.deuna.maven.web_views.external_url
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.webkit.JavascriptInterface
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.web_views.base.BaseWebView
 import com.deuna.maven.web_views.file_downloaders.downloadFile
+import com.deuna.maven.web_views.file_downloaders.runOnUiThread
+import java.net.URL
 
 
 @Suppress("UNCHECKED_CAST")
@@ -38,7 +41,9 @@ class ExternalUrlWebView(
             override fun onWebViewError() {}
 
             override fun onOpenExternalUrl(url: String, userInitiated: Boolean) {
-                launch(url)
+                runOnUiThread {
+                    launch(url)
+                }
             }
 
             override fun onDownloadFile(url: String) {
@@ -49,13 +54,25 @@ class ExternalUrlWebView(
     }
 
     fun launch(url: String) {
-        super.loadUrl(url) {
-            return@loadUrl """
-            window.close = function() {
-               windowClose.onCloseWindowCalled();
-            };
-            """.trimIndent()
+        runOnUiThread {
+            configureRenderingFor(url)
+            super.loadUrl(url) {
+                return@loadUrl """
+                window.close = function() {
+                   windowClose.onCloseWindowCalled();
+                };
+                """.trimIndent()
+            }
         }
+    }
+
+    private fun configureRenderingFor(url: String) {
+        val host = runCatching { URL(url).host.lowercase() }.getOrNull().orEmpty()
+        val useSoftwareLayer = host.contains("aplazo.net")
+        webView.setLayerType(
+            if (useSoftwareLayer) View.LAYER_TYPE_SOFTWARE else View.LAYER_TYPE_NONE,
+            null
+        )
     }
 
 

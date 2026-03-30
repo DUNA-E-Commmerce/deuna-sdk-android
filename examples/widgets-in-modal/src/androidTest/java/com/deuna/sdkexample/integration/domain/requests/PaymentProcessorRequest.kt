@@ -47,6 +47,39 @@ data class StripeProcessor(
     }
 }
 
+// MARK: - PayU Efecty Processor
+
+data class PayuEfectyProcessor(
+    override val name: String,
+    override val paymentProcessorId: Int,
+    override val enabled: Boolean,
+    override val currencyIso3: String,
+    val countryIso: String,
+    val externalMerchantId: String,
+    val privateApiKey: String,
+    val publicApiKey: String,
+    val automaticCapture: Boolean,
+    val flow: String,
+    val extraParams: JSONObject
+) : BaseProcessor {
+
+    override fun toJson(): JSONObject {
+        return JSONObject().apply {
+            put("name", name)
+            put("payment_processor_id", paymentProcessorId)
+            put("enabled", enabled)
+            put("currency_iso3", currencyIso3)
+            put("country_iso", countryIso)
+            put("external_merchant_id", externalMerchantId)
+            put("private_api_key", privateApiKey)
+            put("public_api_key", publicApiKey)
+            put("automatic_capture", automaticCapture)
+            put("flow", flow)
+            put("extra_params", extraParams)
+        }
+    }
+}
+
 // MARK: - Stripe Processor Configurations
 
 object StripeProcessorConfig {
@@ -82,6 +115,15 @@ object StripeProcessorConfig {
         return stripeProcessor(country = country, automaticCapture = false)
     }
 
+    /**
+     * Stripe processor with 3DS enabled.
+     */
+    fun stripe3dsProcessor(country: CountryCode): StripeProcessor {
+        return stripeProcessor(country = country, automaticCapture = true).copy(
+            enable3dsAuthentication = true
+        )
+    }
+
     private fun getCurrencyForCountry(country: CountryCode): String {
         return when (country) {
             CountryCode.MX -> "MXN"
@@ -97,6 +139,26 @@ object StripeProcessorConfig {
             CountryCode.CR -> "CRC"
             CountryCode.UY -> "UYU"
         }
+    }
+}
+
+object VoucherProcessorConfig {
+    fun payuEfectyProcessor(): PayuEfectyProcessor {
+        return PayuEfectyProcessor(
+            name = "PAYU_EFECTY",
+            paymentProcessorId = 58,
+            enabled = true,
+            currencyIso3 = "COP",
+            countryIso = "CO",
+            externalMerchantId = "511620",
+            privateApiKey = "bjuSxu382vh5d5GjxpRu409wQ2",
+            publicApiKey = "jI5ZhgfpWpVoM15",
+            automaticCapture = true,
+            flow = "payconnect",
+            extraParams = JSONObject().apply {
+                put("account_id", "516553")
+            }
+        )
     }
 }
 

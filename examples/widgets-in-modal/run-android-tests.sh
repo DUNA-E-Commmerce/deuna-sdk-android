@@ -6,7 +6,7 @@ echo "================================================"
 
 # Configuration
 AVD_NAME="test_avd"
-EMULATOR_WAIT_TIME=300  # 5 minutes max wait
+EMULATOR_WAIT_TIME="${EMULATOR_WAIT_TIME:-300}"  # 5 minutes max wait
 ADB_PORT=5037
 EMULATOR_PORT=5554
 

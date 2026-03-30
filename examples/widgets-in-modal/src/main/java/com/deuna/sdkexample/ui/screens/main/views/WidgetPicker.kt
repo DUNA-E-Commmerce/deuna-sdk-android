@@ -19,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.deuna.sdkexample.ui.screens.main.MainScreenTestTags
 import com.deuna.sdkexample.ui.screens.main.WidgetToShow
 
 
@@ -32,7 +34,8 @@ fun WidgetPicker(
 
     Box {
         TextButton(
-            onClick = { expanded = true }
+            onClick = { expanded = true },
+            modifier = Modifier.testTag(MainScreenTestTags.WIDGET_PICKER_BUTTON),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = widgetToShow.label)
@@ -52,6 +55,7 @@ fun WidgetPicker(
         ) {
             WidgetToShow.entries.forEach { widget ->
                 DropdownMenuItem(
+                    modifier = Modifier.testTag(MainScreenTestTags.widgetOption(widget)),
                     text = {
                         Text(text = widget.label)
                     },
