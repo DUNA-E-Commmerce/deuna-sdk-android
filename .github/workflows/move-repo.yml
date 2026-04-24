@@ -39,7 +39,7 @@ jobs:
           cp -r .github temp_dir/
           
           # Remove sensitive integration test code and create empty directory
-          rm -rf temp_dir/examples/widgets-in-modal/src/androidTest/*
+          rm -rf temp_dir/examples/widgets-in-modal/src/androidTest
           mkdir -p temp_dir/examples/widgets-in-modal/src/androidTest
           touch temp_dir/examples/widgets-in-modal/src/androidTest/.gitkeep
           
