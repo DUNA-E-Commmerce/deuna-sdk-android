@@ -13,7 +13,6 @@ import com.lexisnexisrisk.threatmetrix.rl.TMXEndNotifier
 import com.lexisnexisrisk.threatmetrix.rl.TMXProfiling
 import com.lexisnexisrisk.threatmetrix.rl.TMXProfilingHandle
 import com.lexisnexisrisk.threatmetrix.rl.TMXProfilingOptions
-import com.riskified.android_sdk.RiskifiedBeaconMain
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -138,11 +137,10 @@ private class GenerateFraudId(
         }
 
         try {
-            RiskifiedBeaconMain().startBeacon(
-                storeDomain,
-                providerId,
-                false,
-                context
+            RiskifiedNativeBridge.startBeacon(
+                storeDomain = storeDomain,
+                providerId = providerId,
+                context = context
             )
             DeunaLogs.info("[fraud] RISKIFIED beacon started.")
         } catch (error: Throwable) {
@@ -191,6 +189,23 @@ private class GenerateFraudId(
             result[stringKey] = value
         }
         return result
+    }
+}
+
+private object RiskifiedNativeBridge {
+    private const val BEACON_MAIN_CLASS = "com.riskified.android_sdk.RiskifiedBeaconMain"
+
+    fun startBeacon(storeDomain: String, providerId: String, context: Context) {
+        val clazz = Class.forName(BEACON_MAIN_CLASS)
+        val instance = clazz.getDeclaredConstructor().newInstance()
+        val method = clazz.getMethod(
+            "startBeacon",
+            String::class.java,
+            String::class.java,
+            Boolean::class.javaPrimitiveType,
+            Context::class.java
+        )
+        method.invoke(instance, storeDomain, providerId, false, context)
     }
 }
 
