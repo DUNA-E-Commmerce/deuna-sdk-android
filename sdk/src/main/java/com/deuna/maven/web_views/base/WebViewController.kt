@@ -13,6 +13,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.WebViewSettingsCustomizer
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.file_downloaders.isFileDownloadUrl
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
@@ -33,11 +34,21 @@ class WebViewController(
 
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun loadUrl(url: String, jsToInjectCallback: (() -> String)? = null) {
+    fun loadUrl(
+        url: String,
+        jsToInjectCallback: (() -> String)? = null,
+        settingsCustomizer: WebViewSettingsCustomizer? = null,
+    ) {
         webView.settings.apply {
             domStorageEnabled = true
             javaScriptEnabled = true
             setSupportMultipleWindows(true) // Enable support for multiple windows
+        }
+
+        runCatching {
+            settingsCustomizer?.invoke(webView.settings)
+        }.onFailure {
+            DeunaLogs.warning("Custom WebView settings failed: ${it.message}")
         }
 
         webView.addJavascriptInterface(LocalBridge(), "local")
