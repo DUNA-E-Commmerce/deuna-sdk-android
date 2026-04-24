@@ -122,12 +122,12 @@ fun MainScreen(
                         context = context,
                         params = mapOf(
                             "CYBERSOURCE" to mapOf(
-                                "orgId" to "1snn5n9w",
-                                "merchantId" to "deuna_pruebas001",
+                                "orgId" to "your_org_id",
+                                "merchantId" to "your_merchant_id",
                                 "fpServer" to "h.online-metrix.net"
                             ),
                             "RISKIFIED" to mapOf(
-                                "storeDomain" to "cinepolis.com"
+                                "storeDomain" to "your_domain.com"
                             )
                         )
                     ) {
