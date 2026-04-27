@@ -1,9 +1,12 @@
 package com.deuna.sdkexample.ui.screens.main
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +47,7 @@ enum class WidgetToShow(val label: String) {
     ;
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     deunaSDK: DeunaSDK,
@@ -62,110 +66,128 @@ fun MainScreen(
 
     val deunaWidget = remember { mutableStateOf<DeunaWidget?>(null) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
+    BottomSheetScaffold(
+        sheetPeekHeight = 180.dp,
+        sheetContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 24.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        focusManager.clearFocus()
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                focusManager.clearFocus()
+                Row {
+                    WidgetPicker(widgetToShow = widgetToShow) {
+                        widgetToShow = it
+                    }
+
+                    if (config == null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        DeunaButton(
+                            onClick = {
+                                config = buildWidgetConfig(
+                                    widgetToShow = widgetToShow,
+                                    orderToken = orderToken,
+                                    userToken = userToken,
+                                    deunaSDK = deunaSDK,
+                                    onPaymentSuccess = { data ->
+                                        deunaWidget.value?.waitUntilExternalUrlIsClosed {
+                                            deunaWidget.value?.destroy()
+                                            val jsonStr = Uri.encode(JSONObject(data).toString())
+                                            navController.navigate("payment-success/$jsonStr") {
+                                            }
+                                        }
+                                    },
+                                    onSaveCardSuccess = { data ->
+                                        deunaWidget.value?.destroy()
+                                        val jsonStr = Uri.encode(JSONObject(data).toString())
+                                        navController.navigate("card-saved-success/$jsonStr") {
+                                        }
+                                    }
+                                )
+                            },
+                            text = "Show Widget",
+                            backgroundColor = Color(0xFF007AFF)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        DeunaButton(
+                            onClick = {
+                                deunaWidget.value?.submit {}
+                            },
+                            text = "Pay",
+                            backgroundColor = Color.Red
+                        )
+                    }
+                }
+
+                Inputs(
+                    userToken = userToken,
+                    orderToken = orderToken,
+                    onOrderTokenChange = {
+                        orderToken = it
+                    },
+                    onUserTokenChange = {
+                        userToken = it
+                    }
+                )
+                Separator(16.dp)
+
+                DeunaButton(
+                    onClick = {
+                        deunaSDK.generateFraudId(
+                            context = context,
+                            params = mapOf(
+                                "RISKIFIED" to mapOf(
+                                    "storeDomain" to "deuna.com"
+                                )
+                            )
+                        ) {
+                            fraudId = it ?: "ERROR"
+                        }
+                    },
+                    text = "Generate Fraud ID"
+                )
+                Text("Fraud ID: $fraudId")
             }
-    ) {
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .padding(16.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .background(Color.Blue)
+            )
 
             WidgetContainer(
                 config = config,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                    .fillMaxWidth(),
                 onWidgetCreated = {
                     deunaWidget.value = it
                 }
             )
 
-            Separator(10.dp)
-
-            Row {
-                WidgetPicker(widgetToShow = widgetToShow) {
-                    widgetToShow = it
-                }
-
-                if (config == null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    DeunaButton(
-                        onClick = {
-                            config = buildWidgetConfig(
-                                widgetToShow = widgetToShow,
-                                orderToken = orderToken,
-                                userToken = userToken,
-                                deunaSDK = deunaSDK,
-                                onPaymentSuccess = { data ->
-                                    deunaWidget.value?.waitUntilExternalUrlIsClosed {
-                                        deunaWidget.value?.destroy()
-                                        val jsonStr = Uri.encode(JSONObject(data).toString())
-                                        navController.navigate("payment-success/$jsonStr") {
-                                        }
-                                    }
-                                },
-                                onSaveCardSuccess = { data ->
-                                    deunaWidget.value?.destroy()
-                                    val jsonStr = Uri.encode(JSONObject(data).toString())
-                                    navController.navigate("card-saved-success/$jsonStr") {
-                                    }
-                                }
-                            )
-                        },
-                        text = "Show Widget",
-                        backgroundColor = Color(0xFF007AFF)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    DeunaButton(
-                        onClick = {
-                            deunaWidget.value?.submit {}
-                        },
-                        text = "Pay",
-                        backgroundColor = Color.Red
-                    )
-                }
-            }
-
-            Inputs(
-                userToken = userToken,
-                orderToken = orderToken,
-                onOrderTokenChange = {
-                    orderToken = it
-                },
-                onUserTokenChange = {
-                    userToken = it
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(Color.Blue)
             )
-            Separator(30.dp)
-
-            DeunaButton(
-                onClick = {
-                    deunaSDK.generateFraudId(
-                        context = context,
-                        params = mapOf(
-                            "RISKIFIED" to mapOf(
-                                "storeDomain" to "deuna.com"
-                            )
-                        )
-                    ) {
-                        fraudId = it ?: "ERROR"
-                    }
-                },
-                text = "Generate Fraud ID"
-            )
-            Text("Fraud ID: $fraudId")
-
         }
     }
 

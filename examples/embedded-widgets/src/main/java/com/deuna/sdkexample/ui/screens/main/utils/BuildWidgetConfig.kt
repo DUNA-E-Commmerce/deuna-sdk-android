@@ -53,7 +53,8 @@ fun buildWidgetConfig(
                     "storeDomain" to "deuna.com"
                 )
             ),
-            sdkInstance = deunaSDK
+            sdkInstance = deunaSDK,
+            autoResizeEnabled = true
         )
 
         WidgetToShow.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
@@ -66,7 +67,8 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
             },
-            sdkInstance = deunaSDK
+            sdkInstance = deunaSDK,
+            autoResizeEnabled = true
         )
 
         WidgetToShow.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
@@ -79,7 +81,8 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
             },
-            sdkInstance = deunaSDK
+            sdkInstance = deunaSDK,
+            autoResizeEnabled = true
         )
 
         WidgetToShow.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
@@ -93,7 +96,8 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
             },
-            sdkInstance = deunaSDK
+            sdkInstance = deunaSDK,
+            autoResizeEnabled = true
         )
 
         WidgetToShow.VAULT_WIDGET -> ElementsWidgetConfiguration(
@@ -113,7 +117,8 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError code: ${it.metadata?.code}")
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
-            }
+            },
+            autoResizeEnabled = true
         )
 
         WidgetToShow.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
@@ -130,7 +135,8 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError code: ${it.metadata?.code}")
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
-            }
+            },
+            autoResizeEnabled = true
         )
     }
 }

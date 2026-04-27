@@ -18,12 +18,14 @@ class VoucherWidgetConfiguration(
     val widgetIntegration: WidgetIntegration = WidgetIntegration.EMBEDDED,
     fraudCredentials: Json? = null,
     customUserAgent: String? = null,
+    autoResizeEnabled: Boolean = false,
 ) : DeunaWidgetConfiguration(
     sdkInstance = sdkInstance,
     hidePayButton = hidePayButton,
     fraudCredentials = fraudCredentials,
     customUserAgent = customUserAgent,
     domain = domain,
+    autoResizeEnabled = autoResizeEnabled,
 ) {
     override val link: String
         get() {

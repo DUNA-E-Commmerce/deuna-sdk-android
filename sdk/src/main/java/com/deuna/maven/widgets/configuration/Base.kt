@@ -11,6 +11,7 @@ sealed class DeunaWidgetConfiguration(
     val fraudCredentials: Json? = null,
     val customUserAgent: String? = null,
     val domain: String? = null,
+    val autoResizeEnabled: Boolean = false,
 ) {
     var onCloseByUser: (() -> Unit)? = null
     @Volatile

@@ -3,6 +3,7 @@ package com.deuna.maven.web_views.deuna
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.generateFraudId
@@ -79,6 +80,12 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     @SuppressLint("SetJavaScriptEnabled")
     fun launch(url: String, javascriptToInject: String? = null) {
         openedAutomaticExternalUrls.clear()
+
+        if (widgetConfiguration?.autoResizeEnabled == true) {
+            webView.layoutParams = webView.layoutParams.apply {
+                height = ViewGroup.LayoutParams.WRAP_CONTENT
+            }
+        }
 
         fraudCredentials?.let {
             widgetConfiguration?.sdkInstance?.generateFraudId(
