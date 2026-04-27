@@ -12,6 +12,7 @@ import android.widget.ProgressBar
 import com.deuna.maven.R
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Json
+import com.deuna.maven.shared.WebViewSettingsCustomizer
 import com.deuna.maven.shared.toMap
 import com.deuna.maven.web_views.file_downloaders.runOnUiThread
 import org.json.JSONObject
@@ -63,8 +64,12 @@ open class BaseWebView(
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun loadUrl(url: String, jsToInjectCallback: (() -> String)? = null) {
-        controller?.loadUrl(url, jsToInjectCallback)
+    fun loadUrl(
+        url: String,
+        jsToInjectCallback: (() -> String)? = null,
+        settingsCustomizer: WebViewSettingsCustomizer? = null,
+    ) {
+        controller?.loadUrl(url, jsToInjectCallback, settingsCustomizer)
     }
 
 

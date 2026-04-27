@@ -56,13 +56,17 @@ class ExternalUrlWebView(
     fun launch(url: String) {
         runOnUiThread {
             configureRenderingFor(url)
-            super.loadUrl(url) {
-                return@loadUrl """
+            super.loadUrl(
+                url = url,
+                jsToInjectCallback = {
+                    """
                 window.close = function() {
                    windowClose.onCloseWindowCalled();
                 };
                 """.trimIndent()
-            }
+                },
+                settingsCustomizer = null,
+            )
         }
     }
 
