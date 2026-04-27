@@ -10,7 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -48,6 +50,7 @@ fun MainScreen(
     // Retrieve the Context from the composition's LocalContext
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
 
     var orderToken by remember { mutableStateOf(initialOrderToken ?: "") }
     var userToken by remember { mutableStateOf("") }
@@ -118,8 +121,13 @@ fun MainScreen(
                     deunaSDK.generateFraudId(
                         context = context,
                         params = mapOf(
+                            "CYBERSOURCE" to mapOf(
+                                "orgId" to "your_org_id",
+                                "merchantId" to "your_merchant_id",
+                                "fpServer" to "h.online-metrix.net"
+                            ),
                             "RISKIFIED" to mapOf(
-                                "storeDomain" to "deuna.com"
+                                "storeDomain" to "your_domain.com"
                             )
                         )
                     ) {
@@ -129,6 +137,20 @@ fun MainScreen(
                 text = "Generate Fraud ID"
             )
             Text("Fraud ID: $fraudId")
+
+            if (fraudId.isNotBlank() && fraudId != "ERROR") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        clipboardManager.setText(AnnotatedString(fraudId))
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF34C759)
+                    )
+                ) {
+                    Text("Copy Fraud ID")
+                }
+            }
 
         }
     }
