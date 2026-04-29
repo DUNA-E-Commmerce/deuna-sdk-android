@@ -52,7 +52,9 @@ private class GetWalletsAvailable(
 ) {
     companion object {
         @Volatile
-        private var cachedWallets: List<WalletProvider>? = null
+        internal var cachedWallets: List<WalletProvider>? = null
+        @Volatile
+        internal var cachedGooglePayCredentials: GooglePayCredentials? = null
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -116,16 +118,8 @@ private class GetWalletsAvailable(
                     JSONObject().apply {
                         put("type", "CARD")
                         put("parameters", JSONObject().apply {
-                            put("allowedAuthMethods", JSONArray().apply {
-                                put("PAN_ONLY")
-                                put("CRYPTOGRAM_3DS")
-                            })
-                            put("allowedCardNetworks", JSONArray().apply {
-                                put("AMEX")
-                                put("DISCOVER")
-                                put("MASTERCARD")
-                                put("VISA")
-                            })
+                            put("allowedAuthMethods", JSONArray(GooglePayCredentials.DEFAULT_AUTH_METHODS))
+                            put("allowedCardNetworks", JSONArray(GooglePayCredentials.DEFAULT_CARD_NETWORKS))
                         })
                     }
                 ))
@@ -184,14 +178,40 @@ private class GetWalletsAvailable(
     private fun parseWallets(json: String): List<WalletProvider> {
         val root = JSONObject(json)
         val paymentMethods: JSONArray = root.optJSONArray("paymentMethods") ?: return emptyList()
+        val merchant = root.optJSONObject("checkout")?.optJSONObject("merchant")
         val result = mutableListOf<WalletProvider>()
         for (i in 0 until paymentMethods.length()) {
             val method = paymentMethods.optJSONObject(i) ?: continue
             val processorName = method.optString("processor_name")
             val provider = WalletProvider.fromProcessorName(processorName) ?: continue
-            if (!result.contains(provider)) result.add(provider)
+            if (!result.contains(provider)) {
+                result.add(provider)
+                if (provider == WalletProvider.GOOGLE_PAY) {
+                    cachedGooglePayCredentials = parseGooglePayCredentials(method, merchant)
+                }
+            }
         }
         return result
+    }
+
+    private fun parseGooglePayCredentials(method: JSONObject, merchant: JSONObject?): GooglePayCredentials {
+        val creds = method.optJSONObject("credentials") ?: JSONObject()
+        val extraParams = method.optJSONObject("extra_params") ?: JSONObject()
+        val merchantId = creds.optString("external_merchant_id", "")
+        val allowedCardNetworks = extraParams.optJSONArray("allowed_card_networks")
+            ?.let { arr -> (0 until arr.length()).map { arr.getString(it) } }
+            ?: GooglePayCredentials.DEFAULT_CARD_NETWORKS
+        val allowedAuthMethods = extraParams.optJSONArray("allowed_auth_methods")
+            ?.let { arr -> (0 until arr.length()).map { arr.getString(it) } }
+            ?: GooglePayCredentials.DEFAULT_AUTH_METHODS
+        return GooglePayCredentials(
+            merchantId = merchantId,
+            merchantName = merchant?.optString("name", "") ?: "",
+            gateway = extraParams.optString("gateway", ""),
+            gatewayMerchantId = merchantId,
+            allowedCardNetworks = allowedCardNetworks,
+            allowedAuthMethods = allowedAuthMethods,
+        )
     }
 
     private fun callbackOnMain(wallets: List<WalletProvider>, error: WalletsError?) {
