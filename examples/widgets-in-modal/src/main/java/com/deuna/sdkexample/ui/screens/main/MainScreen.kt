@@ -121,7 +121,7 @@ fun MainScreen(
 
             DeunaButton(
                 onClick = {
-                    navController.navigate(AppRoutes.WALLETS.route)
+                    navController.navigate(AppRoutes.WALLETS.walletsRoute(orderToken))
                 },
                 text = "Google Pay Wallets",
                 backgroundColor = Color(0xFF34C759)

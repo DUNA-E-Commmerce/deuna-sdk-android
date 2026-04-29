@@ -1,10 +1,15 @@
-package com.deuna.maven.wallets
+package com.deuna.maven.wallets.google_pay
+
+internal enum class GooglePayTokenizationType { PAYMENT_GATEWAY, DIRECT }
 
 internal data class GooglePayCredentials(
     val merchantId: String = "",
     val merchantName: String = "",
     val gateway: String = "",
     val gatewayMerchantId: String = "",
+    val tokenizationType: GooglePayTokenizationType = GooglePayTokenizationType.PAYMENT_GATEWAY,
+    val publicKey: String? = null,
+    val protocolVersion: String = "ECv2",
     val allowedCardNetworks: List<String> = DEFAULT_CARD_NETWORKS,
     val allowedAuthMethods: List<String> = DEFAULT_AUTH_METHODS,
     val transactionInfo: TransactionInfo? = null,

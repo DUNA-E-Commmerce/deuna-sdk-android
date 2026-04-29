@@ -4,25 +4,13 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.deuna.maven.DeunaSDK
+import com.deuna.maven.shared.DeunaHttpClient
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.domain.UserInfo
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.Wallet
-import com.google.android.gms.wallet.WalletConstants
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONArray
-import org.json.JSONObject
+import com.deuna.maven.wallets.google_pay.GooglePayCredentials
 import java.net.URLEncoder
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 data class GetWalletsAvailableParams(
     val orderToken: String? = null,
@@ -43,7 +31,7 @@ fun DeunaSDK.getWalletsAvailable(
     ).run()
 }
 
-private class GetWalletsAvailable(
+class GetWalletsAvailable(
     private val context: Context,
     private val environment: Environment,
     private val publicApiKey: String,
@@ -51,28 +39,26 @@ private class GetWalletsAvailable(
     private val callback: (wallets: List<WalletProvider>, error: WalletsError?) -> Unit,
 ) {
     companion object {
-        @Volatile
-        internal var cachedWallets: List<WalletProvider>? = null
-        @Volatile
-        internal var cachedGooglePayCredentials: GooglePayCredentials? = null
+        @Volatile internal var cachedWallets: List<WalletProvider>? = null
+        @Volatile internal var cachedGooglePayCredentials: GooglePayCredentials? = null
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val workers = Executors.newSingleThreadExecutor()
-    private val httpClient = OkHttpClient()
 
     fun run() {
         cachedWallets?.let {
-            DeunaLogs.info("Returning cache")
+            DeunaLogs.info("[wallets] Returning cached wallets")
             callbackOnMain(it, null)
             return
         }
         workers.execute {
             try {
-                val backendWallets = fetch()
-                val availableWallets = filterByDeviceAvailability(backendWallets)
-                cachedWallets = availableWallets
-                callbackOnMain(availableWallets, null)
+                val parsed = fetchAndParse()
+                val available = parsed.providers.filter { isAvailableOnDevice(it) }
+                cachedWallets = available
+                cachedGooglePayCredentials = parsed.googlePayCredentials
+                callbackOnMain(available, null)
             } catch (e: Exception) {
                 DeunaLogs.error("[wallets] getWalletsAvailable failed: ${e.message}")
                 callbackOnMain(emptyList(), WalletsError.fetchFailed(e.message ?: "Unknown error"))
@@ -80,146 +66,24 @@ private class GetWalletsAvailable(
         }
     }
 
-    private fun filterByDeviceAvailability(wallets: List<WalletProvider>): List<WalletProvider> {
-        if (wallets.isEmpty()) return emptyList()
-        return wallets.filter { provider ->
-            when (provider) {
-                WalletProvider.GOOGLE_PAY -> isGooglePayAvailable()
-            }
-        }
-    }
+    private fun fetchAndParse(): VaultResponseParser.ProvidersResult {
+        val urlBuilder = StringBuilder("${environment.elementsBaseUrl}/api/vault")
+        params?.orderToken?.let { urlBuilder.append("?orderToken=${URLEncoder.encode(it, "UTF-8")}") }
 
-    private fun isGooglePayAvailable(): Boolean {
-        val gmsStatus = GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(context)
-        if (gmsStatus != ConnectionResult.SUCCESS) {
-            DeunaLogs.info("[wallets] Google Play Services unavailable (code=$gmsStatus). Google Pay excluded.")
-            return false
-        }
-
-        val googlePayEnv = if (environment == Environment.PRODUCTION)
-            WalletConstants.ENVIRONMENT_PRODUCTION
-        else
-            WalletConstants.ENVIRONMENT_TEST
-
-        val paymentsClient = Wallet.getPaymentsClient(
-            context,
-            Wallet.WalletOptions.Builder()
-                .setEnvironment(googlePayEnv)
-                .build()
+        val response = DeunaHttpClient.post(
+            url = urlBuilder.toString(),
+            headers = mapOf("x-api-key" to publicApiKey),
+            body = VaultResponseParser.buildUserInfoBody(params?.userInfo),
         )
-
-        val request = IsReadyToPayRequest.fromJson(
-            JSONObject().apply {
-                put("apiVersion", 2)
-                put("apiVersionMinor", 0)
-                put(
-                    "allowedPaymentMethods", JSONArray().put(
-                    JSONObject().apply {
-                        put("type", "CARD")
-                        put("parameters", JSONObject().apply {
-                            put("allowedAuthMethods", JSONArray(GooglePayCredentials.DEFAULT_AUTH_METHODS))
-                            put("allowedCardNetworks", JSONArray(GooglePayCredentials.DEFAULT_CARD_NETWORKS))
-                        })
-                    }
-                ))
-            }.toString()
-        )
-
-        val latch = CountDownLatch(1)
-        var isReady = false
-
-        paymentsClient.isReadyToPay(request).addOnCompleteListener { task ->
-            isReady = task.isSuccessful && task.result == true
-            latch.countDown()
-        }
-
-        latch.await(5, TimeUnit.SECONDS)
-        return isReady
+        return VaultResponseParser.parseProviders(response)
     }
 
-    private fun fetch(): List<WalletProvider> {
-        val baseUrl = environment.elementsBaseUrl
-        val urlBuilder = StringBuilder("$baseUrl/api/vault")
-        params?.orderToken?.let {
-            urlBuilder.append("?orderToken=${URLEncoder.encode(it, "UTF-8")}")
-        }
-
-        val request = Request.Builder()
-            .url(urlBuilder.toString())
-            .header("x-api-key", publicApiKey)
-            .post(buildBody())
-            .build()
-
-        val response = httpClient.newCall(request).execute()
-        if (!response.isSuccessful) {
-            throw Exception("HTTP ${response.code}: ${response.message}")
-        }
-
-        val responseBody = response.body?.string() ?: return emptyList()
-        return parseWallets(responseBody)
-    }
-
-    private fun buildBody(): RequestBody {
-        val email = params?.userInfo?.email
-        if (params?.userInfo == null || email.isNullOrEmpty()) {
-            return "".toRequestBody("application/json".toMediaType())
-        }
-        val json = JSONObject().apply {
-            put("email", email)
-            val firstName = params.userInfo.firstName
-            val lastName = params.userInfo.lastName
-            if (firstName.isNotEmpty()) put("firstName", firstName)
-            if (lastName.isNotEmpty()) put("lastName", lastName)
-        }
-        return json.toString().toRequestBody("application/json".toMediaType())
-    }
-
-    private fun parseWallets(json: String): List<WalletProvider> {
-        val root = JSONObject(json)
-        val paymentMethods: JSONArray = root.optJSONArray("paymentMethods") ?: return emptyList()
-        val merchant = root.optJSONObject("checkout")?.optJSONObject("merchant")
-        val result = mutableListOf<WalletProvider>()
-        for (i in 0 until paymentMethods.length()) {
-            val method = paymentMethods.optJSONObject(i) ?: continue
-            val processorName = method.optString("processor_name")
-            val provider = WalletProvider.fromProcessorName(processorName) ?: continue
-            if (!result.contains(provider)) {
-                result.add(provider)
-                if (provider == WalletProvider.GOOGLE_PAY) {
-                    cachedGooglePayCredentials = parseGooglePayCredentials(method, merchant)
-                }
-            }
-        }
-        return result
-    }
-
-    private fun parseGooglePayCredentials(method: JSONObject, merchant: JSONObject?): GooglePayCredentials {
-        val creds = method.optJSONObject("credentials") ?: JSONObject()
-        val extraParams = method.optJSONObject("extra_params") ?: JSONObject()
-        val merchantId = creds.optString("external_merchant_id", "")
-        val allowedCardNetworks = extraParams.optJSONArray("allowed_card_networks")
-            ?.let { arr -> (0 until arr.length()).map { arr.getString(it) } }
-            ?: GooglePayCredentials.DEFAULT_CARD_NETWORKS
-        val allowedAuthMethods = extraParams.optJSONArray("allowed_auth_methods")
-            ?.let { arr -> (0 until arr.length()).map { arr.getString(it) } }
-            ?: GooglePayCredentials.DEFAULT_AUTH_METHODS
-        return GooglePayCredentials(
-            merchantId = merchantId,
-            merchantName = merchant?.optString("name", "") ?: "",
-            gateway = extraParams.optString("gateway", ""),
-            gatewayMerchantId = merchantId,
-            allowedCardNetworks = allowedCardNetworks,
-            allowedAuthMethods = allowedAuthMethods,
-        )
-    }
+    private fun isAvailableOnDevice(provider: WalletProvider): Boolean =
+        WalletHandlerRegistry.get(provider)?.isAvailableOnDevice(context, environment) ?: false
 
     private fun callbackOnMain(wallets: List<WalletProvider>, error: WalletsError?) {
-        DeunaLogs.info("Deuna Wallets: ${wallets.size}")
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            callback(wallets, error)
-        } else {
-            mainHandler.post { callback(wallets, error) }
-        }
+        DeunaLogs.info("[wallets] Available wallets: ${wallets.size}")
+        if (Looper.myLooper() == Looper.getMainLooper()) callback(wallets, error)
+        else mainHandler.post { callback(wallets, error) }
     }
 }

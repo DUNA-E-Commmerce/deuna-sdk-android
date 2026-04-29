@@ -54,13 +54,15 @@ fun DeunaSDK.initElements(
     domain: String? = null,
 ) {
 
-    val walletTypeNames = WalletProvider.entries.map { it.name }
-    val isWallet = types.any { it["name"] as? String in walletTypeNames }
-    if (isWallet) {
+    val requestedProvider = types.firstNotNullOfOrNull { entry ->
+        WalletProvider.entries.firstOrNull { it.name == entry["name"] as? String }
+    }
+    if (requestedProvider != null) {
         WalletElements(
             context = context.applicationContext,
             environment = environment,
             publicApiKey = publicApiKey,
+            requestedProvider = requestedProvider,
             orderToken = orderToken,
             userInfo = userInfo,
             callbacks = callbacks,
