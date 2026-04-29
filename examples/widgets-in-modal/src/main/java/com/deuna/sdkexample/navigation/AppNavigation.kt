@@ -11,13 +11,15 @@ import com.deuna.maven.shared.toMap
 import com.deuna.sdkexample.ui.screens.main.MainScreen
 import com.deuna.sdkexample.ui.screens.success.CardSavedSuccessfulScreen
 import com.deuna.sdkexample.ui.screens.success.PaymentSuccessfulScreen
+import com.deuna.sdkexample.ui.screens.wallets.WalletsScreen
 import org.json.JSONObject
 
 
 enum class AppRoutes(val route: String) {
     MAIN("main"),
     PAYMENT_SUCCESS("payment-success/{json}"),
-    CARD_SAVED_SUCCESS("card-saved-success/{json}")
+    CARD_SAVED_SUCCESS("card-saved-success/{json}"),
+    WALLETS("wallets"),
 }
 
 
@@ -59,6 +61,13 @@ fun AppNavigation(deunaSDK: DeunaSDK, initialOrderToken: String? = null) {
                 navController = navController,
                 title = "Card saved successfully",
                 savedCardData = JSONObject(jsonStr).toMap()
+            )
+        }
+
+        composable(AppRoutes.WALLETS.route) {
+            WalletsScreen(
+                deunaSDK = deunaSDK,
+                navController = navController,
             )
         }
     }
