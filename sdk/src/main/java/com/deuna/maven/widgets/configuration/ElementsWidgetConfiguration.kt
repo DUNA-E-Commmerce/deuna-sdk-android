@@ -56,11 +56,9 @@ class ElementsWidgetConfiguration(
             }
 
             if (userInfo != null && userInfo.isValid()) {
-                queryParameters.apply {
-                    put(QueryParameters.FIRST_NAME, userInfo.firstName)
-                    put(QueryParameters.LAST_NAME, userInfo.lastName)
-                    put(QueryParameters.EMAIL, userInfo.email)
-                }
+                userInfo.firstName?.let { queryParameters[QueryParameters.FIRST_NAME] = it }
+                userInfo.lastName?.let { queryParameters[QueryParameters.LAST_NAME] = it }
+                queryParameters[QueryParameters.EMAIL] = userInfo.email
             }
 
             if (!language.isNullOrEmpty()) {
