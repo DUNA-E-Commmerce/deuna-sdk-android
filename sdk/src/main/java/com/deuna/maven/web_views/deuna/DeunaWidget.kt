@@ -169,9 +169,13 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         }
 
 
+        val settingsCustomizer = widgetConfiguration?.sdkInstance?.getWebViewSettingsCustomizer()
+
         super.loadUrl(
-            url
-        ) { return@loadUrl jsToInjectCallback() }
+            url = url,
+            jsToInjectCallback = { jsToInjectCallback() },
+            settingsCustomizer = settingsCustomizer,
+        )
 
         listener = object : Listener {
             override fun onWebViewLoaded() {

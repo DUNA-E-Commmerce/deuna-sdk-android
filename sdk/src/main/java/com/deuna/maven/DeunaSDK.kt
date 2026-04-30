@@ -4,6 +4,7 @@ package com.deuna.maven
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.VoidCallback
+import com.deuna.maven.shared.WebViewSettingsCustomizer
 import com.deuna.maven.internal.modal.DeunaModalHost
 import com.deuna.maven.web_views.deuna.extensions.refetchOrder
 import com.deuna.maven.web_views.deuna.extensions.setCustomStyle
@@ -22,6 +23,8 @@ open class DeunaSDK(
 ) {
 
     private var modalHost: DeunaModalHost? = null
+    @Volatile
+    private var webViewSettingsCustomizer: WebViewSettingsCustomizer? = null
 
     init {
         require(publicApiKey.isNotEmpty()) {
@@ -59,6 +62,18 @@ open class DeunaSDK(
         ) {
             instance = DeunaSDK(environment, publicApiKey)
         }
+    }
+
+    /**
+     * Applies custom settings to the SDK's internal WebView before loading widgets.
+     * This should be configured before calling init* methods or rendering embedded widgets.
+     */
+    fun applyCustomWebViewSettings(customizer: WebViewSettingsCustomizer?) {
+        webViewSettingsCustomizer = customizer
+    }
+
+    internal fun getWebViewSettingsCustomizer(): WebViewSettingsCustomizer? {
+        return webViewSettingsCustomizer
     }
 
     /**
