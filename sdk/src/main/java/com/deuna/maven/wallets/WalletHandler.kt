@@ -4,7 +4,6 @@ import android.content.Context
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.wallets.google_pay.GooglePayWalletHandler
-import com.deuna.maven.wallets.google_pay.WalletFetchResult
 
 /**
  * Contract for a wallet provider's launch logic.

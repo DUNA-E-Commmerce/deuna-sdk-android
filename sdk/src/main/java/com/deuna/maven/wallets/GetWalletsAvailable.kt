@@ -8,7 +8,6 @@ import com.deuna.maven.shared.DeunaHttpClient
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.wallets.google_pay.GooglePayCredentials
 import java.net.URLEncoder
 import java.util.concurrent.Executors
 
@@ -40,7 +39,7 @@ class GetWalletsAvailable(
 ) {
     companion object {
         @Volatile internal var cachedWallets: List<WalletProvider>? = null
-        @Volatile internal var cachedGooglePayCredentials: GooglePayCredentials? = null
+        @Volatile internal var cachedCredentials: Map<WalletProvider, WalletCredentials> = emptyMap()
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -57,7 +56,7 @@ class GetWalletsAvailable(
                 val parsed = fetchAndParse()
                 val available = parsed.providers.filter { isAvailableOnDevice(it) }
                 cachedWallets = available
-                cachedGooglePayCredentials = parsed.googlePayCredentials
+                cachedCredentials = parsed.credentials
                 callbackOnMain(available, null)
             } catch (e: Exception) {
                 DeunaLogs.error("[wallets] getWalletsAvailable failed: ${e.message}")

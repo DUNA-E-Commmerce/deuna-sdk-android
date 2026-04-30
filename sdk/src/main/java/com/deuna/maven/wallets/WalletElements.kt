@@ -8,7 +8,6 @@ import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.domain.UserInfo
-import com.deuna.maven.wallets.google_pay.WalletFetchResult
 import com.deuna.maven.widgets.elements_widget.ElementsError
 import java.net.URLEncoder
 import java.util.concurrent.Executors
@@ -50,7 +49,7 @@ internal class WalletElements(
     private fun fetchCredentials(): WalletFetchResult {
         if (orderToken == null) {
             return WalletFetchResult(
-                googlePayCredentials = GetWalletsAvailable.cachedGooglePayCredentials,
+                credentials = GetWalletsAvailable.cachedCredentials,
                 userToken = null,
                 userId = null,
             )

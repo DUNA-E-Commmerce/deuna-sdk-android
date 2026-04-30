@@ -5,6 +5,7 @@ import android.content.Intent
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
+import com.deuna.maven.wallets.WalletFetchResult
 import com.deuna.maven.wallets.WalletHandler
 import com.deuna.maven.wallets.WalletProvider
 import com.google.android.gms.common.ConnectionResult
@@ -67,7 +68,7 @@ internal object GooglePayWalletHandler : WalletHandler {
         fetchResult: WalletFetchResult,
         callbacks: ElementsCallbacks,
     ) {
-        val credentials = fetchResult.googlePayCredentials
+        val credentials = fetchResult.credentials[WalletProvider.GOOGLE_PAY] as? GooglePayCredentials
             ?: throw Exception("No Google Pay configuration found.")
 
         WalletPaymentActivity.pendingCallbacks = callbacks

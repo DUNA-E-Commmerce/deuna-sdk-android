@@ -3,7 +3,6 @@ package com.deuna.maven.wallets
 import com.deuna.maven.shared.domain.UserInfo
 import com.deuna.maven.wallets.google_pay.GooglePayCredentials
 import com.deuna.maven.wallets.google_pay.GooglePayTokenizationType
-import com.deuna.maven.wallets.google_pay.WalletFetchResult
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -12,22 +11,20 @@ import org.json.JSONObject
  *
  * Used by both [GetWalletsAvailable] (provider list only) and
  * [WalletElements] (full fetch result with credentials + user auth).
- *
- * Expected JSON shape: see [WalletElements.fetchCredentials] KDoc.
  */
 internal object VaultResponseParser {
 
     data class ProvidersResult(
         val providers: List<WalletProvider>,
-        val googlePayCredentials: GooglePayCredentials?,
+        val credentials: Map<WalletProvider, WalletCredentials>,
     )
 
     fun parseProviders(root: JSONObject): ProvidersResult {
         val paymentMethods = root.optJSONArray("paymentMethods")
-            ?: return ProvidersResult(emptyList(), null)
+            ?: return ProvidersResult(emptyList(), emptyMap())
         val merchant = root.optJSONObject("checkout")?.optJSONObject("merchant")
         val providers = mutableListOf<WalletProvider>()
-        var googlePayCredentials: GooglePayCredentials? = null
+        val credentialsMap = mutableMapOf<WalletProvider, WalletCredentials>()
 
         for (i in 0 until paymentMethods.length()) {
             val method = paymentMethods.optJSONObject(i) ?: continue
@@ -35,12 +32,13 @@ internal object VaultResponseParser {
                 ?: continue
             if (provider !in providers) {
                 providers.add(provider)
-                if (provider == WalletProvider.GOOGLE_PAY) {
-                    googlePayCredentials = parseGooglePayCredentials(method, merchant)
+                when (provider) {
+                    WalletProvider.GOOGLE_PAY ->
+                        credentialsMap[provider] = parseGooglePayCredentials(method, merchant)
                 }
             }
         }
-        return ProvidersResult(providers, googlePayCredentials)
+        return ProvidersResult(providers, credentialsMap)
     }
 
     fun parseFetchResult(root: JSONObject): WalletFetchResult {
@@ -49,18 +47,21 @@ internal object VaultResponseParser {
         val order = root.optJSONObject("checkout")?.optJSONObject("order")?.optJSONObject("order")
         val userAuthData = root.optJSONObject("userAuthResponse")?.optJSONObject("data")
 
-        var credentials: GooglePayCredentials? = null
+        val credentialsMap = mutableMapOf<WalletProvider, WalletCredentials>()
         if (paymentMethods != null) {
             for (i in 0 until paymentMethods.length()) {
                 val method = paymentMethods.optJSONObject(i) ?: continue
-                if (method.optString("processor_name") != WalletProvider.GOOGLE_PAY.processorName) continue
-                credentials = parseGooglePayCredentials(method, merchant, order)
-                break
+                val provider = WalletProvider.fromProcessorName(method.optString("processor_name"))
+                    ?: continue
+                when (provider) {
+                    WalletProvider.GOOGLE_PAY ->
+                        credentialsMap[provider] = parseGooglePayCredentials(method, merchant, order)
+                }
             }
         }
 
         return WalletFetchResult(
-            googlePayCredentials = credentials,
+            credentials = credentialsMap,
             userToken = userAuthData?.optString("user_token")?.takeIf { it.isNotEmpty() },
             userId = userAuthData?.optString("user_id")?.takeIf { it.isNotEmpty() },
         )

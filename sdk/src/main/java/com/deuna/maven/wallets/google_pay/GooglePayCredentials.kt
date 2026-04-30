@@ -1,5 +1,7 @@
 package com.deuna.maven.wallets.google_pay
 
+import com.deuna.maven.wallets.WalletCredentials
+
 internal enum class GooglePayTokenizationType { PAYMENT_GATEWAY, DIRECT }
 
 internal data class GooglePayCredentials(
@@ -13,7 +15,8 @@ internal data class GooglePayCredentials(
     val allowedCardNetworks: List<String> = DEFAULT_CARD_NETWORKS,
     val allowedAuthMethods: List<String> = DEFAULT_AUTH_METHODS,
     val transactionInfo: TransactionInfo? = null,
-) {
+) : WalletCredentials {
+
     data class TransactionInfo(
         val totalPrice: String,
         val currencyCode: String,
@@ -25,9 +28,3 @@ internal data class GooglePayCredentials(
         val DEFAULT_AUTH_METHODS = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
     }
 }
-
-internal data class WalletFetchResult(
-    val googlePayCredentials: GooglePayCredentials?,
-    val userToken: String?,
-    val userId: String?,
-)
