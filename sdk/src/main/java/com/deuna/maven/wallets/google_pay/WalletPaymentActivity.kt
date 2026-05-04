@@ -162,11 +162,8 @@ class WalletPaymentActivity : ComponentActivity() {
                 }
             }
         } else {
-            val resultMap = jsonToMap(JSONObject(paymentDataJson))
-            mainHandler.post {
-                callbacks?.onSuccess?.invoke(resultMap)
-                finish()
-            }
+            dispatchError(callbacks, "MISSING_USER_AUTH", "userToken or userId is missing — cannot tokenize wallet payment.")
+            mainHandler.post { finish() }
         }
     }
 
