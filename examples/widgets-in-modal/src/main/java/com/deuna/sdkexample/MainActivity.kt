@@ -42,10 +42,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         deunaSDK.applyCustomWebViewSettings { settings ->
-            runCatching {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.PAYMENT_REQUEST)) {
                 WebSettingsCompat.setPaymentRequestEnabled(settings, true)
-            }.onFailure {
-                DeunaLogs.info("❌ WebViewFeature.PAYMENT_REQUEST not supported: ${it.message}")
             }
         }
 
