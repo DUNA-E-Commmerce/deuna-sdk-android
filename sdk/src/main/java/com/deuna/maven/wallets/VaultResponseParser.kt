@@ -55,7 +55,8 @@ internal object VaultResponseParser {
                     ?: continue
                 when (provider) {
                     WalletProvider.GOOGLE_PAY ->
-                        credentialsMap[provider] = parseGooglePayCredentials(method, merchant, order)
+                        credentialsMap[provider] =
+                            parseGooglePayCredentials(method, merchant, order)
                 }
             }
         }
@@ -68,11 +69,18 @@ internal object VaultResponseParser {
     }
 
     fun buildUserInfoBody(userInfo: UserInfo?): JSONObject? {
-        if (userInfo == null || userInfo.email.isEmpty()) return null
+        if (userInfo == null || userInfo.email.isEmpty()) {
+            return null
+        }
+
+        val email = userInfo.email
+        val firstName = userInfo.firstName
+        val lastName = userInfo.lastName
+
         return JSONObject().apply {
-            put("email", userInfo.email)
-            if (userInfo.firstName.isNotEmpty()) put("firstName", userInfo.firstName)
-            if (userInfo.lastName.isNotEmpty()) put("lastName", userInfo.lastName)
+            put("email", email)
+            if (firstName.isNotEmpty()) put("firstName", userInfo.firstName)
+            if (lastName.isNotEmpty()) put("lastName", userInfo.lastName)
         }
     }
 
