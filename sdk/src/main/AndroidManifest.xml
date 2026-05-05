@@ -8,6 +8,10 @@
             android:name=".web_views.activities.DeunaWidgetActivity"
             android:hardwareAccelerated="false"
             android:exported="false" />
+        <activity
+            android:name=".wallets.google_pay.WalletPaymentActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

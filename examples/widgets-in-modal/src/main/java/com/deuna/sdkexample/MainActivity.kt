@@ -3,7 +3,9 @@ package com.deuna.sdkexample
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.webkit.WebSettingsCompat
 import com.deuna.maven.DeunaSDK
+import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.web_views.ExternalUrlHelper
 import com.deuna.sdkexample.navigation.AppNavigation
@@ -13,10 +15,10 @@ import com.deuna.sdkexample.navigation.AppNavigation
  */
 object Constants {
     val DEUNA_ENV: Environment = Environment.SANDBOX
-    const val DEUNA_API_KEY: String = "YOUR_PUBLIC_API_KEY"
+    const val DEUNA_API_KEY: String = "PUBLIC_API_KEY"
 }
 
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_DEUNA_ENV = "DEUNA_ENV"
@@ -38,6 +40,12 @@ class MainActivity: AppCompatActivity() {
             environment = getEnvironment() ?: Constants.DEUNA_ENV,
             publicApiKey = getApiKey() ?: Constants.DEUNA_API_KEY
         )
+
+        deunaSDK.applyCustomWebViewSettings { settings ->
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.PAYMENT_REQUEST)) {
+                WebSettingsCompat.setPaymentRequestEnabled(settings, true)
+            }
+        }
 
         setContent {
             AppNavigation(
