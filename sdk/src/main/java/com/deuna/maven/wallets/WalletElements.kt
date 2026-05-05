@@ -38,6 +38,10 @@ internal class WalletElements(
         workers.execute {
             try {
                 val fetchResult = fetchCredentials()
+                if (fetchResult.userToken.isNullOrEmpty() || fetchResult.userId.isNullOrEmpty()) {
+                    dispatchError("MISSING_USER_AUTH", "userToken or userId is missing — cannot tokenize wallet payment.")
+                    return@execute
+                }
                 handler.launch(context, environment, publicApiKey, fetchResult, callbacks)
             } catch (e: Exception) {
                 DeunaLogs.error("[wallets] WalletElements failed: ${e.message}")
