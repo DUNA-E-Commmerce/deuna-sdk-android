@@ -79,8 +79,8 @@ internal object VaultResponseParser {
 
         return JSONObject().apply {
             put("email", email)
-            if (firstName.isNotEmpty()) put("firstName", userInfo.firstName)
-            if (lastName.isNotEmpty()) put("lastName", userInfo.lastName)
+            if (!firstName.isNullOrEmpty()) put("firstName", firstName)
+            if (!lastName.isNullOrEmpty()) put("lastName", lastName)
         }
     }
 
