@@ -2,11 +2,13 @@ package com.deuna.maven.wallets.google_pay
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import com.deuna.maven.shared.DeunaLogs
-import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
-import com.deuna.maven.wallets.WalletFetchResult
+import com.deuna.maven.wallets.WalletCredentials
 import com.deuna.maven.wallets.WalletHandler
+import com.deuna.maven.wallets.WalletLaunchResult
 import com.deuna.maven.wallets.WalletProvider
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -21,6 +23,8 @@ import java.util.concurrent.TimeUnit
 internal object GooglePayWalletHandler : WalletHandler {
 
     override val provider = WalletProvider.GOOGLE_PAY
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun isAvailableOnDevice(context: Context, environment: Environment): Boolean {
         val gmsStatus = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
@@ -64,29 +68,26 @@ internal object GooglePayWalletHandler : WalletHandler {
     override fun launch(
         context: Context,
         environment: Environment,
-        publicApiKey: String,
-        fetchResult: WalletFetchResult,
-        callbacks: ElementsCallbacks,
+        credentials: WalletCredentials,
+        onResult: (WalletLaunchResult) -> Unit,
     ) {
-        val credentials = fetchResult.credentials[WalletProvider.GOOGLE_PAY] as? GooglePayCredentials
-            ?: throw Exception("No Google Pay configuration found.")
+        val googlePayCredentials = credentials as? GooglePayCredentials
+            ?: run {
+                onResult(WalletLaunchResult.Error("NO_GOOGLE_PAY_CREDENTIALS", "No Google Pay configuration found."))
+                return
+            }
 
-        WalletPaymentActivity.pendingCallbacks = callbacks
-        context.startActivity(buildIntent(context, environment, publicApiKey, fetchResult, credentials))
+        WalletPaymentActivity.pendingOnResult = onResult
+        context.startActivity(buildIntent(context, environment, googlePayCredentials))
     }
 
     private fun buildIntent(
         context: Context,
         environment: Environment,
-        publicApiKey: String,
-        fetchResult: WalletFetchResult,
         credentials: GooglePayCredentials,
     ) = Intent(context, WalletPaymentActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
         putExtra(WalletPaymentActivity.EXTRA_PAYMENT_REQUEST_JSON, GooglePayRequestBuilder.build(credentials).toJson())
         putExtra(WalletPaymentActivity.EXTRA_ENVIRONMENT, environment.name)
-        putExtra(WalletPaymentActivity.EXTRA_PUBLIC_API_KEY, publicApiKey)
-        fetchResult.userToken?.let { putExtra(WalletPaymentActivity.EXTRA_USER_TOKEN, it) }
-        fetchResult.userId?.let { putExtra(WalletPaymentActivity.EXTRA_USER_ID, it) }
     }
 }

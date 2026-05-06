@@ -19,6 +19,12 @@ internal object VaultResponseParser {
         val credentials: Map<WalletProvider, WalletCredentials>,
     )
 
+    data class FetchResult(
+        val credentials: Map<WalletProvider, WalletCredentials>,
+        val userToken: String?,
+        val userId: String?,
+    )
+
     fun parseProviders(root: JSONObject): ProvidersResult {
         val paymentMethods = root.optJSONArray("paymentMethods")
             ?: return ProvidersResult(emptyList(), emptyMap())
@@ -41,7 +47,7 @@ internal object VaultResponseParser {
         return ProvidersResult(providers, credentialsMap)
     }
 
-    fun parseFetchResult(root: JSONObject): WalletFetchResult {
+    fun parseFetchResult(root: JSONObject): FetchResult {
         val paymentMethods = root.optJSONArray("paymentMethods")
         val merchant = root.optJSONObject("checkout")?.optJSONObject("merchant")
         val order = root.optJSONObject("checkout")?.optJSONObject("order")?.optJSONObject("order")
@@ -61,7 +67,7 @@ internal object VaultResponseParser {
             }
         }
 
-        return WalletFetchResult(
+        return FetchResult(
             credentials = credentialsMap,
             userToken = userAuthData?.optString("user_token")?.takeIf { it.isNotEmpty() },
             userId = userAuthData?.optString("user_id")?.takeIf { it.isNotEmpty() },
