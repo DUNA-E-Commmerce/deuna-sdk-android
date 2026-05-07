@@ -33,13 +33,18 @@ object DeunaHttpClient {
         val responseBody = response.body?.string()
             ?: throw Exception("Empty response (HTTP ${response.code})")
 
-        DeunaLogs.info("[http] ${method.name} ${request.url} → ${response.code}\n${JSONObject(responseBody).toString(2)}")
+        val bodyJson = try { JSONObject(responseBody) } catch (_: Exception) { null }
 
         if (!response.isSuccessful) {
-            throw Exception("HTTP ${response.code}: ${response.message}")
+            val apiMessage = bodyJson?.optString("message")?.takeIf { it.isNotEmpty() }
+                ?: bodyJson?.optJSONObject("error")?.optString("message")?.takeIf { it.isNotEmpty() }
+                ?: "HTTP ${response.code}: ${response.message}"
+            val apiCode = bodyJson?.optString("code")?.takeIf { it.isNotEmpty() }
+                ?: bodyJson?.optJSONObject("error")?.optString("code")?.takeIf { it.isNotEmpty() }
+            throw Exception(if (apiCode != null) "$apiCode: $apiMessage" else apiMessage)
         }
 
-        return JSONObject(responseBody)
+        return bodyJson ?: JSONObject(responseBody)
     }
 
     fun get(url: String, headers: Map<String, String> = emptyMap()) =

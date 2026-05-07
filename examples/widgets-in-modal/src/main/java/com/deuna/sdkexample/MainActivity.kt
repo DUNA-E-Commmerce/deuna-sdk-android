@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
@@ -15,7 +16,7 @@ import com.deuna.sdkexample.navigation.AppNavigation
  */
 object Constants {
     val DEUNA_ENV: Environment = Environment.SANDBOX
-    const val DEUNA_API_KEY: String = "PUBLIC_API_KEY"
+    const val DEUNA_API_KEY: String = "YOUR_PUBLIC_API_KEY"
 }
 
 class MainActivity : AppCompatActivity() {

@@ -1,12 +1,19 @@
 package com.deuna.maven.wallets
 
 import android.content.Context
-import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.wallets.google_pay.GooglePayWalletHandler
 
+sealed class WalletLaunchResult {
+    data class Success(val rawData: Map<String, Any?>) : WalletLaunchResult()
+    data class Error(val code: String, val message: String) : WalletLaunchResult()
+    object Closed : WalletLaunchResult()
+}
+
 /**
  * Contract for a wallet provider's launch logic.
+ * Handlers only manage native payment UI and return raw payment data.
+ * Tokenization is the caller's responsibility.
  * Add a new wallet by implementing this interface and registering it in [WalletHandlerRegistry].
  */
 internal interface WalletHandler {
@@ -19,15 +26,14 @@ internal interface WalletHandler {
     fun isAvailableOnDevice(context: Context, environment: Environment): Boolean
 
     /**
-     * Starts the wallet payment flow. Called on a background thread.
-     * Responsible for launching any UI (Activity, sheet, etc.) and wiring [callbacks].
+     * Starts the wallet payment flow and returns raw payment data via [onResult].
+     * Never tokenizes — callers are responsible for tokenization.
      */
     fun launch(
         context: Context,
         environment: Environment,
-        publicApiKey: String,
-        fetchResult: WalletFetchResult,
-        callbacks: ElementsCallbacks,
+        credentials: WalletCredentials,
+        onResult: (WalletLaunchResult) -> Unit,
     )
 }
 

@@ -59,7 +59,7 @@ fun DeunaSDK.initElements(
     }
     if (requestedProvider != null) {
         WalletElements(
-            context = context.applicationContext,
+            context = context,
             environment = environment,
             publicApiKey = publicApiKey,
             requestedProvider = requestedProvider,

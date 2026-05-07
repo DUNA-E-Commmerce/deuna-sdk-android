@@ -37,8 +37,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "deuna://congrats" -->
-                <data android:scheme="deuna"
+                <!-- Accepts URIs that begin with "explore://congrats" -->
+                <data android:scheme="explore"
                     android:host="congrats" />
             </intent-filter>
 

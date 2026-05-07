@@ -1,9 +1,12 @@
 package com.deuna.maven.web_views.activities
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.deuna.maven.R
 import com.deuna.maven.internal.modal.DeunaModalHost
 import com.deuna.maven.internal.modal.DeunaModalRecovery
@@ -41,6 +44,10 @@ class DeunaWidgetActivity : ComponentActivity() {
             0,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
         )
+        // Preserve status bar visibility — Translucent theme makes it transparent by default.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = Color.WHITE
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
         setContentView(R.layout.deuna_webview_container)
 
         widgetConfigId = intent.getStringExtra(EXTRA_WIDGET_CONFIG_ID)

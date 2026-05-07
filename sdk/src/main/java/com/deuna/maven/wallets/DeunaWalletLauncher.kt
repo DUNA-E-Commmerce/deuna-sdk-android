@@ -1,11 +1,9 @@
 package com.deuna.maven.wallets
 
 import android.content.Context
-import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.wallets.google_pay.GooglePayCredentials
 import com.deuna.maven.wallets.google_pay.GooglePayTokenizationType
-import com.deuna.maven.widgets.elements_widget.ElementsError
 
 /**
  * Standalone wallet launcher — no DeunaSDK instance required.
@@ -24,7 +22,7 @@ object DeunaWalletLauncher {
     }
 
     /**
-     * Launches the wallet payment sheet and returns raw payment data via callbacks.
+     * Launches the wallet payment sheet and returns raw payment data via onResult.
      * No tokenization — caller is responsible for POST to /users/{id}/cards.
      */
     fun launch(
@@ -32,11 +30,11 @@ object DeunaWalletLauncher {
         provider: String,
         credentials: Map<String, Any>,
         environment: String,
-        callbacks: ElementsCallbacks,
+        onResult: (WalletLaunchResult) -> Unit,
     ) {
         val walletProvider = WalletProvider.fromProcessorName(provider)
         if (walletProvider == null) {
-            dispatchError(callbacks, "UNSUPPORTED_WALLET", "Unknown wallet provider: $provider")
+            onResult(WalletLaunchResult.Error("UNSUPPORTED_WALLET", "Unknown wallet provider: $provider"))
             return
         }
 
@@ -44,22 +42,13 @@ object DeunaWalletLauncher {
             WalletProvider.GOOGLE_PAY -> parseGooglePayCredentials(credentials)
         }
 
-        // userToken/userId null → WalletPaymentActivity returns raw paymentData without tokenizing
-        val fetchResult = WalletFetchResult(
-            credentials = mapOf(walletProvider to walletCredentials),
-            userToken = null,
-            userId = null,
-        )
-
         val handler = WalletHandlerRegistry.get(walletProvider)
         if (handler == null) {
-            dispatchError(callbacks, "NO_HANDLER", "No handler registered for $provider")
+            onResult(WalletLaunchResult.Error("NO_HANDLER", "No handler registered for $provider"))
             return
         }
 
-        // publicApiKey empty string — handler only uses it for tokenization, which is skipped
-        // when userToken/userId are null (see WalletPaymentActivity.handlePaymentSuccess)
-        handler.launch(context, environmentFrom(environment), "", fetchResult, callbacks)
+        handler.launch(context, environmentFrom(environment), walletCredentials, onResult)
     }
 
     private fun environmentFrom(s: String) = when (s.lowercase()) {
@@ -92,13 +81,5 @@ object DeunaWalletLauncher {
                 )
             },
         )
-    }
-
-    private fun dispatchError(callbacks: ElementsCallbacks, code: String, message: String) {
-        val err = ElementsError(
-            type = ElementsError.Type.UNKNOWN_ERROR,
-            metadata = ElementsError.Metadata(code = code, message = message),
-        )
-        callbacks.onError?.invoke(err)
     }
 }
