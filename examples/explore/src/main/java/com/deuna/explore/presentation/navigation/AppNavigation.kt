@@ -3,6 +3,8 @@ package com.deuna.explore.presentation.navigation
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -16,6 +18,7 @@ import com.deuna.explore.presentation.screens.main.MainScreen
 import com.deuna.explore.presentation.screens.result.CardSavedSuccessScreen
 import com.deuna.explore.presentation.screens.result.PaymentSuccessScreen
 import com.deuna.explore.presentation.screens.wallets.WalletsScreen
+import com.deuna.explore.presentation.screens.widgets.AutoResizeScreen
 import com.deuna.maven.shared.toMap
 import org.json.JSONObject
 
@@ -24,6 +27,7 @@ private enum class Routes(val route: String) {
     PAYMENT_SUCCESS("payment-success/{json}"),
     CARD_SAVED_SUCCESS("card-saved-success/{json}"),
     WALLETS("wallets/{orderToken}"),
+    AUTO_RESIZE("auto-resize"),
 }
 
 @Composable
@@ -46,6 +50,9 @@ fun AppNavigation() {
                 is NavigationEvent.OpenWallets -> {
                     val token = Uri.encode(event.orderToken ?: "")
                     navController.navigate("wallets/$token")
+                }
+                is NavigationEvent.OpenAutoResize -> {
+                    navController.navigate(Routes.AUTO_RESIZE.route)
                 }
             }
         }
@@ -88,6 +95,15 @@ fun AppNavigation() {
                 deunaSDK = viewModel.deunaSDK,
                 orderToken = orderToken,
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(route = Routes.AUTO_RESIZE.route) {
+            val state by viewModel.uiState.collectAsState()
+            AutoResizeScreen(
+                widgetConfig = state.embeddedWidgetConfig,
+                onBack = { navController.popBackStack() },
+                onReload = { viewModel.refreshAutoResize() },
             )
         }
     }

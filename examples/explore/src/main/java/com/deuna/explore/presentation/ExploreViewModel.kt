@@ -49,6 +49,7 @@ sealed class NavigationEvent {
     data class PaymentSuccess(val orderJson: String) : NavigationEvent()
     data class CardSavedSuccess(val cardJson: String) : NavigationEvent()
     data class OpenWallets(val orderToken: String?) : NavigationEvent()
+    object OpenAutoResize : NavigationEvent()
 }
 
 // ─── UI State ────────────────────────────────────────────────────────────────
@@ -190,7 +191,8 @@ class ExploreViewModel(
             val useManual = hasManualOrderToken
 
             if (privateKey.isNotEmpty()) {
-                val shouldTokenize = newConfig.presentationMode == ExplorePresentationMode.EMBEDDED
+                val shouldTokenize = (newConfig.presentationMode == ExplorePresentationMode.EMBEDDED
+                    || newConfig.presentationMode == ExplorePresentationMode.AUTO_RESIZE)
                     && !hasManualOrderToken
 
                 try {
@@ -325,6 +327,18 @@ class ExploreViewModel(
                         )
                     }
                 }
+
+                ExplorePresentationMode.AUTO_RESIZE -> {
+                    val widgetConfig = buildEmbeddedWidgetConfig(config, orderToken, autoResizeEnabled = true)
+                    _uiState.update {
+                        it.copy(
+                            embeddedWidgetConfig = widgetConfig,
+                            isShowingEmbeddedScreen = false,
+                            isLaunchingModalWidget = false,
+                        )
+                    }
+                    _navigationEvents.send(NavigationEvent.OpenAutoResize)
+                }
             }
         }
     }
@@ -347,6 +361,28 @@ class ExploreViewModel(
             val token = config.orderToken
             if (token.isNotBlank()) {
                 val widgetConfig = buildEmbeddedWidgetConfig(config, token)
+                _uiState.update { it.copy(embeddedWidgetConfig = widgetConfig) }
+            }
+        }
+    }
+
+    fun refreshAutoResize() {
+        val state = _uiState.value
+        if (state.appliedConfig.presentationMode != ExplorePresentationMode.AUTO_RESIZE) return
+
+        deunaSDK = DeunaSDK(
+            environment = state.appliedConfig.environment.sdkEnvironment,
+            publicApiKey = state.appliedConfig.publicKey,
+        )
+
+        _uiState.update { it.copy(embeddedWidgetConfig = null) }
+
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(50)
+            val config = _uiState.value.appliedConfig
+            val token = config.orderToken
+            if (token.isNotBlank()) {
+                val widgetConfig = buildEmbeddedWidgetConfig(config, token, autoResizeEnabled = true)
                 _uiState.update { it.copy(embeddedWidgetConfig = widgetConfig) }
             }
         }
@@ -479,6 +515,28 @@ class ExploreViewModel(
                         )
                     }
                 }
+
+                ExplorePresentationMode.AUTO_RESIZE -> {
+                    val widgetConfig = PaymentWidgetConfiguration(
+                        sdkInstance = deunaSDK,
+                        orderToken = orderToken,
+                        userToken = tokenOrNull(config.userToken),
+                        hidePayButton = config.hidePayButton,
+                        paymentMethods = paymentMethods,
+                        behavior = splitPaymentBehavior(config.enableSplitPayment),
+                        fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
+                        callbacks = makePaymentCallbacks(),
+                        autoResizeEnabled = true,
+                    )
+                    _uiState.update {
+                        it.copy(
+                            embeddedWidgetConfig = widgetConfig,
+                            isShowingEmbeddedScreen = false,
+                            isLaunchingFormularios = false,
+                        )
+                    }
+                    _navigationEvents.send(NavigationEvent.OpenAutoResize)
+                }
             }
         }
     }
@@ -582,6 +640,7 @@ class ExploreViewModel(
     private fun buildEmbeddedWidgetConfig(
         config: IntegrationConfig,
         orderToken: String,
+        autoResizeEnabled: Boolean = false,
     ): DeunaWidgetConfiguration {
         return when (config.selectedWidget) {
             ExploreWidget.PAYMENT_WIDGET -> PaymentWidgetConfiguration(
@@ -592,6 +651,7 @@ class ExploreViewModel(
                 behavior = splitPaymentBehavior(config.enableSplitPayment),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makePaymentCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
             ExploreWidget.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -599,6 +659,7 @@ class ExploreViewModel(
                 userToken = tokenOrNull(config.userToken),
                 hidePayButton = config.hidePayButton,
                 callbacks = makeCheckoutCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
             ExploreWidget.VAULT_WIDGET -> ElementsWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -609,18 +670,21 @@ class ExploreViewModel(
                 userInfo = fallbackUserInfo(config),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makeElementsCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
             ExploreWidget.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
                 sdkInstance = deunaSDK,
                 orderToken = orderToken,
                 hidePayButton = config.hidePayButton,
                 callbacks = makeNextActionCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
             ExploreWidget.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
                 sdkInstance = deunaSDK,
                 orderToken = orderToken,
                 hidePayButton = config.hidePayButton,
                 callbacks = makeVoucherCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
             ExploreWidget.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -630,6 +694,7 @@ class ExploreViewModel(
                 userInfo = fallbackUserInfo(config),
                 types = listOf(mapOf("name" to "clickToPay")),
                 callbacks = makeElementsCallbacks(),
+                autoResizeEnabled = autoResizeEnabled,
             )
         }
     }
