@@ -69,6 +69,7 @@ data class ExploreUiState(
     val apmOptions: List<ApmOption> = emptyList(),
     val isLoadingApms: Boolean = false,
     val isLaunchingFormularios: Boolean = false,
+    val generatedOrderToken: String? = null,
 )
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
@@ -510,11 +511,33 @@ class ExploreViewModel(
                 merchantCurrencyCode = result.merchantProfile.currencyCode,
             )
             configStorage.save(updatedConfig)
-            _uiState.update { it.copy(appliedConfig = updatedConfig, draftConfig = DraftConfig.from(updatedConfig)) }
+            _uiState.update {
+                it.copy(
+                    appliedConfig = updatedConfig,
+                    draftConfig = DraftConfig.from(updatedConfig),
+                    generatedOrderToken = result.orderToken,
+                )
+            }
             result.orderToken
         } catch (e: Exception) {
             _uiState.update { it.copy(modalStatusMessage = e.message ?: "Failed to create order token.") }
             null
+        }
+    }
+
+    fun clearGeneratedOrder() {
+        val state = _uiState.value
+        val updatedConfig = state.appliedConfig.copy(orderToken = "")
+        configStorage.save(updatedConfig)
+        _uiState.update {
+            it.copy(
+                appliedConfig = updatedConfig,
+                draftConfig = DraftConfig.from(updatedConfig),
+                generatedOrderToken = null,
+                useManualOrderTokenFlow = false,
+                selectedProductIds = emptySet(),
+                modalStatusMessage = null,
+            )
         }
     }
 
@@ -683,19 +706,23 @@ class ExploreViewModel(
     }
 
     private fun routePaymentSuccess(data: Json) {
-        val json = try { org.json.JSONObject(data).toString() } catch (e: Exception) { data.toString() }
-        viewModelScope.launch {
-            _uiState.update { it.copy(isShowingEmbeddedScreen = false, embeddedWidgetConfig = null) }
-            _navigationEvents.send(NavigationEvent.PaymentSuccess(json))
+        deunaSDK.close {
+            val json = try { org.json.JSONObject(data).toString() } catch (e: Exception) { data.toString() }
+            viewModelScope.launch {
+                _uiState.update { it.copy(isShowingEmbeddedScreen = false, embeddedWidgetConfig = null) }
+                _navigationEvents.send(NavigationEvent.PaymentSuccess(json))
+            }
         }
     }
 
     private fun routeCardSavedSuccess(data: Json) {
-        val json = try { org.json.JSONObject(data).toString() } catch (e: Exception) { data.toString() }
-        viewModelScope.launch {
-            _uiState.update { it.copy(isShowingEmbeddedScreen = false, embeddedWidgetConfig = null) }
-            _navigationEvents.send(NavigationEvent.CardSavedSuccess(json))
-        }
+       deunaSDK.close {
+           val json = try { org.json.JSONObject(data).toString() } catch (e: Exception) { data.toString() }
+           viewModelScope.launch {
+               _uiState.update { it.copy(isShowingEmbeddedScreen = false, embeddedWidgetConfig = null) }
+               _navigationEvents.send(NavigationEvent.CardSavedSuccess(json))
+           }
+       }
     }
 
     private fun parseFraudCredentials(fraudProvidersJson: String): Json? {

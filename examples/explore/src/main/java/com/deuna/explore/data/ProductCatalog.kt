@@ -21,9 +21,9 @@ object ProductCatalog {
     )
 
     private val seeds = listOf(
-        ProductSeed("polo-shirt", "Polo Shirt", "polo_shirt", 105.55),
-        ProductSeed("headphones", "Headphones", "headphones", 151.00),
-        ProductSeed("sun-glasses", "Sun Glasses", "sun_glasses", 50.00),
+        ProductSeed("polo-shirt", "Polo Shirt", "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&q=80", 105.55),
+        ProductSeed("headphones", "Headphones", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80", 151.00),
+        ProductSeed("sun-glasses", "Sun Glasses", "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80", 50.00),
     )
 
     private val fallback = CurrencyProfile("USD", "$", 1.0, 2)
