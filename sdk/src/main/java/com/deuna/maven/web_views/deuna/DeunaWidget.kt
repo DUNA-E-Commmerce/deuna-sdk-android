@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import androidx.activity.result.contract.ActivityResultContracts
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.generateFraudId
@@ -55,6 +56,27 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     private var fraudCredentials: Json? = null
     private var customUserAgent: String? = null
+    private var autoResizeBridge: AutoResizeBridge? = null
+
+    inner class AutoResizeBridge {
+        val bridgeName = "deunaAutoResize"
+
+        @JavascriptInterface
+        fun updateHeight(heightCssStr: String) {
+            val heightCss = heightCssStr.toFloatOrNull() ?: return
+            val heightPx = (heightCss * resources.displayMetrics.density).toInt()
+            if (heightPx <= 0) return
+            post {
+                val lp = layoutParams ?: ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    heightPx,
+                )
+                lp.height = heightPx
+                layoutParams = lp
+                requestLayout()
+            }
+        }
+    }
 
     fun setFraudCredentials(fraudCredentials: Json?) {
         this.fraudCredentials = fraudCredentials
@@ -82,8 +104,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
         openedAutomaticExternalUrls.clear()
 
         if (widgetConfiguration?.autoResizeEnabled == true) {
-            webView.layoutParams = webView.layoutParams.apply {
-                height = ViewGroup.LayoutParams.WRAP_CONTENT
+            autoResizeBridge = AutoResizeBridge().also {
+                webView.addJavascriptInterface(it, it.bridgeName)
             }
         }
 
@@ -165,6 +187,19 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 };
                 """.trimIndent()
             }
+
+            if (widgetConfiguration?.autoResizeEnabled == true) {
+                js += """
+                ;if (window.xprops) {
+                    window.xprops.onContentResize = function(dimensions) {
+                        if (typeof deunaAutoResize !== 'undefined' && dimensions && dimensions.height) {
+                            deunaAutoResize.updateHeight(dimensions.height.toString());
+                        }
+                    };
+                }
+                """.trimIndent()
+            }
+
             return js
         }
 
@@ -258,6 +293,10 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     }
 
     override fun destroy() {
+        autoResizeBridge?.let {
+            runCatching { webView.removeJavascriptInterface(it.bridgeName) }
+            autoResizeBridge = null
+        }
         closeSubWebView()
         super.destroy()
     }
