@@ -6,6 +6,7 @@ import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.widgets.configuration.AutoResizeConfig
 import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
@@ -54,7 +55,7 @@ fun buildWidgetConfig(
                 )
             ),
             sdkInstance = deunaSDK,
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
 
         WidgetToShow.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
@@ -68,7 +69,7 @@ fun buildWidgetConfig(
                 }
             },
             sdkInstance = deunaSDK,
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
 
         WidgetToShow.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
@@ -82,7 +83,7 @@ fun buildWidgetConfig(
                 }
             },
             sdkInstance = deunaSDK,
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
 
         WidgetToShow.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
@@ -97,7 +98,7 @@ fun buildWidgetConfig(
                 }
             },
             sdkInstance = deunaSDK,
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
 
         WidgetToShow.VAULT_WIDGET -> ElementsWidgetConfiguration(
@@ -118,7 +119,7 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
             },
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
 
         WidgetToShow.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
@@ -136,7 +137,7 @@ fun buildWidgetConfig(
                     Log.i(DEBUG_TAG, "onError message: ${it.metadata?.message}")
                 }
             },
-            autoResizeEnabled = true
+            autoResizeConfig = AutoResizeConfig()
         )
     }
 }

@@ -25,6 +25,7 @@ import com.deuna.maven.shared.CheckoutCallbacks
 import com.deuna.maven.shared.ElementsCallbacks
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.widgets.configuration.AutoResizeConfig
 import com.deuna.maven.widgets.configuration.CheckoutWidgetConfiguration
 import com.deuna.maven.widgets.configuration.DeunaWidgetConfiguration
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
@@ -329,7 +330,7 @@ class ExploreViewModel(
                 }
 
                 ExplorePresentationMode.AUTO_RESIZE -> {
-                    val widgetConfig = buildEmbeddedWidgetConfig(config, orderToken, autoResizeEnabled = true)
+                    val widgetConfig = buildEmbeddedWidgetConfig(config, orderToken, autoResizeConfig = AutoResizeConfig(initialHeightDp = 100))
                     _uiState.update {
                         it.copy(
                             embeddedWidgetConfig = widgetConfig,
@@ -382,7 +383,7 @@ class ExploreViewModel(
             val config = _uiState.value.appliedConfig
             val token = config.orderToken
             if (token.isNotBlank()) {
-                val widgetConfig = buildEmbeddedWidgetConfig(config, token, autoResizeEnabled = true)
+                val widgetConfig = buildEmbeddedWidgetConfig(config, token, autoResizeConfig = AutoResizeConfig(initialHeightDp = 100))
                 _uiState.update { it.copy(embeddedWidgetConfig = widgetConfig) }
             }
         }
@@ -526,7 +527,7 @@ class ExploreViewModel(
                         behavior = splitPaymentBehavior(config.enableSplitPayment),
                         fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                         callbacks = makePaymentCallbacks(),
-                        autoResizeEnabled = true,
+                        autoResizeConfig = AutoResizeConfig(initialHeightDp = 100),
                     )
                     _uiState.update {
                         it.copy(
@@ -640,7 +641,7 @@ class ExploreViewModel(
     private fun buildEmbeddedWidgetConfig(
         config: IntegrationConfig,
         orderToken: String,
-        autoResizeEnabled: Boolean = false,
+        autoResizeConfig: AutoResizeConfig? = null,
     ): DeunaWidgetConfiguration {
         return when (config.selectedWidget) {
             ExploreWidget.PAYMENT_WIDGET -> PaymentWidgetConfiguration(
@@ -651,7 +652,7 @@ class ExploreViewModel(
                 behavior = splitPaymentBehavior(config.enableSplitPayment),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makePaymentCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
             ExploreWidget.CHECKOUT_WIDGET -> CheckoutWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -659,7 +660,7 @@ class ExploreViewModel(
                 userToken = tokenOrNull(config.userToken),
                 hidePayButton = config.hidePayButton,
                 callbacks = makeCheckoutCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
             ExploreWidget.VAULT_WIDGET -> ElementsWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -670,21 +671,21 @@ class ExploreViewModel(
                 userInfo = fallbackUserInfo(config),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makeElementsCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
             ExploreWidget.NEXT_ACTION_WIDGET -> NextActionWidgetConfiguration(
                 sdkInstance = deunaSDK,
                 orderToken = orderToken,
                 hidePayButton = config.hidePayButton,
                 callbacks = makeNextActionCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
             ExploreWidget.VOUCHER_WIDGET -> VoucherWidgetConfiguration(
                 sdkInstance = deunaSDK,
                 orderToken = orderToken,
                 hidePayButton = config.hidePayButton,
                 callbacks = makeVoucherCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
             ExploreWidget.CLICK_TO_PAY_WIDGET -> ElementsWidgetConfiguration(
                 sdkInstance = deunaSDK,
@@ -694,7 +695,7 @@ class ExploreViewModel(
                 userInfo = fallbackUserInfo(config),
                 types = listOf(mapOf("name" to "clickToPay")),
                 callbacks = makeElementsCallbacks(),
-                autoResizeEnabled = autoResizeEnabled,
+                autoResizeConfig = autoResizeConfig,
             )
         }
     }

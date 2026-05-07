@@ -139,9 +139,17 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     fun launch(url: String, javascriptToInject: String? = null) {
         openedAutomaticExternalUrls.clear()
 
-        if (widgetConfiguration?.autoResizeEnabled == true) {
+        widgetConfiguration?.autoResizeConfig?.let { config ->
             autoResizeBridge = AutoResizeBridge().also {
                 webView.addJavascriptInterface(it, it.bridgeName)
+            }
+            config.initialHeightDp?.let { dp ->
+                val heightPx = (dp * resources.displayMetrics.density).toInt()
+                post {
+                    val lp = layoutParams ?: ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightPx)
+                    lp.height = heightPx
+                    layoutParams = lp
+                }
             }
         }
 
@@ -224,7 +232,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 """.trimIndent()
             }
 
-            if (widgetConfiguration?.autoResizeEnabled == true) {
+            if (widgetConfiguration?.autoResizeConfig != null) {
                 js += """
                 ;if (window.xprops) {
                     window.xprops.onContentResize = function(dimensions) {
