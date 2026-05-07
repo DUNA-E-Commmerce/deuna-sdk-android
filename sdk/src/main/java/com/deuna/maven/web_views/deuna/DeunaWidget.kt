@@ -61,6 +61,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     inner class AutoResizeBridge {
         val bridgeName = "deunaAutoResize"
 
+        var onScrollBy: ((Float) -> Unit)? = null
+
         @JavascriptInterface
         fun updateHeight(heightCssStr: String) {
             val heightCss = heightCssStr.toFloatOrNull() ?: return
@@ -74,6 +76,40 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
                 lp.height = heightPx
                 layoutParams = lp
                 requestLayout()
+            }
+        }
+
+        @JavascriptInterface
+        fun scrollBy(amountCssStr: String) {
+            val amountCss = amountCssStr.toFloatOrNull() ?: return
+            if (amountCss <= 0f) return
+            val amountPx = amountCss * resources.displayMetrics.density
+            post { onScrollBy?.invoke(amountPx) }
+        }
+    }
+
+    fun setOnScrollByCallback(callback: (Float) -> Unit) {
+        autoResizeBridge?.onScrollBy = callback
+    }
+
+    fun onKeyboardHeightChanged(keyboardHeightPx: Int) {
+        val bridge = autoResizeBridge ?: return
+        if (bridge.onScrollBy == null) return
+        webView.evaluateJavascript(
+            """(function(){try{var el=document.activeElement;if(!el||el.tagName==='BODY'||el.tagName==='HTML')return '-1';return el.getBoundingClientRect().bottom.toString();}catch(e){return '-1';}})()"""
+        ) { result ->
+            val bottomCss = result?.trim('"')?.toFloatOrNull()?.takeIf { it >= 0 } ?: return@evaluateJavascript
+            val bottomPx = bottomCss * resources.displayMetrics.density
+            val loc = IntArray(2)
+            getLocationOnScreen(loc)
+            val widgetTopPx = loc[1]
+            val elementAbsoluteBottom = widgetTopPx + bottomPx
+            val windowHeight = (context as? android.app.Activity)?.window?.decorView?.height
+                ?: resources.displayMetrics.heightPixels
+            val visibleBottom = windowHeight - keyboardHeightPx
+            val overlap = elementAbsoluteBottom - visibleBottom
+            if (overlap > 0f) {
+                post { bridge.onScrollBy?.invoke(overlap + 48f) }
             }
         }
     }
