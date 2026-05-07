@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
+import com.deuna.explore.R
 import com.deuna.explore.data.ApmRepository
 import com.deuna.explore.data.ConfigStorage
 import com.deuna.explore.data.MerchantService
@@ -80,6 +81,8 @@ class ExploreViewModel(
     private val configStorage: ConfigStorage,
     private val merchantService: MerchantService = MerchantService(),
     private val orderTokenService: OrderTokenService = OrderTokenService(),
+    val githubRepo: String = "",
+    private val appVersion: String = "",
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExploreUiState())
@@ -113,10 +116,9 @@ class ExploreViewModel(
 
         viewModelScope.launch {
             val latest = runCatching {
-                UpdateChecker.getLatestVersion(com.deuna.explore.BuildConfig.GITHUB_REPO)
+                UpdateChecker.getLatestVersion(githubRepo)
             }.getOrNull()
-            val current = com.deuna.explore.BuildConfig.VERSION_NAME
-            if (latest != null && latest != current) {
+            if (latest != null && latest != appVersion) {
                 _uiState.update { it.copy(latestVersion = latest) }
             }
         }
@@ -755,8 +757,16 @@ class ExploreViewModel(
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val githubRepo = context.getString(R.string.github_repo)
+            val appVersion = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0"
+            } catch (e: Exception) { "1.0" }
             @Suppress("UNCHECKED_CAST")
-            return ExploreViewModel(ConfigStorage(context.applicationContext)) as T
+            return ExploreViewModel(
+                configStorage = ConfigStorage(context.applicationContext),
+                githubRepo = githubRepo,
+                appVersion = appVersion,
+            ) as T
         }
     }
 }

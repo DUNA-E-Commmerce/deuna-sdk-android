@@ -12,7 +12,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 
     defaultConfig {
@@ -21,7 +20,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = appVersionName
-        buildConfigField("String", "GITHUB_REPO", "\"$appGithubRepo\"")
+        resValue("string", "github_repo", appGithubRepo)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

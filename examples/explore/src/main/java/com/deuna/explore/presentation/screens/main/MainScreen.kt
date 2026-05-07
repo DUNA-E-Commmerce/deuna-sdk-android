@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.deuna.explore.BuildConfig
 import com.deuna.explore.domain.ExplorePresentationMode
 import com.deuna.explore.presentation.ExploreViewModel
 import com.deuna.explore.presentation.screens.drawer.ConfigurationDrawer
@@ -44,7 +43,7 @@ fun MainScreen(viewModel: ExploreViewModel) {
                 UpdateBanner(
                     latestVersion = state.latestVersion!!,
                     onDownload = {
-                        val url = "https://github.com/${BuildConfig.GITHUB_REPO}/releases"
+                        val url = "https://github.com/${viewModel.githubRepo}/releases"
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     },
                 )
