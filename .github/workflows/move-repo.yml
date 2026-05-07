@@ -78,10 +78,15 @@ jobs:
       - name: Grant Gradle execute permission
         run: chmod +x gradlew
 
+      - name: Enable explore module in settings.gradle.kts
+        run: |
+          sed -i 's|//include( "explore")|include( "explore")|' settings.gradle.kts
+          sed -i 's|//project(":explore").projectDir = file("examples/explore")|project(":explore").projectDir = file("examples/explore")|' settings.gradle.kts
+
       - name: Build Explore APK
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
-          ./gradlew :examples:explore:assembleDebug \
+          ./gradlew :explore:assembleDebug \
             -PversionName=$VERSION \
             -PgithubRepo=${{ env.DESTINATION_GITHUB_USERNAME }}/${{ env.DESTINATION_REPOSITORY_NAME }}
 
