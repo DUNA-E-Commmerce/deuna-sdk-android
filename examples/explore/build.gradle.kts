@@ -3,12 +3,16 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val appVersionName = project.findProperty("versionName") as String? ?: "1.0"
+val appGithubRepo = project.findProperty("githubRepo") as String? ?: ""
+
 android {
     namespace = "com.deuna.explore"
     compileSdk = 34
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     defaultConfig {
@@ -16,7 +20,8 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = appVersionName
+        buildConfigField("String", "GITHUB_REPO", "\"$appGithubRepo\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

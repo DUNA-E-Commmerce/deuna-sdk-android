@@ -11,6 +11,7 @@ import com.deuna.explore.data.ConfigStorage
 import com.deuna.explore.data.MerchantService
 import com.deuna.explore.data.OrderTokenService
 import com.deuna.explore.data.ProductCatalog
+import com.deuna.explore.data.UpdateChecker
 import com.deuna.explore.domain.*
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.generateFraudId
@@ -70,6 +71,7 @@ data class ExploreUiState(
     val isLoadingApms: Boolean = false,
     val isLaunchingFormularios: Boolean = false,
     val generatedOrderToken: String? = null,
+    val latestVersion: String? = null,
 )
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
@@ -107,6 +109,16 @@ class ExploreViewModel(
                 products = ProductCatalog.buildProducts(savedConfig.merchantCurrencyCode),
                 useManualOrderTokenFlow = savedConfig.orderToken.isNotBlank(),
             )
+        }
+
+        viewModelScope.launch {
+            val latest = runCatching {
+                UpdateChecker.getLatestVersion(com.deuna.explore.BuildConfig.GITHUB_REPO)
+            }.getOrNull()
+            val current = com.deuna.explore.BuildConfig.VERSION_NAME
+            if (latest != null && latest != current) {
+                _uiState.update { it.copy(latestVersion = latest) }
+            }
         }
     }
 
