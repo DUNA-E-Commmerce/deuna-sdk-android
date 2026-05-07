@@ -11,13 +11,19 @@ import com.deuna.maven.shared.toMap
 import com.deuna.sdkexample.ui.screens.main.MainScreen
 import com.deuna.sdkexample.ui.screens.success.CardSavedSuccessfulScreen
 import com.deuna.sdkexample.ui.screens.success.PaymentSuccessfulScreen
+import com.deuna.sdkexample.ui.screens.wallets.WalletsScreen
 import org.json.JSONObject
 
 
 enum class AppRoutes(val route: String) {
     MAIN("main"),
     PAYMENT_SUCCESS("payment-success/{json}"),
-    CARD_SAVED_SUCCESS("card-saved-success/{json}")
+    CARD_SAVED_SUCCESS("card-saved-success/{json}"),
+    WALLETS("wallets?orderToken={orderToken}"),
+    ;
+
+    fun walletsRoute(orderToken: String?) =
+        if (orderToken.isNullOrEmpty()) "wallets" else "wallets?orderToken=$orderToken"
 }
 
 
@@ -41,7 +47,6 @@ fun AppNavigation(deunaSDK: DeunaSDK, initialOrderToken: String? = null) {
             ),
         ) { backStackEntry ->
             val jsonStr = backStackEntry.arguments?.getString("json") ?: ""
-
             PaymentSuccessfulScreen(
                 navController = navController, json = JSONObject(jsonStr).toMap()
             )
@@ -54,11 +59,27 @@ fun AppNavigation(deunaSDK: DeunaSDK, initialOrderToken: String? = null) {
             ),
         ) { backStackEntry ->
             val jsonStr = backStackEntry.arguments?.getString("json") ?: ""
-
             CardSavedSuccessfulScreen(
                 navController = navController,
                 title = "Card saved successfully",
                 savedCardData = JSONObject(jsonStr).toMap()
+            )
+        }
+
+        composable(
+            "wallets?orderToken={orderToken}",
+            arguments = listOf(
+                navArgument("orderToken") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
+        ) { backStackEntry ->
+            WalletsScreen(
+                deunaSDK = deunaSDK,
+                orderToken = backStackEntry.arguments?.getString("orderToken"),
+                navController = navController,
             )
         }
     }

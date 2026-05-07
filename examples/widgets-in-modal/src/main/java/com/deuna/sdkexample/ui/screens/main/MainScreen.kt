@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import com.deuna.maven.DeunaSDK
 import com.deuna.maven.generateFraudId
 import com.deuna.maven.shared.Environment
+import com.deuna.sdkexample.navigation.AppRoutes
 import com.deuna.sdkexample.shared.views.Separator
 import com.deuna.sdkexample.ui.screens.main.utils.showWidgetInModal
 import com.deuna.sdkexample.ui.screens.main.view_model.MainViewModel
@@ -115,6 +116,18 @@ fun MainScreen(
                 }
             )
             Separator(30.dp)
+
+            Separator(16.dp)
+
+            DeunaButton(
+                onClick = {
+                    navController.navigate(AppRoutes.WALLETS.walletsRoute(orderToken))
+                },
+                text = "Google Pay Wallets",
+                backgroundColor = Color(0xFF34C759)
+            )
+
+            Separator(16.dp)
 
             DeunaButton(
                 onClick = {

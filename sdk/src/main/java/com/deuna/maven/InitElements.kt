@@ -4,9 +4,10 @@ import android.content.Context
 import com.deuna.maven.internal.modal.DeunaWidgetModalLauncher
 import com.deuna.maven.shared.*
 import com.deuna.maven.shared.domain.UserInfo
+import com.deuna.maven.wallets.WalletElements
+import com.deuna.maven.wallets.WalletProvider
 import com.deuna.maven.widgets.configuration.ElementsWidgetConfiguration
 import com.deuna.maven.widgets.elements_widget.ElementsEvent
-import java.lang.IllegalStateException
 
 class ElementsWidgetExperience(val userExperience: UserExperience) {
     class UserExperience(
@@ -52,6 +53,22 @@ fun DeunaSDK.initElements(
     customUserAgent: String? = null,
     domain: String? = null,
 ) {
+
+    val requestedProvider = types.firstNotNullOfOrNull { entry ->
+        WalletProvider.entries.firstOrNull { it.name == entry["name"] as? String }
+    }
+    if (requestedProvider != null) {
+        WalletElements(
+            context = context,
+            environment = environment,
+            publicApiKey = publicApiKey,
+            requestedProvider = requestedProvider,
+            orderToken = orderToken,
+            userInfo = userInfo,
+            callbacks = callbacks,
+        ).run()
+        return
+    }
 
     DeunaWidgetModalLauncher.launch(
         context = context,
