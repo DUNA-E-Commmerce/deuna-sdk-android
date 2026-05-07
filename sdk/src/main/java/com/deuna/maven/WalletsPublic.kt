@@ -8,16 +8,6 @@ import com.deuna.maven.wallets.google_pay.GooglePayCredentials
 import com.deuna.maven.wallets.google_pay.GooglePayTokenizationType
 
 /**
- * Returns true if the given wallet provider is available on this device.
- * Does NOT make any network calls.
- */
-fun DeunaSDK.isWalletAvailableOnDevice(context: Context, provider: String): Boolean {
-    val walletProvider = WalletProvider.fromProcessorName(provider) ?: return false
-    return WalletHandlerRegistry.get(walletProvider)
-        ?.isAvailableOnDevice(context, environment) ?: false
-}
-
-/**
  * Launches the wallet payment sheet using pre-fetched credentials from the caller.
  * Returns raw payment data — no tokenization is performed.
  * No vault API call is made — the caller is responsible for fetching credentials.

@@ -33,8 +33,6 @@ object DeunaHttpClient {
         val responseBody = response.body?.string()
             ?: throw Exception("Empty response (HTTP ${response.code})")
 
-        DeunaLogs.info("[http] ${method.name} ${request.url} → ${response.code}\n${JSONObject(responseBody).toString(2)}")
-
         val bodyJson = try { JSONObject(responseBody) } catch (_: Exception) { null }
 
         if (!response.isSuccessful) {

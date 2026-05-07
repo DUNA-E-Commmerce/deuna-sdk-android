@@ -16,7 +16,6 @@ internal object GooglePayRequestBuilder {
             credentials.transactionInfo?.let { put("transactionInfo", buildTransactionInfo(it)) }
             put("merchantInfo", buildMerchantInfo(credentials))
         }
-        DeunaLogs.info("[wallets] PaymentDataRequest JSON:\n${json.toString(2)}")
         return PaymentDataRequest.fromJson(json.toString())
     }
 
