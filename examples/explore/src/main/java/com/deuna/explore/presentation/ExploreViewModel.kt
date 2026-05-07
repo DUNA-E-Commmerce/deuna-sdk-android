@@ -533,9 +533,13 @@ class ExploreViewModel(
         )
     }
 
-    private fun fallbackUserInfo(userToken: String): UserInfo? {
-        if (tokenOrNull(userToken) != null) return null
-        return UserInfo(firstName = "John", lastName = "Doe", email = "johndoe@example.com")
+    private fun fallbackUserInfo(config: IntegrationConfig): UserInfo? {
+        if (tokenOrNull(config.userToken) != null) return null
+        val email = config.userInfoEmail.trim()
+        if (email.isEmpty()) return null
+        val firstName = config.userInfoFirstName.trim().ifEmpty { null }
+        val lastName = config.userInfoLastName.trim().ifEmpty { null }
+        return UserInfo(firstName = firstName, lastName = lastName, email = email)
     }
 
     private fun buildEmbeddedWidgetConfig(
@@ -565,7 +569,7 @@ class ExploreViewModel(
                 orderToken = tokenOrNull(orderToken),
                 hidePayButton = config.hidePayButton,
                 behavior = splitPaymentBehavior(config.enableSplitPayment),
-                userInfo = fallbackUserInfo(config.userToken),
+                userInfo = fallbackUserInfo(config),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makeElementsCallbacks(),
             )
@@ -586,7 +590,7 @@ class ExploreViewModel(
                 userToken = tokenOrNull(config.userToken),
                 orderToken = tokenOrNull(orderToken),
                 hidePayButton = config.hidePayButton,
-                userInfo = fallbackUserInfo(config.userToken),
+                userInfo = fallbackUserInfo(config),
                 types = listOf(mapOf("name" to "clickToPay")),
                 callbacks = makeElementsCallbacks(),
             )
@@ -614,7 +618,7 @@ class ExploreViewModel(
                 userToken = tokenOrNull(config.userToken),
                 orderToken = tokenOrNull(orderToken),
                 behavior = splitPaymentBehavior(config.enableSplitPayment),
-                userInfo = fallbackUserInfo(config.userToken),
+                userInfo = fallbackUserInfo(config),
                 fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
                 callbacks = makeElementsCallbacks(),
             )
@@ -632,7 +636,7 @@ class ExploreViewModel(
                 context = context,
                 userToken = tokenOrNull(config.userToken),
                 orderToken = tokenOrNull(orderToken),
-                userInfo = fallbackUserInfo(config.userToken),
+                userInfo = fallbackUserInfo(config),
                 types = listOf(mapOf("name" to "clickToPay")),
                 callbacks = makeElementsCallbacks(),
             )

@@ -77,6 +77,15 @@ fun ConfigurationDrawer(
                 onPresentationModeChange = { viewModel.updateDraftConfig { c -> c.copy(presentationMode = it) } },
             )
 
+            UserInfoSection(
+                firstName = draft.userInfoFirstName,
+                lastName = draft.userInfoLastName,
+                email = draft.userInfoEmail,
+                onFirstNameChange = { viewModel.updateDraftConfig { c -> c.copy(userInfoFirstName = it) } },
+                onLastNameChange = { viewModel.updateDraftConfig { c -> c.copy(userInfoLastName = it) } },
+                onEmailChange = { viewModel.updateDraftConfig { c -> c.copy(userInfoEmail = it) } },
+            )
+
             FraudSection(
                 fraudProvidersJson = draft.fraudProvidersJson,
                 fraudId = draft.fraudId,

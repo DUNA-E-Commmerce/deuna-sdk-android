@@ -17,6 +17,9 @@ data class IntegrationConfig(
     val enableSplitPayment: Boolean,
     val presentationMode: ExplorePresentationMode,
     val selectedWidget: ExploreWidget,
+    val userInfoFirstName: String,
+    val userInfoLastName: String,
+    val userInfoEmail: String,
 ) {
     companion object {
         private val defaultFraudProvidersJson = """
@@ -46,6 +49,9 @@ data class IntegrationConfig(
             enableSplitPayment = false,
             presentationMode = ExplorePresentationMode.MODAL,
             selectedWidget = ExploreWidget.PAYMENT_WIDGET,
+            userInfoFirstName = "",
+            userInfoLastName = "",
+            userInfoEmail = "",
         )
 
         fun fromJson(jsonStr: String): IntegrationConfig {
@@ -67,6 +73,9 @@ data class IntegrationConfig(
                     enableSplitPayment = j.optBoolean("enableSplitPayment", d.enableSplitPayment),
                     presentationMode = ExplorePresentationMode.entries.firstOrNull { it.name == j.optString("presentationMode") } ?: d.presentationMode,
                     selectedWidget = ExploreWidget.entries.firstOrNull { it.name == j.optString("selectedWidget") } ?: d.selectedWidget,
+                    userInfoFirstName = j.optString("userInfoFirstName", d.userInfoFirstName),
+                    userInfoLastName = j.optString("userInfoLastName", d.userInfoLastName),
+                    userInfoEmail = j.optString("userInfoEmail", d.userInfoEmail),
                 )
             } catch (e: Exception) {
                 default
@@ -89,6 +98,9 @@ data class IntegrationConfig(
         put("enableSplitPayment", enableSplitPayment)
         put("presentationMode", presentationMode.name)
         put("selectedWidget", selectedWidget.name)
+        put("userInfoFirstName", userInfoFirstName)
+        put("userInfoLastName", userInfoLastName)
+        put("userInfoEmail", userInfoEmail)
     }.toString()
 }
 
@@ -107,6 +119,9 @@ data class DraftConfig(
     val enableSplitPayment: Boolean,
     val presentationMode: ExplorePresentationMode,
     val selectedWidget: ExploreWidget,
+    val userInfoFirstName: String,
+    val userInfoLastName: String,
+    val userInfoEmail: String,
 ) {
     companion object {
         fun from(config: IntegrationConfig) = DraftConfig(
@@ -124,6 +139,9 @@ data class DraftConfig(
             enableSplitPayment = config.enableSplitPayment,
             presentationMode = config.presentationMode,
             selectedWidget = config.selectedWidget,
+            userInfoFirstName = config.userInfoFirstName,
+            userInfoLastName = config.userInfoLastName,
+            userInfoEmail = config.userInfoEmail,
         )
     }
 
@@ -142,5 +160,8 @@ data class DraftConfig(
         enableSplitPayment = enableSplitPayment,
         presentationMode = presentationMode,
         selectedWidget = selectedWidget,
+        userInfoFirstName = userInfoFirstName,
+        userInfoLastName = userInfoLastName,
+        userInfoEmail = userInfoEmail,
     )
 }

@@ -198,6 +198,39 @@ fun OptionsSection(
     }
 }
 
+// ─── User Info ────────────────────────────────────────────────────────────────
+
+@Composable
+fun UserInfoSection(
+    firstName: String,
+    lastName: String,
+    email: String,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+) {
+    DrawerCardSection(title = "User Info") {
+        FieldTitle("FIRST NAME (OPTIONAL)")
+        ClearableTextField(
+            value = firstName,
+            onValueChange = onFirstNameChange,
+            placeholder = "John",
+        )
+        FieldTitle("LAST NAME (OPTIONAL)")
+        ClearableTextField(
+            value = lastName,
+            onValueChange = onLastNameChange,
+            placeholder = "Doe",
+        )
+        FieldTitle("EMAIL")
+        ClearableTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            placeholder = "john@example.com",
+        )
+    }
+}
+
 // ─── Fraud ────────────────────────────────────────────────────────────────────
 
 @Composable
