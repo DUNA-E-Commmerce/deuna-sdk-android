@@ -15,8 +15,8 @@ import com.deuna.sdkexample.navigation.AppNavigation
  * Change this values to try the DEUNA SDK
  */
 object Constants {
-    val DEUNA_ENV: Environment = Environment.DEVELOPMENT
-    const val DEUNA_API_KEY: String = "b914ae1c70ea94eb9d99f1a572d35dbb7722e7f1afc3f7f89c07f50d97ae230ed2d2be29c3ae7161e2ea0ecd509e3592dea4bc527dec1dffa81552c83c1b"
+    val DEUNA_ENV: Environment = Environment.SANDBOX
+    const val DEUNA_API_KEY: String = "YOUR_PUBLIC_API_KEY"
 }
 
 class MainActivity : AppCompatActivity() {
