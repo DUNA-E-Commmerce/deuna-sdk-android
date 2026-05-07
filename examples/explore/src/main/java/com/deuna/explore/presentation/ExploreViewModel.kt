@@ -645,12 +645,14 @@ class ExploreViewModel(
         onSuccess = { data -> routePaymentSuccess(data) }
         onError = { error -> android.util.Log.e("Explore", "Payment error: ${error.metadata?.message}") }
         onClosed = { android.util.Log.d("Explore", "Widget closed") }
+        onEventDispatch = { event, data -> android.util.Log.d("Explore", "PaymentWidget event=${event} data=$data") }
     }
 
     private fun makeCheckoutCallbacks() = CheckoutCallbacks().apply {
         onSuccess = { data -> routePaymentSuccess(data) }
         onError = { error -> android.util.Log.e("Explore", "Checkout error: ${error.metadata?.message}") }
         onClosed = { android.util.Log.d("Explore", "Widget closed") }
+        onEventDispatch = { event, data -> android.util.Log.d("Explore", "Checkout event=${event} data=$data") }
     }
 
     private fun makeElementsCallbacks() = ElementsCallbacks().apply {
@@ -661,16 +663,19 @@ class ExploreViewModel(
         }
         onError = { error -> android.util.Log.e("Explore", "Elements error: ${error.metadata?.message}") }
         onClosed = { android.util.Log.d("Explore", "Widget closed") }
+        onEventDispatch = { event, data -> android.util.Log.d("Explore", "Elements event=${event} data=$data") }
     }
 
     private fun makeNextActionCallbacks() = NextActionCallbacks().apply {
         onSuccess = { data -> routePaymentSuccess(data) }
         onError = { error -> android.util.Log.e("Explore", "NextAction error: ${error.metadata?.message}") }
+        onEventDispatch = { event, data -> android.util.Log.d("Explore", "NextAction event=${event} data=$data") }
     }
 
     private fun makeVoucherCallbacks() = VoucherCallbacks().apply {
         onSuccess = { data -> routePaymentSuccess(data) }
         onError = { error -> android.util.Log.e("Explore", "Voucher error: ${error.metadata?.message}") }
+        onEventDispatch = { event, data -> android.util.Log.d("Explore", "Voucher event=${event} data=$data") }
     }
 
     private fun routePaymentSuccess(data: Json) {
