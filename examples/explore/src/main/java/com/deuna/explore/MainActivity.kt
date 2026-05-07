@@ -21,14 +21,23 @@ class MainActivity : ComponentActivity() {
 
         ExternalUrlHelper.registerForActivityResult(this)
 
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        window.statusBarColor = Color.White.toArgb()
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
+        applyStatusBar()
 
         setContent {
             MaterialTheme(colorScheme = lightColorScheme()) {
                 AppNavigation()
             }
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) applyStatusBar()
+    }
+
+    private fun applyStatusBar() {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = Color.White.toArgb()
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
     }
 }
