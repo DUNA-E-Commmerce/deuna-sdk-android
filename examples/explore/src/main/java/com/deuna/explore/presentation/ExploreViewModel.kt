@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
+import com.deuna.explore.data.ApmRepository
 import com.deuna.explore.data.ConfigStorage
 import com.deuna.explore.data.MerchantService
 import com.deuna.explore.data.OrderTokenService
@@ -65,6 +66,9 @@ data class ExploreUiState(
     val fraudIdStatusMessage: String? = null,
     val isGeneratingFraudId: Boolean = false,
     val useManualOrderTokenFlow: Boolean = false,
+    val apmOptions: List<ApmOption> = emptyList(),
+    val isLoadingApms: Boolean = false,
+    val isLaunchingFormularios: Boolean = false,
 )
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
@@ -394,6 +398,73 @@ class ExploreViewModel(
 
             _uiState.update { it.copy(isLaunchingWallets = false) }
             _navigationEvents.send(NavigationEvent.OpenWallets(orderToken))
+        }
+    }
+
+    fun loadApmOptions() {
+        if (_uiState.value.isLoadingApms) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingApms = true) }
+            val options = try {
+                ApmRepository.fetchApmOptions()
+            } catch (e: Exception) {
+                emptyList()
+            }
+            _uiState.update { it.copy(apmOptions = options, isLoadingApms = false) }
+        }
+    }
+
+    fun showFormularios(context: Context, apm: ApmOption) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLaunchingFormularios = true, modalStatusMessage = null) }
+
+            val state = _uiState.value
+            val config = state.appliedConfig
+
+            val orderToken = resolveOrderToken(config, state)
+            if (orderToken == null) {
+                _uiState.update { it.copy(isLaunchingFormularios = false) }
+                return@launch
+            }
+
+            val paymentMethods: List<com.deuna.maven.shared.Json> = listOf(
+                mapOf("paymentMethod" to apm.paymentMethod, "processors" to listOf(apm.processor))
+            )
+
+            when (config.presentationMode) {
+                ExplorePresentationMode.MODAL -> {
+                    deunaSDK.initPaymentWidget(
+                        context = context,
+                        orderToken = orderToken,
+                        userToken = tokenOrNull(config.userToken),
+                        paymentMethods = paymentMethods,
+                        behavior = splitPaymentBehavior(config.enableSplitPayment),
+                        fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
+                        callbacks = makePaymentCallbacks(),
+                    )
+                    _uiState.update { it.copy(isLaunchingFormularios = false) }
+                }
+
+                ExplorePresentationMode.EMBEDDED -> {
+                    val widgetConfig = PaymentWidgetConfiguration(
+                        sdkInstance = deunaSDK,
+                        orderToken = orderToken,
+                        userToken = tokenOrNull(config.userToken),
+                        hidePayButton = config.hidePayButton,
+                        paymentMethods = paymentMethods,
+                        behavior = splitPaymentBehavior(config.enableSplitPayment),
+                        fraudCredentials = parseFraudCredentials(config.fraudProvidersJson),
+                        callbacks = makePaymentCallbacks(),
+                    )
+                    _uiState.update {
+                        it.copy(
+                            embeddedWidgetConfig = widgetConfig,
+                            isShowingEmbeddedScreen = true,
+                            isLaunchingFormularios = false,
+                        )
+                    }
+                }
+            }
         }
     }
 

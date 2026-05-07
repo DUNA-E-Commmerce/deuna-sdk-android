@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.deuna.explore.data.ProductCatalog
 import com.deuna.explore.domain.ExploreProduct
 import com.deuna.explore.presentation.ExploreViewModel
+import com.deuna.explore.domain.ApmOption
 
 @Composable
 fun ModalScreen(viewModel: ExploreViewModel) {
@@ -30,6 +31,19 @@ fun ModalScreen(viewModel: ExploreViewModel) {
     val products = state.products
     val selectedIds = state.selectedProductIds
     val useManual = state.useManualOrderTokenFlow
+    var showApmDialog by remember { mutableStateOf(false) }
+
+    if (showApmDialog) {
+        ApmPickerDialog(
+            options = state.apmOptions,
+            isLoading = state.isLoadingApms,
+            onSelect = { apm ->
+                showApmDialog = false
+                viewModel.showFormularios(context, apm)
+            },
+            onDismiss = { showApmDialog = false },
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -61,13 +75,13 @@ fun ModalScreen(viewModel: ExploreViewModel) {
             )
         }
 
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Button(
                 onClick = { viewModel.showModalWidget(context) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLaunchingModalWidget,
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147AE8)),
@@ -80,13 +94,29 @@ fun ModalScreen(viewModel: ExploreViewModel) {
 
             Button(
                 onClick = { viewModel.showWallets() },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLaunchingWallets,
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6)),
             ) {
                 Text(
                     text = if (state.isLaunchingWallets) "Preparing..." else "Wallets",
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            Button(
+                onClick = {
+                    viewModel.loadApmOptions()
+                    showApmDialog = true
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLaunchingFormularios,
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
+            ) {
+                Text(
+                    text = if (state.isLaunchingFormularios) "Preparando..." else "Formularios",
                     fontWeight = FontWeight.SemiBold,
                 )
             }
