@@ -3,16 +3,14 @@ package com.deuna.maven
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.deuna.maven.fraud.runCybersource
+import com.deuna.maven.fraud.runRiskified
+import com.deuna.maven.fraud.runSift
 import com.deuna.maven.shared.DeunaLogs
 import com.deuna.maven.shared.Environment
 import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.toBase64
 import com.deuna.maven.shared.value
-import com.lexisnexisrisk.threatmetrix.rl.TMXConfig
-import com.lexisnexisrisk.threatmetrix.rl.TMXEndNotifier
-import com.lexisnexisrisk.threatmetrix.rl.TMXProfiling
-import com.lexisnexisrisk.threatmetrix.rl.TMXProfilingHandle
-import com.lexisnexisrisk.threatmetrix.rl.TMXProfilingOptions
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -28,7 +26,7 @@ fun DeunaSDK.generateFraudId(
     callback: (fraudId: String?) -> Unit
 ) {
     GenerateFraudId(
-        context = context.applicationContext,
+        context = context,
         environment = environment,
         callback = callback,
         params = params
@@ -37,7 +35,8 @@ fun DeunaSDK.generateFraudId(
 
 private enum class FraudProviderName {
     RISKIFIED,
-    CYBERSOURCE;
+    CYBERSOURCE,
+    SIFT;
 
     companion object {
         fun from(raw: String): FraudProviderName? =
@@ -50,8 +49,8 @@ private data class FraudProviderRequest(
     val config: Json
 )
 
-private class GenerateFraudId(
-    private val context: Context,
+internal class GenerateFraudId(
+    internal val context: Context,
     private val environment: Environment,
     private val callback: (fraudId: String?) -> Unit,
     private val params: Json?
@@ -126,54 +125,11 @@ private class GenerateFraudId(
         when (provider) {
             FraudProviderName.RISKIFIED -> runRiskified(config, providerId)
             FraudProviderName.CYBERSOURCE -> runCybersource(config, providerId)
+            FraudProviderName.SIFT -> runSift(config, providerId)
         }
     }
 
-    private fun runRiskified(config: Json, providerId: String) {
-        val storeDomain = config["storeDomain"] as? String
-        if (storeDomain.isNullOrBlank()) {
-            DeunaLogs.warning("[fraud] Missing RISKIFIED.storeDomain. Skipping native init.")
-            return
-        }
-
-        try {
-            RiskifiedNativeBridge.startBeacon(
-                storeDomain = storeDomain,
-                providerId = providerId,
-                context = context
-            )
-            DeunaLogs.info("[fraud] RISKIFIED beacon started.")
-        } catch (error: Throwable) {
-            DeunaLogs.warning("[fraud] RISKIFIED native init failed: ${error.message}")
-        }
-    }
-
-    private fun runCybersource(config: Json, providerId: String) {
-        val orgId = config["orgId"] as? String
-        val merchantId = config["merchantId"] as? String
-        val fpServer = config["fpServer"] as? String ?: "h.online-metrix.net"
-        if (orgId.isNullOrBlank() || merchantId.isNullOrBlank()) {
-            DeunaLogs.warning("[fraud] Missing CYBERSOURCE.orgId or merchantId. Skipping native init.")
-            return
-        }
-
-        val sessionId = merchantId + providerId
-        try {
-            val profiled = CybersourceNativeBridge.profile(
-                context = context,
-                orgId = orgId,
-                fpServer = fpServer,
-                sessionId = sessionId
-            )
-            if (!profiled) {
-                DeunaLogs.warning("[fraud] CYBERSOURCE profile did not return TMX_OK.")
-            }
-        } catch (error: Throwable) {
-            DeunaLogs.warning("[fraud] CYBERSOURCE native profiling failed: ${error.message}")
-        }
-    }
-
-    private fun callbackOnMain(value: String?) {
+    internal fun callbackOnMain(value: String?) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             callback.invoke(value)
         } else {
@@ -189,81 +145,5 @@ private class GenerateFraudId(
             result[stringKey] = value
         }
         return result
-    }
-}
-
-private object RiskifiedNativeBridge {
-    private const val BEACON_MAIN_CLASS = "com.riskified.android_sdk.RiskifiedBeaconMain"
-
-    fun startBeacon(storeDomain: String, providerId: String, context: Context) {
-        val clazz = Class.forName(BEACON_MAIN_CLASS)
-        val instance = clazz.getDeclaredConstructor().newInstance()
-        val method = clazz.getMethod(
-            "startBeacon",
-            String::class.java,
-            String::class.java,
-            Boolean::class.javaPrimitiveType,
-            Context::class.java
-        )
-        method.invoke(instance, storeDomain, providerId, false, context)
-    }
-}
-
-private object CybersourceNativeBridge {
-    private val configurationLock = Any()
-    private var configuredOrgId: String? = null
-    private var configuredFpServer: String? = null
-
-    fun profile(context: Context, orgId: String, fpServer: String, sessionId: String): Boolean {
-        val profiling = TMXProfiling.getInstance()
-        configureIfNeeded(context, profiling, orgId, fpServer)
-
-        val options = TMXProfilingOptions()
-            .setSessionID(sessionId)
-
-        val latch = CountDownLatch(1)
-        var profiled = false
-
-        profiling.profile(options, object : TMXEndNotifier {
-            override fun complete(result: TMXProfilingHandle.Result) {
-                val statusName = result.status.name
-                val returnedSessionId = result.sessionID
-                DeunaLogs.info(
-                    "[fraud] CYBERSOURCE profile status: $statusName, sessionId: $returnedSessionId"
-                )
-                profiled = statusName == "TMX_OK"
-                latch.countDown()
-            }
-        })
-
-        latch.await(8, TimeUnit.SECONDS)
-        return profiled
-    }
-
-    private fun configureIfNeeded(
-        context: Context,
-        profiling: TMXProfiling,
-        orgId: String,
-        fpServer: String
-    ) {
-        synchronized(configurationLock) {
-            val alreadyConfigured = configuredOrgId
-            if (alreadyConfigured != null) {
-                if (alreadyConfigured != orgId || configuredFpServer != fpServer) {
-                    DeunaLogs.warning(
-                        "[fraud] CYBERSOURCE already configured with orgId=$alreadyConfigured and fpServer=$configuredFpServer. Ignoring new orgId=$orgId fpServer=$fpServer."
-                    )
-                }
-                return
-            }
-
-            val config = TMXConfig()
-                .setContext(context)
-                .setOrgId(orgId)
-                .setFPServer(fpServer)
-            profiling.init(config)
-            configuredOrgId = orgId
-            configuredFpServer = fpServer
-        }
     }
 }
