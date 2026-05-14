@@ -39,6 +39,9 @@ jobs:
           rm -rf temp_dir/examples/widgets-in-modal/src/androidTest
           mkdir -p temp_dir/examples/widgets-in-modal/src/androidTest
           touch temp_dir/examples/widgets-in-modal/src/androidTest/.gitkeep
+          rm -rf temp_dir/examples/explore/src/androidTest
+          mkdir -p temp_dir/examples/explore/src/androidTest
+          touch temp_dir/examples/explore/src/androidTest/.gitkeep
 
           # Remove Docker, preprod and integration CI artifacts (not needed in public repo)
           rm -f temp_dir/examples/widgets-in-modal/Dockerfile
@@ -56,6 +59,12 @@ jobs:
           rm -f temp_dir/.github/scripts/run-integration-tests-with-video.sh
 
           cd temp_dir
+
+          # Guardrail: fail if sensitive explore test bootstrap code leaked into public payload
+          if rg -n "TestMerchantKeysProvider|ADMIN_USERNAME|ADMIN_PASSWORD|DEUNA_API_ENDPOINT|superadmin|developers@getduna.com" examples/explore 2>/dev/null; then
+            echo "Sensitive explore test code detected in public payload. Aborting."
+            exit 1
+          fi
 
           # Navigate to temp_dir and set up git
           git init --initial-branch=main

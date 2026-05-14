@@ -23,10 +23,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Enable widgets-in-modal module
+      - name: Enable explore module
         run: |
-          sed -i 's|//include( "widgets-in-modal")|include("widgets-in-modal")|' settings.gradle.kts
-          sed -i 's|//project(":widgets-in-modal").projectDir|project(":widgets-in-modal").projectDir|' settings.gradle.kts
+          sed -i 's|//include( "explore")|include( "explore")|' settings.gradle.kts
+          sed -i 's|//project(":explore").projectDir = file("examples/explore")|project(":explore").projectDir = file("examples/explore")|' settings.gradle.kts
 
       - name: Enable KVM
         run: |
@@ -95,4 +95,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-results
-          path: examples/widgets-in-modal/build/reports/androidTests/
+          path: examples/explore/build/reports/androidTests/
