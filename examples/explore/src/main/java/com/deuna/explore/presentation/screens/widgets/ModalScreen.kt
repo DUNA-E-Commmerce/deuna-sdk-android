@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,6 +26,7 @@ import com.deuna.explore.data.ProductCatalog
 import com.deuna.explore.domain.ApmOption
 import com.deuna.explore.domain.ExploreProduct
 import com.deuna.explore.presentation.ExploreViewModel
+import com.deuna.explore.presentation.ExploreTestTags
 
 private val NavyBlue = Color(0xFF1B2B6E)
 private val MediumBlue = Color(0xFF2563EB)
@@ -95,7 +97,10 @@ fun ModalScreen(viewModel: ExploreViewModel) {
         ) {
             Button(
                 onClick = { viewModel.showModalWidget(context) },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .testTag(ExploreTestTags.SHOW_WIDGET_BUTTON),
                 enabled = !state.isLaunchingModalWidget,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = NavyBlue),
@@ -162,6 +167,7 @@ private fun ProductCatalogSection(
                         ProductCard(
                             product = product,
                             isSelected = product.id in selectedIds,
+                            isFirstProduct = product.id == products.firstOrNull()?.id,
                             onToggle = { onToggle(product.id) },
                             modifier = Modifier.weight(1f),
                         )
@@ -184,6 +190,7 @@ private fun ProductCatalogSection(
 private fun ProductCard(
     product: ExploreProduct,
     isSelected: Boolean,
+    isFirstProduct: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -259,7 +266,12 @@ private fun ProductCard(
             } else {
                 Button(
                     onClick = onToggle,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (isFirstProduct) Modifier.testTag(ExploreTestTags.FIRST_PRODUCT_ADD_BUTTON)
+                            else Modifier
+                        ),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentBlue),
                     contentPadding = PaddingValues(vertical = 8.dp),

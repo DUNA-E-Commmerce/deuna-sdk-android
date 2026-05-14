@@ -11,12 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deuna.explore.domain.ExplorePresentationMode
 import com.deuna.explore.domain.ExploreWidget
+import com.deuna.explore.presentation.ExploreTestTags
 
 // ─── Keys ────────────────────────────────────────────────────────────────────
 
@@ -34,12 +36,14 @@ fun KeysSection(
             value = publicKey,
             onValueChange = onPublicKeyChange,
             placeholder = "pub_test••••••••••••",
+            modifier = Modifier.testTag(ExploreTestTags.PUBLIC_KEY_FIELD),
         )
         FieldTitle("PRIVATE KEY")
         ClearableTextField(
             value = privateKey,
             onValueChange = onPrivateKeyChange,
             placeholder = "pk_test••••••••••••",
+            modifier = Modifier.testTag(ExploreTestTags.PRIVATE_KEY_FIELD),
         )
         if (!keyErrorMessage.isNullOrEmpty()) {
             Text(
@@ -156,6 +160,7 @@ fun OptionsSection(
                 Switch(
                     checked = hidePayButton,
                     onCheckedChange = onHidePayButtonChange,
+                    modifier = Modifier.testTag(ExploreTestTags.HIDE_PAY_BUTTON_SWITCH),
                     colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = ExploreColors.brandBlue),
                 )
             }

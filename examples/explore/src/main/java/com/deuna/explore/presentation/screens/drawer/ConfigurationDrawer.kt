@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.deuna.explore.presentation.ExploreTestTags
 import com.deuna.explore.domain.DraftConfig
 import com.deuna.explore.domain.ExploreEnvironment
 import com.deuna.explore.presentation.ExploreViewModel
@@ -144,6 +146,7 @@ private fun EnvironmentSection(
             items = ExploreEnvironment.entries,
             selected = selected,
             labelOf = { it.title },
+            itemTagOf = { "explore.environment.${it.name.lowercase()}" },
             onSelect = onSelect,
         )
     }
@@ -171,7 +174,9 @@ private fun DrawerFooter(
                 Text("Cancelar")
             }
             Button(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(ExploreTestTags.APPLY_CONFIGURATION_BUTTON),
                 onClick = onApply,
                 enabled = !isApplyingConfiguration,
                 colors = ButtonDefaults.buttonColors(containerColor = ExploreColors.brandBlue),
