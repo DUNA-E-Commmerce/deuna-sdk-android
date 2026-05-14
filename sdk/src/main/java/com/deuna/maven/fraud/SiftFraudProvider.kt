@@ -10,7 +10,7 @@ internal fun GenerateFraudId.runSift(config: Json, providerId: String) {
     val accountId = config["accountId"] as? String
     val beaconKey = config["beaconKey"] as? String
     if (accountId.isNullOrBlank() || beaconKey.isNullOrBlank()) {
-        DeunaLogs.warning("[fraud] Missing SIFT.accountId or beaconKey. Skipping native init.")
+        DeunaLogs.warning("[fraud] Missing SIFT.accountId or beaconKey. Native Sift requires both (note: CDL only needs beaconKey). Skipping native init.")
         return
     }
     try {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.deuna.maven.fraud.runCybersource
+import com.deuna.maven.fraud.runKount
 import com.deuna.maven.fraud.runRiskified
 import com.deuna.maven.fraud.runSift
 import com.deuna.maven.shared.DeunaLogs
@@ -36,7 +37,8 @@ fun DeunaSDK.generateFraudId(
 private enum class FraudProviderName {
     RISKIFIED,
     CYBERSOURCE,
-    SIFT;
+    SIFT,
+    KOUNT;
 
     companion object {
         fun from(raw: String): FraudProviderName? =
@@ -126,6 +128,7 @@ internal class GenerateFraudId(
             FraudProviderName.RISKIFIED -> runRiskified(config, providerId)
             FraudProviderName.CYBERSOURCE -> runCybersource(config, providerId)
             FraudProviderName.SIFT -> runSift(config, providerId)
+            FraudProviderName.KOUNT -> runKount(config, providerId)
         }
     }
 
