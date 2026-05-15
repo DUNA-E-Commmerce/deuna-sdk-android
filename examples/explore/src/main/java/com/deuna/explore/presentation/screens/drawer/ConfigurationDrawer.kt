@@ -10,16 +10,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.deuna.explore.presentation.ExploreTestTags
 import com.deuna.explore.domain.DraftConfig
 import com.deuna.explore.domain.ExploreEnvironment
+import com.deuna.explore.domain.ExploreWidget
 import com.deuna.explore.presentation.ExploreViewModel
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ConfigurationDrawer(
     viewModel: ExploreViewModel,
@@ -33,6 +38,7 @@ fun ConfigurationDrawer(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .semantics { testTagsAsResourceId = true }
             .background(ExploreColors.screenBackground)
     ) {
         Column(
@@ -44,6 +50,10 @@ fun ConfigurationDrawer(
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             DrawerHeader(onClose = onClose)
+            DebugWidgetQuickSelectors(
+                onSelect = { selected -> viewModel.updateDraftConfig { c -> c.copy(selectedWidget = selected) } },
+                onSetTestEmail = { viewModel.updateDraftConfig { c -> c.copy(userInfoEmail = "explore-android+vault@deuna.test") } },
+            )
 
             EnvironmentSection(
                 selected = draft.environment,
@@ -109,6 +119,35 @@ fun ConfigurationDrawer(
             onApply = {
                 viewModel.applyConfiguration { onClose() }
             },
+        )
+    }
+}
+
+@Composable
+private fun DebugWidgetQuickSelectors(
+    onSelect: (ExploreWidget) -> Unit,
+    onSetTestEmail: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AssistChip(
+            onClick = { onSelect(ExploreWidget.PAYMENT_WIDGET) },
+            label = { Text("T:Payment") },
+            modifier = Modifier.testTag(ExploreTestTags.DEBUG_SELECT_WIDGET_PAYMENT),
+        )
+        AssistChip(
+            onClick = { onSelect(ExploreWidget.VAULT_WIDGET) },
+            label = { Text("T:Vault") },
+            modifier = Modifier.testTag(ExploreTestTags.DEBUG_SELECT_WIDGET_VAULT),
+        )
+        AssistChip(
+            onClick = { onSelect(ExploreWidget.VOUCHER_WIDGET) },
+            label = { Text("T:Voucher") },
+            modifier = Modifier.testTag(ExploreTestTags.DEBUG_SELECT_WIDGET_VOUCHER),
+        )
+        AssistChip(
+            onClick = onSetTestEmail,
+            label = { Text("T:Email") },
+            modifier = Modifier.testTag(ExploreTestTags.DEBUG_SET_TEST_EMAIL),
         )
     }
 }

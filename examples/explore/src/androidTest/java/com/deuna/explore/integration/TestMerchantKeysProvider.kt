@@ -14,6 +14,17 @@ enum class TestTargetEnvironment(val drawerTitle: String) {
     STAGING("Staging"),
 }
 
+enum class TestProcessorType {
+    STRIPE_AUTHORIZE,
+    STRIPE_3DS,
+    PAYU_EFECTY,
+}
+
+data class TestMerchantSetup(
+    val processorType: TestProcessorType = TestProcessorType.STRIPE_AUTHORIZE,
+    val countryIso: String = "MX",
+)
+
 data class TestMerchantKeys(
     val publicKey: String,
     val privateKey: String,
@@ -25,17 +36,22 @@ object TestMerchantKeysProvider {
     private val adminUsername: String = System.getenv("ADMIN_USERNAME") ?: "developers@getduna.com"
     private val adminPassword: String = System.getenv("ADMIN_PASSWORD") ?: "superadmin"
 
-    fun createKeys(): TestMerchantKeys {
+    fun createKeys(setup: TestMerchantSetup = TestMerchantSetup()): TestMerchantKeys {
+        val country = setup.countryIso.uppercase()
+        val city = if (country == "CO") "Bogota" else "CDMX"
+        val timezone = if (country == "CO") "America/Bogota" else "America/Mexico_City"
+        val currency = if (country == "CO") "COP" else "MXN"
+
         val merchant = requestJson(
             path = "/merchants",
             method = "POST",
             body = JSONObject().apply {
-                put("country", "MX")
-                put("city", "CDMX")
-                put("name", "AUTO_MERCHANT_MX ${Random.nextInt(10000, 9009999)}")
+                put("country", country)
+                put("city", city)
+                put("name", "AUTO_MERCHANT_${country} ${Random.nextInt(10000, 9009999)}")
                 put("short_name", "AUTO")
-                put("timezone", "America/Mexico_City")
-                put("currency", "MXN")
+                put("timezone", timezone)
+                put("currency", currency)
                 put("managed_by_deuna", false)
             }
         )
@@ -76,7 +92,13 @@ object TestMerchantKeysProvider {
         )
 
         configureVaultWidget(merchantId = merchantId, merchantToken = merchantToken)
-        createPaymentProcessor(merchantId = merchantId, merchantToken = merchantToken)
+        createPaymentProcessor(
+            merchantId = merchantId,
+            merchantToken = merchantToken,
+            processorType = setup.processorType,
+            countryIso = country,
+            currencyIso3 = currency,
+        )
 
         return TestMerchantKeys(
             publicKey = app.getString("public_key"),
@@ -200,22 +222,59 @@ object TestMerchantKeysProvider {
         )
     }
 
-    private fun createPaymentProcessor(merchantId: String, merchantToken: String) {
-        requestJson(
-            path = "/merchants/$merchantId/stores/all/processors",
-            method = "POST",
-            body = JSONObject().apply {
+    private fun createPaymentProcessor(
+        merchantId: String,
+        merchantToken: String,
+        processorType: TestProcessorType,
+        countryIso: String,
+        currencyIso3: String,
+    ) {
+        val body = when (processorType) {
+            TestProcessorType.STRIPE_AUTHORIZE -> JSONObject().apply {
                 put("name", "STRIPE_DIRECT")
                 put("payment_processor_id", 50)
                 put("enabled", true)
-                put("currency_iso3", "MXN")
-                put("country_iso", "MX")
+                put("currency_iso3", currencyIso3)
+                put("country_iso", countryIso)
                 put("public_api_key", "pk_test_51KanPjHzvAJD6fk5wekkuEqfrT0qyzDrNw9Rlw2Nu4PBqlS8Vt1FtTgVDmXZxZ0eM4ccxBarVwUa5v0TICjSOyei00HmiJm3my")
                 put("private_api_key", "sk_test_51KanPjHzvAJD6fk5iA6c7M6Hv9pHZZirj5kzEUzGW7x5Xh4bTXIbs9kxOxdawiOQxiDoySOiRDOmtyqAm3loCQmZ001dBHZhy0")
                 put("allow_installments", true)
                 put("enable_3ds_authentication", false)
                 put("automatic_capture", false)
-            },
+            }
+            TestProcessorType.STRIPE_3DS -> JSONObject().apply {
+                put("name", "STRIPE_DIRECT")
+                put("payment_processor_id", 50)
+                put("enabled", true)
+                put("currency_iso3", currencyIso3)
+                put("country_iso", countryIso)
+                put("public_api_key", "pk_test_51KanPjHzvAJD6fk5wekkuEqfrT0qyzDrNw9Rlw2Nu4PBqlS8Vt1FtTgVDmXZxZ0eM4ccxBarVwUa5v0TICjSOyei00HmiJm3my")
+                put("private_api_key", "sk_test_51KanPjHzvAJD6fk5iA6c7M6Hv9pHZZirj5kzEUzGW7x5Xh4bTXIbs9kxOxdawiOQxiDoySOiRDOmtyqAm3loCQmZ001dBHZhy0")
+                put("allow_installments", true)
+                put("enable_3ds_authentication", true)
+                put("automatic_capture", true)
+            }
+            TestProcessorType.PAYU_EFECTY -> JSONObject().apply {
+                put("name", "PAYU_EFECTY")
+                put("payment_processor_id", 58)
+                put("enabled", true)
+                put("currency_iso3", "COP")
+                put("country_iso", "CO")
+                put("external_merchant_id", "511620")
+                put("private_api_key", "bjuSxu382vh5d5GjxpRu409wQ2")
+                put("public_api_key", "jI5ZhgfpWpVoM15")
+                put("automatic_capture", true)
+                put("flow", "payconnect")
+                put("extra_params", JSONObject().apply {
+                    put("account_id", "516553")
+                })
+            }
+        }
+
+        requestJson(
+            path = "/merchants/$merchantId/stores/all/processors",
+            method = "POST",
+            body = body,
             headers = mapOf("Authorization" to "Bearer $merchantToken")
         )
     }

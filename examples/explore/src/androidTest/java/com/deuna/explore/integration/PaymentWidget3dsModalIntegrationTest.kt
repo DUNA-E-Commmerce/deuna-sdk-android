@@ -10,10 +10,13 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class PaymentWidgetModalIntegrationTest : BaseExploreIntegrationTest() {
+class PaymentWidget3dsModalIntegrationTest : BaseExploreIntegrationTest() {
+
+    override fun merchantSetup(): TestMerchantSetup =
+        TestMerchantSetup(processorType = TestProcessorType.STRIPE_3DS, countryIso = "MX")
 
     @Test
-    fun testModalPaymentWidgetSuccessUsingExploreFlow() {
+    fun testModalPaymentWidgetStripe3dsSuccessUsingExploreFlow() {
         val scenario = launchActivity()
 
         configureDrawerAndApply(
@@ -28,19 +31,24 @@ class PaymentWidgetModalIntegrationTest : BaseExploreIntegrationTest() {
             throw AssertionError("WebView should open after tapping Show Widget")
         }
 
-        webViewHelper.fillTextFieldByLabel("4242424242424242", "Número de tarjeta")
+        webViewHelper.fillTextFieldByLabel("4000000000003220", "Número de tarjeta")
         webViewHelper.fillTextFieldByLabel("1230", "Fecha expiración")
         webViewHelper.fillTextFieldByLabel("123", "CVV")
         webViewHelper.fillTextFieldByLabel("Test User", "Nombre como aparece en la tarjeta")
-        fillIdentityDocumentOrFail(flowName = "Payment")
+        fillIdentityDocumentOrFail(flowName = "Payment 3DS")
 
         webViewHelper.dismissKeyboard()
         webViewHelper.swipeUp()
         Thread.sleep(1000)
         webViewHelper.buttonTap("Pagar")
 
-        if (!waitForPaymentSuccess(maxTimeoutMs = 60000)) {
-            throw AssertionError("Payment success screen was not shown")
+        val challengeCompleted = webViewHelper.completeStripe3dsChallenge(timeout = 35000)
+        if (!challengeCompleted) {
+            throw AssertionError("Stripe 3DS challenge was not completed")
+        }
+
+        if (!waitForPaymentSuccess(maxTimeoutMs = 120000)) {
+            throw AssertionError("Payment success screen was not shown after 3DS challenge")
         }
 
         scenario.close()

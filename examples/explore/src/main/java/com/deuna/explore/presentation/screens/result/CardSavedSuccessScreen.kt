@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.deuna.explore.presentation.ExploreTestTags
 import com.deuna.maven.shared.Json
 
 @Composable
@@ -21,7 +23,11 @@ fun CardSavedSuccessScreen(cardData: Json, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            Text("Card saved successfully", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "Card saved successfully",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.testTag(ExploreTestTags.CARD_SAVED_SUCCESS_TITLE),
+            )
             Text("ID: ${cardData["id"]}")
             Text("Holder: ${cardData["cardHolder"] ?: cardData["card_holder"]}")
             Text("Card brand: ${cardData["company"]}")

@@ -95,6 +95,13 @@ fun WidgetTypeSection(
     selected: ExploreWidget,
     onSelect: (ExploreWidget) -> Unit,
 ) {
+    fun widgetTag(widget: ExploreWidget): String = when (widget) {
+        ExploreWidget.PAYMENT_WIDGET -> ExploreTestTags.WIDGET_PAYMENT_OPTION
+        ExploreWidget.VAULT_WIDGET -> ExploreTestTags.WIDGET_VAULT_OPTION
+        ExploreWidget.VOUCHER_WIDGET -> ExploreTestTags.WIDGET_VOUCHER_OPTION
+        else -> "explore.widget.${widget.name.lowercase()}"
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionTitle("Widget Type")
         DrawerCard {
@@ -102,6 +109,7 @@ fun WidgetTypeSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag(widgetTag(widget))
                         .clickable { onSelect(widget) }
                         .padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -196,6 +204,12 @@ fun OptionsSection(
                     items = ExplorePresentationMode.entries,
                     selected = presentationMode,
                     labelOf = { it.title },
+                    itemTagOf = {
+                        when (it) {
+                            ExplorePresentationMode.EMBEDDED -> ExploreTestTags.PRESENTATION_EMBEDDED_OPTION
+                            ExplorePresentationMode.MODAL -> ExploreTestTags.PRESENTATION_MODAL_OPTION
+                        }
+                    },
                     onSelect = onPresentationModeChange,
                 )
             }

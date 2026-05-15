@@ -7,9 +7,14 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
+import androidx.test.uiautomator.UiScrollable
+import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import kotlin.math.abs
 import com.deuna.explore.MainActivity
+import com.deuna.explore.domain.ExplorePresentationMode
+import com.deuna.explore.domain.ExploreWidget
+import com.deuna.explore.presentation.ExploreTestTags
 
 abstract class BaseExploreIntegrationTest {
 
@@ -19,6 +24,8 @@ abstract class BaseExploreIntegrationTest {
     protected lateinit var publicKey: String
     protected lateinit var privateKey: String
     protected lateinit var targetEnvironment: TestTargetEnvironment
+
+    protected open fun merchantSetup(): TestMerchantSetup = TestMerchantSetup()
 
     @org.junit.Before
     fun setup() {
@@ -80,13 +87,13 @@ abstract class BaseExploreIntegrationTest {
         repeat(times) {
             val w = device.displayWidth
             val h = device.displayHeight
-            // Keep swipe in upper/middle area to avoid hitting the on-screen keyboard.
-            device.swipe(w / 2, (h * 60) / 100, w / 2, (h * 35) / 100, 20)
+            // Swipe in middle zone to avoid triggering system gestures.
+            device.swipe(w / 2, (h * 62) / 100, w / 2, (h * 36) / 100, 18)
             Thread.sleep(200)
         }
     }
 
-    private fun findObjectWithScroll(selector: BySelector, timeoutMs: Long): UiObject2? {
+    protected fun findObjectWithScroll(selector: BySelector, timeoutMs: Long): UiObject2? {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             device.findObject(selector)?.let { return it }
@@ -114,6 +121,57 @@ abstract class BaseExploreIntegrationTest {
         setTextFieldByLabelOrFail(label = "PUBLIC KEY", value = publicKey)
         setTextFieldByLabelOrFail(label = "PRIVATE KEY", value = privateKey)
         dismissKeyboardIfVisible()
+    }
+
+    protected fun configureDrawerAndApply(
+        widget: ExploreWidget,
+        presentationMode: ExplorePresentationMode,
+    ) {
+        openConfigurationDrawerOrFail()
+        clickByResTagOrFail("explore.environment.${targetEnvironment.name.lowercase()}", fallbackText = targetEnvironment.drawerTitle)
+        setDrawerKeysOrFail(publicKey = publicKey, privateKey = privateKey)
+
+        selectWidgetInDrawer(widget)
+        if (widget == ExploreWidget.VAULT_WIDGET) {
+            device.findObject(By.res(ExploreTestTags.DEBUG_SET_TEST_EMAIL))?.click()
+            Thread.sleep(150)
+        }
+        selectPresentationModeInDrawer(presentationMode)
+
+        clickByResTagOrFail(ExploreTestTags.APPLY_CONFIGURATION_BUTTON, fallbackText = "Explorar")
+    }
+
+    protected fun fillIdentityDocumentOrFail(flowName: String) {
+        val identityFilled = listOf(
+            "Número de RFC",
+            "RFC",
+            "Número de documento",
+            "Documento de identidad",
+            "Identity document",
+        ).any { webViewHelper.fillTextFieldByLabel("GODE561231GR8", it, timeout = 2000) }
+        if (!identityFilled) throw AssertionError("Could not fill identity document field in $flowName flow")
+    }
+
+    protected fun waitForPaymentSuccess(maxTimeoutMs: Long = 60000): Boolean {
+        val deadline = System.currentTimeMillis() + maxTimeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            val successByTag = device.findObject(By.res(ExploreTestTags.PAYMENT_SUCCESS_TITLE))
+            val successByText = device.findObject(By.textContains("Payment Successful"))
+            if (successByTag != null || successByText != null) return true
+            Thread.sleep(250)
+        }
+        return false
+    }
+
+    protected fun waitForVaultSuccess(maxTimeoutMs: Long = 60000): Boolean {
+        val deadline = System.currentTimeMillis() + maxTimeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            val successByTag = device.findObject(By.res(ExploreTestTags.CARD_SAVED_SUCCESS_TITLE))
+            val successByText = device.findObject(By.textContains("Card saved successfully"))
+            if (successByTag != null || successByText != null) return true
+            Thread.sleep(250)
+        }
+        return false
     }
 
     private fun setTextFieldByLabelOrFail(label: String, value: String, timeoutMs: Long = 10_000) {
@@ -164,7 +222,7 @@ abstract class BaseExploreIntegrationTest {
     private fun resolveOrCreateKeys(): TestMerchantKeys {
         val byArgs = readOptionalKeysFromArgsOrEnv()
         if (byArgs != null) return byArgs
-        return TestMerchantKeysProvider.createKeys()
+        return TestMerchantKeysProvider.createKeys(setup = merchantSetup())
     }
 
     private fun readOptionalKeysFromArgsOrEnv(): TestMerchantKeys? {
@@ -189,5 +247,146 @@ abstract class BaseExploreIntegrationTest {
             )
         }
         return null
+    }
+
+    private fun selectWidgetInDrawer(widget: ExploreWidget) {
+        val debugSelector = when (widget) {
+            ExploreWidget.PAYMENT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_PAYMENT, "T:Payment")
+            ExploreWidget.VAULT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VAULT, "T:Vault")
+            ExploreWidget.VOUCHER_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VOUCHER, "T:Voucher")
+            else -> null
+        }
+        if (debugSelector != null) {
+            val byTag = device.wait(Until.findObject(By.res(debugSelector.first)), 4000)
+            val node = byTag ?: device.wait(Until.findObject(By.textContains(debugSelector.second)), 3000)
+                ?: throw AssertionError("Missing debug widget selector '${debugSelector.second}'")
+            node.click()
+            Thread.sleep(200)
+            return
+        }
+
+        if (clickWidgetUsingUiScrollable(widget.title)) return
+
+        // First, prefer visible text lookup with bounded swipes to avoid
+        // exhausting the drawer and ending at the bottom.
+        val byText = findObjectWithBoundedScroll(By.textContains(widget.title), maxSwipes = 10)
+        if (byText != null) {
+            runCatching { byText.click() }
+                .onFailure {
+                    val b = byText.visibleBounds
+                    // Tap near the radio area on the left side of the row.
+                    val radioX = (b.left + (b.width() * 0.12f)).toInt()
+                    device.click(radioX, b.centerY())
+                }
+            Thread.sleep(250)
+            return
+        }
+
+        val widgetTag = when (widget) {
+            ExploreWidget.PAYMENT_WIDGET -> ExploreTestTags.WIDGET_PAYMENT_OPTION
+            ExploreWidget.VAULT_WIDGET -> ExploreTestTags.WIDGET_VAULT_OPTION
+            ExploreWidget.VOUCHER_WIDGET -> ExploreTestTags.WIDGET_VOUCHER_OPTION
+            else -> "explore.widget.${widget.name.lowercase()}"
+        }
+        val node = findObjectWithScroll(By.res(widgetTag), timeoutMs = 20000)
+        if (node != null) {
+            runCatching { node.click() }
+                .onFailure {
+                    val b = node.visibleBounds
+                    device.click(b.centerX(), b.centerY())
+                }
+            Thread.sleep(200)
+            return
+        }
+
+        if (clickWidgetByRadioIndex(widget)) return
+        throw AssertionError("Could not find widget option by text='${widget.title}' or tag=$widgetTag")
+    }
+
+    private fun selectPresentationModeInDrawer(mode: ExplorePresentationMode) {
+        val modeTag = when (mode) {
+            ExplorePresentationMode.MODAL -> ExploreTestTags.PRESENTATION_MODAL_OPTION
+            ExplorePresentationMode.EMBEDDED -> ExploreTestTags.PRESENTATION_EMBEDDED_OPTION
+        }
+        val node = findObjectWithScroll(By.res(modeTag), timeoutMs = 20000)
+            ?: throw AssertionError("Could not find presentation mode by tag=$modeTag")
+        node.click()
+    }
+
+    private fun findObjectWithBoundedScroll(selector: BySelector, maxSwipes: Int): UiObject2? {
+        repeat(maxSwipes + 1) { idx ->
+            device.findObject(selector)?.let { return it }
+            if (idx < maxSwipes) scrollDown(1)
+        }
+        return null
+    }
+
+    private fun openConfigurationDrawerOrFail() {
+        runCatching { clickByResTagOrFail(ExploreTestTags.MENU_BUTTON, fallbackText = "Menu", timeoutMs = 4000) }
+            .onSuccess { return }
+
+        val byDesc = device.findObject(By.descContains("menu"))
+            ?: device.findObject(By.descContains("Menu"))
+            ?: device.findObject(By.descContains("Open"))
+        if (byDesc != null) {
+            byDesc.click()
+            Thread.sleep(250)
+            if (device.findObject(By.textContains("Configuration")) != null) return
+        }
+
+        val x = (device.displayWidth * 0.08).toInt()
+        val y = (device.displayHeight * 0.07).toInt()
+        device.click(x, y)
+        Thread.sleep(300)
+        if (device.findObject(By.textContains("Configuration")) != null) return
+
+        throw AssertionError("Could not open configuration drawer")
+    }
+
+    private fun clickWidgetUsingUiScrollable(widgetTitle: String): Boolean {
+        return runCatching {
+            val scrollable = UiScrollable(UiSelector().scrollable(true))
+            scrollable.setAsVerticalList()
+            scrollable.scrollTextIntoView("Widget Type")
+            scrollable.scrollTextIntoView(widgetTitle)
+
+            val uiObj = device.findObject(UiSelector().textContains(widgetTitle))
+            if (!uiObj.exists()) return false
+
+            if (!uiObj.click()) {
+                val b = uiObj.bounds
+                val radioX = (b.left + (b.width() * 0.12f)).toInt()
+                device.click(radioX, b.centerY())
+            }
+            Thread.sleep(250)
+            true
+        }.getOrDefault(false)
+    }
+
+    private fun clickWidgetByRadioIndex(widget: ExploreWidget): Boolean {
+        val targetIndex = when (widget) {
+            ExploreWidget.PAYMENT_WIDGET -> 0
+            ExploreWidget.CHECKOUT_WIDGET -> 1
+            ExploreWidget.VAULT_WIDGET -> 2
+            ExploreWidget.NEXT_ACTION_WIDGET -> 3
+            ExploreWidget.VOUCHER_WIDGET -> 4
+            ExploreWidget.CLICK_TO_PAY_WIDGET -> 5
+        }
+
+        repeat(18) {
+            val radios = device.findObjects(By.clazz("android.widget.RadioButton"))
+                .sortedBy { it.visibleBounds.centerY() }
+            if (radios.size > targetIndex) {
+                runCatching { radios[targetIndex].click() }
+                    .onFailure {
+                        val b = radios[targetIndex].visibleBounds
+                        device.click(b.centerX(), b.centerY())
+                    }
+                Thread.sleep(250)
+                return true
+            }
+            scrollDown(1)
+        }
+        return false
     }
 }
