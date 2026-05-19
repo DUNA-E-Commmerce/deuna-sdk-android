@@ -93,6 +93,15 @@ abstract class BaseExploreIntegrationTest {
         }
     }
 
+    protected fun scrollUp(times: Int = 1) {
+        repeat(times) {
+            val w = device.displayWidth
+            val h = device.displayHeight
+            device.swipe(w / 2, (h * 35) / 100, w / 2, (h * 70) / 100, 18)
+            Thread.sleep(180)
+        }
+    }
+
     protected fun findObjectWithScroll(selector: BySelector, timeoutMs: Long): UiObject2? {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
@@ -126,10 +135,14 @@ abstract class BaseExploreIntegrationTest {
     protected fun configureDrawerAndApply(
         widget: ExploreWidget,
         presentationMode: ExplorePresentationMode,
+        orderToken: String? = null,
     ) {
         openConfigurationDrawerOrFail()
         clickByResTagOrFail("explore.environment.${targetEnvironment.name.lowercase()}", fallbackText = targetEnvironment.drawerTitle)
         setDrawerKeysOrFail(publicKey = publicKey, privateKey = privateKey)
+        if (!orderToken.isNullOrBlank()) {
+            setDrawerOrderTokenOrFail(orderToken)
+        }
 
         selectWidgetInDrawer(widget)
         if (widget == ExploreWidget.VAULT_WIDGET) {
@@ -139,6 +152,11 @@ abstract class BaseExploreIntegrationTest {
         selectPresentationModeInDrawer(presentationMode)
 
         clickByResTagOrFail(ExploreTestTags.APPLY_CONFIGURATION_BUTTON, fallbackText = "Explorar")
+    }
+
+    protected fun setDrawerOrderTokenOrFail(orderToken: String) {
+        setTextFieldByLabelOrFail(label = "ORDER TOKEN (OPTIONAL)", value = orderToken, timeoutMs = 12000)
+        dismissKeyboardIfVisible()
     }
 
     protected fun fillIdentityDocumentOrFail(flowName: String) {
@@ -259,10 +277,18 @@ abstract class BaseExploreIntegrationTest {
         if (debugSelector != null) {
             val byTag = device.wait(Until.findObject(By.res(debugSelector.first)), 4000)
             val node = byTag ?: device.wait(Until.findObject(By.textContains(debugSelector.second)), 3000)
-                ?: throw AssertionError("Missing debug widget selector '${debugSelector.second}'")
-            node.click()
-            Thread.sleep(200)
-            return
+            if (node != null) {
+                node.click()
+                Thread.sleep(200)
+                return
+            }
+            scrollUp(4)
+            val nodeAfterUp = device.wait(Until.findObject(By.textContains(debugSelector.second)), 2500)
+            if (nodeAfterUp != null) {
+                nodeAfterUp.click()
+                Thread.sleep(200)
+                return
+            }
         }
 
         if (clickWidgetUsingUiScrollable(widget.title)) return

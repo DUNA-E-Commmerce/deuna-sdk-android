@@ -19,14 +19,19 @@ class PaymentWidgetVoucherPayuEfectyModalIntegrationTest : BaseExploreIntegratio
 
     @Test
     fun testModalPaymentWidgetPayuEfectySuccessUsingExploreFlow() {
+        val preCreatedOrderToken = TestMerchantKeysProvider.createOrderTokenForCountry(
+            privateKey = privateKey,
+            countryIso = "CO",
+            currencyIso3 = "COP",
+        )
         val scenario = launchActivity()
 
         configureDrawerAndApply(
             widget = ExploreWidget.VOUCHER_WIDGET,
             presentationMode = ExplorePresentationMode.MODAL,
+            orderToken = preCreatedOrderToken,
         )
 
-        clickByResTagOrFail(ExploreTestTags.FIRST_PRODUCT_ADD_BUTTON, fallbackText = "Add", timeoutMs = 30000)
         clickByResTagOrFail(ExploreTestTags.SHOW_WIDGET_BUTTON, fallbackText = "Show Widget", timeoutMs = 30000)
 
         if (!webViewHelper.waitForWebView(20000)) {
