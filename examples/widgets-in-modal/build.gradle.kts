@@ -41,12 +41,16 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8" // Versión compatible con Kotlin 1.9.20
     }
+    testOptions {
+        animationsDisabled = true
+    }
 }
 
 dependencies {
     implementation(project(":sdk"))
     implementation("androidx.webkit:webkit:1.14.0")
     implementation(fileTree(mapOf("dir" to "../../sdk/libs/cybersource", "include" to listOf("*.aar"))))
+    implementation(fileTree(mapOf("dir" to "../../sdk/libs/signifyd", "include" to listOf("*.aar"))))
     implementation("androidx.navigation:navigation-compose:2.8.9")
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
@@ -67,12 +71,12 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.espresso:espresso-web:3.5.1")
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-web:3.6.1")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
