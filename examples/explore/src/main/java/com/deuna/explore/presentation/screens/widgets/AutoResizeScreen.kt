@@ -1,7 +1,5 @@
 package com.deuna.explore.presentation.screens.widgets
 
-import android.graphics.Rect
-import android.view.ViewTreeObserver
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,28 +32,9 @@ fun AutoResizeScreen(
     onReload: () -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
     val widgetRef = remember { mutableStateOf<DeunaWidget?>(null) }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-
-    DisposableEffect(context) {
-        val activity = context as? android.app.Activity
-        val rootView = activity?.window?.decorView
-        if (rootView == null) return@DisposableEffect onDispose {}
-        val rect = Rect()
-        val listener = ViewTreeObserver.OnGlobalLayoutListener {
-            rootView.getWindowVisibleDisplayFrame(rect)
-            val keyboardHeight = rootView.height - rect.bottom
-            if (keyboardHeight > 150) {
-                widgetRef.value?.onKeyboardHeightChanged(keyboardHeight)
-            }
-        }
-        rootView.viewTreeObserver.addOnGlobalLayoutListener(listener)
-        onDispose {
-            rootView.viewTreeObserver.removeOnGlobalLayoutListener(listener)
-        }
-    }
 
     Scaffold(
         topBar = {

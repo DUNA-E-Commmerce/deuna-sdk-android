@@ -95,7 +95,6 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     fun onKeyboardHeightChanged(keyboardHeightPx: Int) {
         val bridge = autoResizeBridge ?: return
-        if (bridge.onScrollBy == null) return
         webView.evaluateJavascript(
             """(function(){try{var el=document.activeElement;if(!el||el.tagName==='BODY'||el.tagName==='HTML')return '-1';return el.getBoundingClientRect().bottom.toString();}catch(e){return '-1';}})()"""
         ) { result ->
@@ -111,7 +110,15 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             val visibleBottom = windowHeight - keyboardHeightPx
             val overlap = elementAbsoluteBottom - visibleBottom
             if (overlap > 0f) {
-                post { bridge.onScrollBy?.invoke(overlap + 48f) }
+                post {
+                    val onScroll = bridge.onScrollBy
+                    if (onScroll != null) {
+                        onScroll.invoke(overlap + 48f)
+                    } else {
+                        val rect = android.graphics.Rect(0, (bottomPx - 100).toInt(), width, (bottomPx + 48).toInt())
+                        requestRectangleOnScreen(rect, false)
+                    }
+                }
             }
         }
     }
@@ -305,6 +312,7 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             }
 
         }
+        setupKeyboardListener()
     }
 
     // Check internet connection and initialize other components
@@ -349,6 +357,43 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
 
     fun waitUntilExternalUrlIsClosed(callback: () -> Unit) {
         ExternalUrlHelper.waitUntilChromeTabIsClosed(callback)
+    }
+
+    private var keyboardListener: android.view.ViewTreeObserver.OnGlobalLayoutListener? = null
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        setupKeyboardListener()
+    }
+
+    override fun onDetachedFromWindow() {
+        removeKeyboardListener()
+        super.onDetachedFromWindow()
+    }
+
+    private fun setupKeyboardListener() {
+        if (keyboardListener != null) return
+        if (widgetConfiguration?.autoResizeConfig == null) return
+        val activity = context.findComponentActivity() ?: context.findFragmentActivity()
+        val rootView = activity?.window?.decorView ?: return
+        val rect = android.graphics.Rect()
+        keyboardListener = android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            rootView.getWindowVisibleDisplayFrame(rect)
+            val keyboardHeight = rootView.height - rect.bottom
+            if (keyboardHeight > 150) {
+                onKeyboardHeightChanged(keyboardHeight)
+            }
+        }.also {
+            rootView.viewTreeObserver.addOnGlobalLayoutListener(it)
+        }
+    }
+
+    private fun removeKeyboardListener() {
+        val listener = keyboardListener ?: return
+        val activity = context.findComponentActivity() ?: context.findFragmentActivity()
+        val rootView = activity?.window?.decorView ?: return
+        rootView.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+        keyboardListener = null
     }
 
 }
