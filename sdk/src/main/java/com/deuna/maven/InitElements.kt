@@ -13,6 +13,7 @@ class ElementsWidgetExperience(val userExperience: UserExperience) {
     class UserExperience(
         val showSavedCardFlow: Boolean? = null,
         val defaultCardFlow: Boolean? = null,
+        val disableInstallments: Boolean? = null,
     )
 }
 
@@ -36,6 +37,7 @@ class ElementsWidgetExperience(val userExperience: UserExperience) {
  *  The currently supported configurations are:
  *   - `userExperience.showSavedCardFlow`: (Bool) Shows the saved cards toggle.
  *   - `userExperience.defaultCardFlow`: (Bool) Shows the toggle to save the card as default.
+ *   - `userExperience.disableInstallments`: (Bool) Disables installments inside the flow.
  * @throws IllegalStateException if the passed userToken is not valid
  */
 fun DeunaSDK.initElements(

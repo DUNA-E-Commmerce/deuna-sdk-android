@@ -78,6 +78,9 @@ class ElementsWidgetConfiguration(
                 it.userExperience.defaultCardFlow?.let { value ->
                     queryParameters[QueryParameters.DEFAULT_CARD_FLOW] = "$value"
                 }
+                it.userExperience.disableInstallments?.let { value ->
+                    queryParameters[QueryParameters.DISABLE_INSTALLMENTS] = "$value"
+                }
             }
 
             styleFile?.let {

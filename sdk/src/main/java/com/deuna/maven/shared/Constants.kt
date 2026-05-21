@@ -50,6 +50,7 @@ object QueryParameters {
     const val LANGUAGE = "language"
     const val SHOW_SAVED_CARD_FLOW = "showSavedCardFlow"
     const val DEFAULT_CARD_FLOW = "defaultCardFlow"
+    const val DISABLE_INSTALLMENTS = "disableInstallments"
     const val INT = "int"
     const val BEHAVIOR = "behavior"
 }
