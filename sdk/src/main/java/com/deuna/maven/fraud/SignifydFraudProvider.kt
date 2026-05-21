@@ -130,7 +130,8 @@ private object SignifydNativeBridge {
     private fun resolveStatus(result: Any?, resultClass: Class<*>): String? {
         if (result == null) return null
         return try {
-            resultClass.getMethod("getStatus").invoke(result)?.toString()
+            val status = resultClass.getMethod("getStatus").invoke(result)
+            (status as? Enum<*>)?.name ?: status?.toString()
         } catch (_: Throwable) { null }
     }
 

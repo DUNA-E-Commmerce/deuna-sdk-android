@@ -48,6 +48,9 @@ android {
 
 dependencies {
     implementation(project(":sdk"))
+    // implementation(fileTree(mapOf("dir" to "../../sdk/libs/cybersource", "include" to listOf("*.aar"))))
+    // implementation(fileTree(mapOf("dir" to "../../sdk/libs/signifyd", "include" to listOf("*.aar"))))
+
     implementation("androidx.webkit:webkit:1.14.0")
     implementation("androidx.navigation:navigation-compose:2.8.9")
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
