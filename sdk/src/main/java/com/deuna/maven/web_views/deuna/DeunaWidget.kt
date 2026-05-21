@@ -18,6 +18,7 @@ import com.deuna.maven.shared.Json
 import com.deuna.maven.shared.NetworkUtils
 import com.deuna.maven.shared.PaymentWidgetErrors
 import com.deuna.maven.shared.enums.CloseAction
+import com.deuna.maven.shared.extensions.findComponentActivity
 import com.deuna.maven.shared.extensions.findFragmentActivity
 import com.deuna.maven.web_views.ExternalUrlBrowser
 import com.deuna.maven.web_views.ExternalUrlHelper
@@ -104,7 +105,8 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             getLocationOnScreen(loc)
             val widgetTopPx = loc[1]
             val elementAbsoluteBottom = widgetTopPx + bottomPx
-            val windowHeight = (context as? android.app.Activity)?.window?.decorView?.height
+            val activity = context.findComponentActivity() ?: context.findFragmentActivity()
+            val windowHeight = activity?.window?.decorView?.height
                 ?: resources.displayMetrics.heightPixels
             val visibleBottom = windowHeight - keyboardHeightPx
             val overlap = elementAbsoluteBottom - visibleBottom
