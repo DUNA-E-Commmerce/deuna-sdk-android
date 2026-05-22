@@ -96,26 +96,34 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
     fun onKeyboardHeightChanged(keyboardHeightPx: Int) {
         val bridge = autoResizeBridge ?: return
         webView.evaluateJavascript(
-            """(function(){try{var el=document.activeElement;if(!el||el.tagName==='BODY'||el.tagName==='HTML')return '-1';return el.getBoundingClientRect().bottom.toString();}catch(e){return '-1';}})()"""
+            """(function(){try{var el=document.activeElement;if(!el||el.tagName==='BODY'||el.tagName==='HTML')return null;var r=el.getBoundingClientRect();return {b:r.bottom};}catch(e){return null;}})()"""
         ) { result ->
-            val bottomCss = result?.trim('"')?.toFloatOrNull()?.takeIf { it >= 0 } ?: return@evaluateJavascript
-            val bottomPx = bottomCss * resources.displayMetrics.density
+            val obj = try { result?.let { JSONObject(it) } } catch (e: Exception) { null } ?: return@evaluateJavascript
+            val bottomCss = obj.optDouble("b", -1.0)
+            if (bottomCss < 0) return@evaluateJavascript
+
+            val density = resources.displayMetrics.density
+            val bottomPx = (bottomCss * density).toFloat()
+
             val loc = IntArray(2)
             getLocationOnScreen(loc)
             val widgetTopPx = loc[1]
-            val elementAbsoluteBottom = widgetTopPx + bottomPx
+
             val activity = context.findComponentActivity() ?: context.findFragmentActivity()
             val windowHeight = activity?.window?.decorView?.height
                 ?: resources.displayMetrics.heightPixels
             val visibleBottom = windowHeight - keyboardHeightPx
+
+            val elementAbsoluteBottom = widgetTopPx + bottomPx
             val overlap = elementAbsoluteBottom - visibleBottom
+
             if (overlap > 0f) {
                 post {
                     val onScroll = bridge.onScrollBy
                     if (onScroll != null) {
-                        onScroll.invoke(overlap + 48f)
+                        onScroll.invoke(overlap + 80f)
                     } else {
-                        val rect = android.graphics.Rect(0, (bottomPx - 100).toInt(), width, (bottomPx + 48).toInt())
+                        val rect = android.graphics.Rect(0, (bottomPx - 100).toInt(), width, (bottomPx + 80).toInt())
                         requestRectangleOnScreen(rect, false)
                     }
                 }
