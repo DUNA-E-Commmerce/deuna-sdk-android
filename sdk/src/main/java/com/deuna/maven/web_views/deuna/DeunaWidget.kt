@@ -69,12 +69,14 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             val heightCss = heightCssStr.toFloatOrNull() ?: return
             val heightPx = (heightCss * resources.displayMetrics.density).toInt()
             if (heightPx <= 0) return
+            val minPx = (resources.displayMetrics.density * (widgetConfiguration?.autoResizeConfig?.initialHeightDp ?: 150)).toInt()
+            val finalHeight = heightPx.coerceAtLeast(minPx)
             post {
                 val lp = layoutParams ?: ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    heightPx,
+                    finalHeight,
                 )
-                lp.height = heightPx
+                lp.height = finalHeight
                 layoutParams = lp
                 requestLayout()
             }
@@ -160,13 +162,11 @@ class DeunaWidget(context: Context, attrs: AttributeSet? = null) : BaseWebView(c
             autoResizeBridge = AutoResizeBridge().also {
                 webView.addJavascriptInterface(it, it.bridgeName)
             }
-            config.initialHeightDp?.let { dp ->
-                val heightPx = (dp * resources.displayMetrics.density).toInt()
-                post {
-                    val lp = layoutParams ?: ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightPx)
-                    lp.height = heightPx
-                    layoutParams = lp
-                }
+            val initPx = (config.initialHeightDp * resources.displayMetrics.density).toInt()
+            post {
+                val lp = layoutParams ?: ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, initPx)
+                lp.height = initPx
+                layoutParams = lp
             }
         }
 

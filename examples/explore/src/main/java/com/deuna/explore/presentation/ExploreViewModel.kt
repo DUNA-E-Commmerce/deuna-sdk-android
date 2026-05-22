@@ -330,7 +330,7 @@ class ExploreViewModel(
                 }
 
                 ExplorePresentationMode.AUTO_RESIZE -> {
-                    val widgetConfig = buildEmbeddedWidgetConfig(config, orderToken, autoResizeConfig = AutoResizeConfig(initialHeightDp = 100))
+                    val widgetConfig = buildEmbeddedWidgetConfig(config, orderToken, autoResizeConfig = AutoResizeConfig(initialHeightDp = 200))
                     _uiState.update {
                         it.copy(
                             embeddedWidgetConfig = widgetConfig,

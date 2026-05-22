@@ -7,8 +7,8 @@ package com.deuna.maven.widgets.configuration
  * resizing to the WebView content height. The widget must be placed inside a
  * scrollable container (e.g., a Compose Column with verticalScroll).
  *
- * @param initialHeightDp Optional initial height in dp shown while the page loads.
+ * @param initialHeightDp Initial height in dp, also used as minimum height.
  */
 data class AutoResizeConfig(
-    val initialHeightDp: Int? = null,
+    val initialHeightDp: Int = 150,
 )
