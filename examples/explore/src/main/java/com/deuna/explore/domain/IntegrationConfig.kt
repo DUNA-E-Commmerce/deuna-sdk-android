@@ -37,7 +37,7 @@ data class IntegrationConfig(
         val default = IntegrationConfig(
             environment = ExploreEnvironment.SANDBOX,
             privateKey = "",
-            publicKey = "YOUR_PUBLIC_API_KEY",
+            publicKey = "",
             orderToken = "",
             userToken = "",
             fraudId = "",
@@ -45,7 +45,7 @@ data class IntegrationConfig(
             merchantName = "",
             merchantCountryCode = "US",
             merchantCurrencyCode = "USD",
-            hidePayButton = true,
+            hidePayButton = false,
             enableSplitPayment = false,
             presentationMode = ExplorePresentationMode.MODAL,
             selectedWidget = ExploreWidget.PAYMENT_WIDGET,

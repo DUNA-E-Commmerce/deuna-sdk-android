@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.deuna.explore.presentation.ExploreTestTags
 import com.deuna.maven.shared.Json
 
 @Suppress("UNCHECKED_CAST")
@@ -32,7 +34,11 @@ fun PaymentSuccessScreen(json: Json, onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Payment Successful", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "Payment Successful",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.testTag(ExploreTestTags.PAYMENT_SUCCESS_TITLE),
+            )
             Text("Order ID: $orderId")
 
             LazyColumn(modifier = Modifier.weight(1f)) {

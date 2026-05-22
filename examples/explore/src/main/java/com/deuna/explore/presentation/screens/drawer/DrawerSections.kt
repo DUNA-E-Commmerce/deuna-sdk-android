@@ -11,12 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deuna.explore.domain.ExplorePresentationMode
 import com.deuna.explore.domain.ExploreWidget
+import com.deuna.explore.presentation.ExploreTestTags
 
 // ─── Keys ────────────────────────────────────────────────────────────────────
 
@@ -34,12 +36,14 @@ fun KeysSection(
             value = publicKey,
             onValueChange = onPublicKeyChange,
             placeholder = "pub_test••••••••••••",
+            modifier = Modifier.testTag(ExploreTestTags.PUBLIC_KEY_FIELD),
         )
         FieldTitle("PRIVATE KEY")
         ClearableTextField(
             value = privateKey,
             onValueChange = onPrivateKeyChange,
             placeholder = "pk_test••••••••••••",
+            modifier = Modifier.testTag(ExploreTestTags.PRIVATE_KEY_FIELD),
         )
         if (!keyErrorMessage.isNullOrEmpty()) {
             Text(
@@ -91,6 +95,13 @@ fun WidgetTypeSection(
     selected: ExploreWidget,
     onSelect: (ExploreWidget) -> Unit,
 ) {
+    fun widgetTag(widget: ExploreWidget): String = when (widget) {
+        ExploreWidget.PAYMENT_WIDGET -> ExploreTestTags.WIDGET_PAYMENT_OPTION
+        ExploreWidget.VAULT_WIDGET -> ExploreTestTags.WIDGET_VAULT_OPTION
+        ExploreWidget.VOUCHER_WIDGET -> ExploreTestTags.WIDGET_VOUCHER_OPTION
+        else -> "explore.widget.${widget.name.lowercase()}"
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionTitle("Widget Type")
         DrawerCard {
@@ -98,6 +109,7 @@ fun WidgetTypeSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag(widgetTag(widget))
                         .clickable { onSelect(widget) }
                         .padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -156,6 +168,7 @@ fun OptionsSection(
                 Switch(
                     checked = hidePayButton,
                     onCheckedChange = onHidePayButtonChange,
+                    modifier = Modifier.testTag(ExploreTestTags.HIDE_PAY_BUTTON_SWITCH),
                     colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = ExploreColors.brandBlue),
                 )
             }
@@ -191,6 +204,12 @@ fun OptionsSection(
                     items = ExplorePresentationMode.entries,
                     selected = presentationMode,
                     labelOf = { it.title },
+                    itemTagOf = {
+                        when (it) {
+                            ExplorePresentationMode.EMBEDDED -> ExploreTestTags.PRESENTATION_EMBEDDED_OPTION
+                            ExplorePresentationMode.MODAL -> ExploreTestTags.PRESENTATION_MODAL_OPTION
+                        }
+                    },
                     onSelect = onPresentationModeChange,
                 )
             }

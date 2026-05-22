@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.deuna.explore.presentation.ExploreTestTags
 
 @Composable
 fun TopBar(
@@ -27,7 +29,10 @@ fun TopBar(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onOpenDrawer) {
+            IconButton(
+                onClick = onOpenDrawer,
+                modifier = Modifier.testTag(ExploreTestTags.MENU_BUTTON),
+            ) {
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Menu",

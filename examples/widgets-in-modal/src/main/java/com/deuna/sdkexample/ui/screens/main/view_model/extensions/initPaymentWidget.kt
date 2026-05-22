@@ -30,6 +30,7 @@ fun MainViewModel.showPaymentWidget(
         orderToken = orderToken.trim(),
         callbacks = PaymentWidgetCallbacks().apply {
             onSuccess = { order ->
+                TestEventBroadcaster.broadcast(TestEvent.PAYMENT_SUCCESS)
                 deunaSDK.close {
                     viewModelScope.launch {
                         completion(

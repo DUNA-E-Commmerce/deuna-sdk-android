@@ -10,9 +10,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,12 +24,17 @@ import com.deuna.explore.presentation.ExploreViewModel
 import com.deuna.explore.presentation.screens.drawer.ConfigurationDrawer
 
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 fun MainScreen(viewModel: ExploreViewModel) {
     val state by viewModel.uiState.collectAsState()
     var isDrawerOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTagsAsResourceId = true }
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopBar(
                 title = state.appliedConfig.merchantName.ifEmpty { "SDK Tester" },

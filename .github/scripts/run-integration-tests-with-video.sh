@@ -28,7 +28,7 @@ adb shell wm density 420 || true
 screenrecord_loop_pid=$!
 
 set +e
-./gradlew :widgets-in-modal:connectedAndroidTest
+./gradlew :explore:connectedDebugAndroidTest
 test_exit_code=$?
 set -e
 

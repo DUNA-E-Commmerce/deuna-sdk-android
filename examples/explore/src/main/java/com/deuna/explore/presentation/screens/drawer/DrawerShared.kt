@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,6 +110,7 @@ fun <T> SegmentedPillSelector(
     items: List<T>,
     selected: T,
     labelOf: (T) -> String,
+    itemTagOf: ((T) -> String)? = null,
     onSelect: (T) -> Unit,
 ) {
     Row(
@@ -125,6 +127,11 @@ fun <T> SegmentedPillSelector(
                     .background(
                         if (isSelected) Color.White else Color.Transparent,
                         RoundedCornerShape(12.dp),
+                    )
+                    .then(
+                        itemTagOf?.let { tagProvider ->
+                            Modifier.testTag(tagProvider(item))
+                        } ?: Modifier
                     )
                     .clickable { onSelect(item) }
                     .padding(vertical = 10.dp),
