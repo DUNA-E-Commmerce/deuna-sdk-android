@@ -146,8 +146,10 @@ abstract class BaseExploreIntegrationTest {
 
         selectWidgetInDrawer(widget)
         if (widget == ExploreWidget.VAULT_WIDGET) {
-            device.findObject(By.res(ExploreTestTags.DEBUG_SET_TEST_EMAIL))?.click()
-            Thread.sleep(150)
+            scrollDown(2)
+            setTextFieldByLabelOrFail(label = "EMAIL", value = "explore-android+vault@deuna.test")
+            dismissKeyboardIfVisible()
+            scrollUp(3)
         }
         selectPresentationModeInDrawer(presentationMode)
 
@@ -268,28 +270,7 @@ abstract class BaseExploreIntegrationTest {
     }
 
     private fun selectWidgetInDrawer(widget: ExploreWidget) {
-        val debugSelector = when (widget) {
-            ExploreWidget.PAYMENT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_PAYMENT, "T:Payment")
-            ExploreWidget.VAULT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VAULT, "T:Vault")
-            ExploreWidget.VOUCHER_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VOUCHER, "T:Voucher")
-            else -> null
-        }
-        if (debugSelector != null) {
-            val byTag = device.wait(Until.findObject(By.res(debugSelector.first)), 4000)
-            val node = byTag ?: device.wait(Until.findObject(By.textContains(debugSelector.second)), 3000)
-            if (node != null) {
-                node.click()
-                Thread.sleep(200)
-                return
-            }
-            scrollUp(4)
-            val nodeAfterUp = device.wait(Until.findObject(By.textContains(debugSelector.second)), 2500)
-            if (nodeAfterUp != null) {
-                nodeAfterUp.click()
-                Thread.sleep(200)
-                return
-            }
-        }
+
 
         if (clickWidgetUsingUiScrollable(widget.title)) return
 
