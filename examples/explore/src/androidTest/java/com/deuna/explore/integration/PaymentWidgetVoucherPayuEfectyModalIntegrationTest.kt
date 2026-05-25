@@ -24,6 +24,11 @@ class PaymentWidgetVoucherPayuEfectyModalIntegrationTest : BaseExploreIntegratio
             countryIso = "CO",
             currencyIso3 = "COP",
         )
+        preConfigureSavedConfig(
+            widget = ExploreWidget.PAYMENT_WIDGET,
+            presentationMode = ExplorePresentationMode.MODAL,
+            orderToken = preCreatedOrderToken,
+        )
         val scenario = launchActivity()
 
         configureDrawerAndApply(

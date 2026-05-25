@@ -17,6 +17,10 @@ class PaymentWidget3dsModalIntegrationTest : BaseExploreIntegrationTest() {
 
     @Test
     fun testModalPaymentWidgetStripe3dsSuccessUsingExploreFlow() {
+        preConfigureSavedConfig(
+            widget = ExploreWidget.PAYMENT_WIDGET,
+            presentationMode = ExplorePresentationMode.MODAL,
+        )
         val scenario = launchActivity()
 
         configureDrawerAndApply(
