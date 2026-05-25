@@ -27,7 +27,7 @@ class PaymentWidgetVoucherPayuEfectyModalIntegrationTest : BaseExploreIntegratio
         val scenario = launchActivity()
 
         configureDrawerAndApply(
-            widget = ExploreWidget.VOUCHER_WIDGET,
+            widget = ExploreWidget.PAYMENT_WIDGET,
             presentationMode = ExplorePresentationMode.MODAL,
             orderToken = preCreatedOrderToken,
         )
