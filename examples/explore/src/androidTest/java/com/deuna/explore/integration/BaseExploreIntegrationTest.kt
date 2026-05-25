@@ -138,19 +138,7 @@ abstract class BaseExploreIntegrationTest {
         orderToken: String? = null,
     ) {
         openConfigurationDrawerOrFail()
-        clickByResTagOrFail("explore.environment.${targetEnvironment.name.lowercase()}", fallbackText = targetEnvironment.drawerTitle)
-        setDrawerKeysOrFail(publicKey = publicKey, privateKey = privateKey)
-        if (!orderToken.isNullOrBlank()) {
-            setDrawerOrderTokenOrFail(orderToken)
-        }
-
-        selectWidgetInDrawer(widget)
-        if (widget == ExploreWidget.VAULT_WIDGET) {
-            device.findObject(By.res(ExploreTestTags.DEBUG_SET_TEST_EMAIL))?.click()
-            Thread.sleep(150)
-        }
-        selectPresentationModeInDrawer(presentationMode)
-
+        Thread.sleep(1000)
         clickByResTagOrFail(ExploreTestTags.APPLY_CONFIGURATION_BUTTON, fallbackText = "Explorar")
     }
 
@@ -237,6 +225,52 @@ abstract class BaseExploreIntegrationTest {
             .commit()
     }
 
+    protected fun preConfigureSavedConfig(
+        widget: ExploreWidget,
+        presentationMode: ExplorePresentationMode,
+        orderToken: String? = null,
+    ) {
+        val environment = when (targetEnvironment) {
+            TestTargetEnvironment.STAGING -> com.deuna.explore.domain.ExploreEnvironment.STAGING
+            TestTargetEnvironment.DEVELOP -> com.deuna.explore.domain.ExploreEnvironment.DEVELOPMENT
+            else -> com.deuna.explore.domain.ExploreEnvironment.SANDBOX
+        }
+        val config = com.deuna.explore.domain.IntegrationConfig(
+            environment = environment,
+            privateKey = privateKey,
+            publicKey = publicKey,
+            orderToken = orderToken.orEmpty(),
+            userToken = "",
+            fraudId = "",
+            fraudProvidersJson = """
+                {
+                  "CYBERSOURCE": {
+                    "orgId": "your_org_id",
+                    "merchantId": "your_merchant_id"
+                  },
+                  "RISKIFIED": {
+                    "storeDomain": "your_domain.com"
+                  }
+                }
+            """.trimIndent(),
+            merchantName = "",
+            merchantCountryCode = if (widget == ExploreWidget.VAULT_WIDGET) "MX" else if (orderToken.isNullOrBlank()) "MX" else "CO",
+            merchantCurrencyCode = if (widget == ExploreWidget.VAULT_WIDGET) "MXN" else if (orderToken.isNullOrBlank()) "MXN" else "COP",
+            hidePayButton = false,
+            enableSplitPayment = false,
+            presentationMode = presentationMode,
+            selectedWidget = widget,
+            userInfoFirstName = "Test",
+            userInfoLastName = "User",
+            userInfoEmail = if (widget == ExploreWidget.VAULT_WIDGET) "explore-android+vault@deuna.test" else "",
+        )
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        context.getSharedPreferences("explore_config", android.content.Context.MODE_PRIVATE)
+            .edit()
+            .putString("integration_config", config.toJson())
+            .commit()
+    }
+
     private fun resolveOrCreateKeys(): TestMerchantKeys {
         val byArgs = readOptionalKeysFromArgsOrEnv()
         if (byArgs != null) return byArgs
@@ -268,28 +302,7 @@ abstract class BaseExploreIntegrationTest {
     }
 
     private fun selectWidgetInDrawer(widget: ExploreWidget) {
-        val debugSelector = when (widget) {
-            ExploreWidget.PAYMENT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_PAYMENT, "T:Payment")
-            ExploreWidget.VAULT_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VAULT, "T:Vault")
-            ExploreWidget.VOUCHER_WIDGET -> Pair(ExploreTestTags.DEBUG_SELECT_WIDGET_VOUCHER, "T:Voucher")
-            else -> null
-        }
-        if (debugSelector != null) {
-            val byTag = device.wait(Until.findObject(By.res(debugSelector.first)), 4000)
-            val node = byTag ?: device.wait(Until.findObject(By.textContains(debugSelector.second)), 3000)
-            if (node != null) {
-                node.click()
-                Thread.sleep(200)
-                return
-            }
-            scrollUp(4)
-            val nodeAfterUp = device.wait(Until.findObject(By.textContains(debugSelector.second)), 2500)
-            if (nodeAfterUp != null) {
-                nodeAfterUp.click()
-                Thread.sleep(200)
-                return
-            }
-        }
+
 
         if (clickWidgetUsingUiScrollable(widget.title)) return
 

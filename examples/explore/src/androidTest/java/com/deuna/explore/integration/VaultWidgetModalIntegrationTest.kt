@@ -15,6 +15,10 @@ class VaultWidgetModalIntegrationTest : BaseExploreIntegrationTest() {
 
     @Test
     fun testModalVaultWidgetSuccessUsingExploreFlow() {
+        preConfigureSavedConfig(
+            widget = ExploreWidget.VAULT_WIDGET,
+            presentationMode = ExplorePresentationMode.MODAL,
+        )
         val scenario = launchActivity()
 
         configureDrawerAndApply(
