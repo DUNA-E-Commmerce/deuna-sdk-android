@@ -18,11 +18,14 @@ enum class TestProcessorType {
     STRIPE_AUTHORIZE,
     STRIPE_3DS,
     PAYU_EFECTY,
+    GLOBALPAY,
 }
 
 data class TestMerchantSetup(
     val processorType: TestProcessorType = TestProcessorType.STRIPE_AUTHORIZE,
     val countryIso: String = "MX",
+    val checkoutModulesJson: String? = null,
+    val enableMsi: Boolean = false,
 )
 
 data class TestMerchantKeys(
@@ -91,7 +94,11 @@ object TestMerchantKeysProvider {
             headers = mapOf("Authorization" to "Bearer $merchantToken")
         )
 
-        configureVaultWidget(merchantId = merchantId, merchantToken = merchantToken)
+        configureVaultWidget(
+            merchantId = merchantId,
+            merchantToken = merchantToken,
+            checkoutModulesJson = setup.checkoutModulesJson
+        )
         createPaymentProcessor(
             merchantId = merchantId,
             merchantToken = merchantToken,
@@ -99,6 +106,15 @@ object TestMerchantKeysProvider {
             countryIso = country,
             currencyIso3 = currency,
         )
+
+        if (setup.enableMsi) {
+            createInstallmentCampaign(
+                merchantId = merchantId,
+                merchantToken = merchantToken,
+                processorType = setup.processorType,
+                currencyIso3 = currency
+            )
+        }
 
         return TestMerchantKeys(
             publicKey = app.getString("public_key"),
@@ -252,7 +268,11 @@ object TestMerchantKeysProvider {
         }
     }
 
-    private fun configureVaultWidget(merchantId: String, merchantToken: String) {
+    private fun configureVaultWidget(
+        merchantId: String,
+        merchantToken: String,
+        checkoutModulesJson: String? = null
+    ) {
         requestJson(
             path = "/checkout/$merchantId/configuration",
             method = "POST",
@@ -305,7 +325,7 @@ object TestMerchantKeysProvider {
                     put("currencies", JSONObject().apply {
                         put("minor_units", org.json.JSONArray())
                     })
-                    put("checkout_modules", org.json.JSONArray())
+                    put("checkout_modules", if (checkoutModulesJson != null) org.json.JSONArray(checkoutModulesJson) else org.json.JSONArray())
                 })
             },
             headers = mapOf("Authorization" to "Bearer $merchantToken")
@@ -376,10 +396,89 @@ object TestMerchantKeysProvider {
                     put("account_id", "516553")
                 })
             }
+            TestProcessorType.GLOBALPAY -> JSONObject().apply {
+                put("name", "globalpay")
+                put("payment_processor_id", 78)
+                put("enabled", true)
+                put("currency_iso3", currencyIso3)
+                put("country_iso", countryIso)
+                put("private_api_key", "syIGM7iXBJzxgNnwDMRcqHI3TwRY5d")
+                put("external_merchant_id", "DEUNA-STG-GLP")
+                put("allow_installments", true)
+                put("enable_3ds_authentication", false)
+                put("flow", "direct")
+                put("flow_version", "workflow")
+                put("three_ds_internal_version", "2.0")
+            }
         }
 
         requestJson(
             path = "/merchants/$merchantId/stores/all/processors",
+            method = "POST",
+            body = body,
+            headers = mapOf("Authorization" to "Bearer $merchantToken")
+        )
+    }
+
+    private fun createInstallmentCampaign(
+        merchantId: String,
+        merchantToken: String,
+        processorType: TestProcessorType,
+        currencyIso3: String
+    ) {
+        val (processorId, processorName) = when (processorType) {
+            TestProcessorType.GLOBALPAY -> 78 to "globalpay"
+            TestProcessorType.STRIPE_AUTHORIZE, TestProcessorType.STRIPE_3DS -> 50 to "STRIPE_DIRECT"
+            TestProcessorType.PAYU_EFECTY -> 58 to "PAYU_EFECTY"
+        }
+
+        val buildCardBranch = { amountMin: Int ->
+            org.json.JSONArray().apply {
+                listOf("visa", "mastercard", "amex", "diners").forEach { brand ->
+                    put(JSONObject().apply {
+                        put("amount_min", amountMin)
+                        put("name", brand)
+                        put("cost", 0)
+                        put("installment_rate", 0)
+                        put("installments_interest_formula", "")
+                    })
+                }
+            }
+        }
+
+        val body = JSONObject().apply {
+            put("name", "Campaña MSI Dinámica")
+            put("description", "Creada en integración de Android")
+            put("status", "active")
+            put("processors", org.json.JSONArray().apply {
+                put(JSONObject().apply {
+                    put("id", processorId)
+                    put("name", processorName)
+                })
+            })
+            put("display_label_template", JSONObject().apply {
+                put("language", "es")
+                put("MSI", "{installments} de \${amount} sin interés")
+                put("MCI", "{installments} meses de \${amount}")
+            })
+            put("options", org.json.JSONArray().apply {
+                put(JSONObject().apply {
+                    put("installments", 3)
+                    put("installments_type", "MSI")
+                    put("currency", currencyIso3)
+                    put("card_branch", buildCardBranch(500))
+                })
+                put(JSONObject().apply {
+                    put("installments", 6)
+                    put("installments_type", "MSI")
+                    put("currency", currencyIso3)
+                    put("card_branch", buildCardBranch(250))
+                })
+            })
+        }
+
+        requestJson(
+            path = "/merchants/$merchantId/installments/campaigns",
             method = "POST",
             body = body,
             headers = mapOf("Authorization" to "Bearer $merchantToken")
