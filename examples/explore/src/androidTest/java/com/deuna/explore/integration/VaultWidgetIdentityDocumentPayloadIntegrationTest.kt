@@ -105,6 +105,9 @@ class VaultWidgetIdentityDocumentPayloadIntegrationTest : BaseExploreIntegration
             throw AssertionError("Could not fill identity document field")
         }
 
+        dismissKeyboardSafely()
+        Thread.sleep(1000)
+
         // Open Billing details
         val billingButton = device.wait(Until.findObject(By.textContains("Agregar datos")), 10000)
             ?: device.wait(Until.findObject(By.textContains("Dirección")), 2000)
