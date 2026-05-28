@@ -171,11 +171,9 @@ class PaymentWidgetIdentityDocumentIntegrationTest : BaseExploreIntegrationTest(
     }
 
     private fun blurDocumentField() {
-        val label = device.findObject(By.textContains("Número de tarjeta"))
-            ?: device.findObject(By.textContains("Card Number"))
-            ?: device.findObject(By.textContains("CVV"))
-        label?.click()
-        Thread.sleep(500)
+        val editText = device.findObjects(By.clazz("android.widget.EditText")).firstOrNull()
+        editText?.click()
+        Thread.sleep(1000)
     }
 
     private fun dismissKeyboardSafely() {
