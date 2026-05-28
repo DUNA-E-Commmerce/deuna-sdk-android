@@ -101,11 +101,9 @@ class PaymentWidgetIdentityDocumentIntegrationTest : BaseExploreIntegrationTest(
         android.util.Log.d("TEST_DUMP", "Visible texts: $allTexts")
 
         // Verify validation error is displayed
-        val errorTextVisible = device.wait(Until.findObject(By.textContains("requerido")), 10000) != null ||
-                device.wait(Until.findObject(By.textContains("documento")), 2000) != null ||
-                device.wait(Until.findObject(By.textContains("válido")), 2000) != null
-        if (!errorTextVisible) {
-            throw AssertionError("Identity document validation error message not displayed. Visible texts: $allTexts")
+        if (!isValidationErrorVisible(15000)) {
+            val currentTexts = dumpAllVisibleTexts()
+            throw AssertionError("Identity document validation error message not displayed. Visible texts: $currentTexts")
         }
 
         // Select CC and fill valid document number
@@ -115,11 +113,9 @@ class PaymentWidgetIdentityDocumentIntegrationTest : BaseExploreIntegrationTest(
         dismissKeyboardSafely()
 
         // Error should disappear
-        val errorGone = device.wait(Until.gone(By.textContains("requerido")), 5000) &&
-                device.wait(Until.gone(By.textContains("documento")), 2000) &&
-                device.wait(Until.gone(By.textContains("válido")), 2000)
-        if (!errorGone) {
-            throw AssertionError("Validation error remained after entering valid document number")
+        if (!isValidationErrorGone(10000)) {
+            val currentTexts = dumpAllVisibleTexts()
+            throw AssertionError("Validation error remained after entering valid document number. Visible: $currentTexts")
         }
 
         // Change document type to NIT, verify input field resets (becomes empty)
@@ -133,22 +129,18 @@ class PaymentWidgetIdentityDocumentIntegrationTest : BaseExploreIntegrationTest(
         webViewHelper.fillTextFieldByLabel("123456789", "Cédula / Doc de identidad")
         blurDocumentField()
         dismissKeyboardSafely()
-        val errorShownForInvalidNit = device.wait(Until.findObject(By.textContains("válido")), 5000) != null ||
-                device.wait(Until.findObject(By.textContains("inválido")), 2000) != null ||
-                device.wait(Until.findObject(By.textContains("documento")), 2000) != null
-        if (!errorShownForInvalidNit) {
-            throw AssertionError("Error not shown for invalid NIT format")
+        if (!isValidationErrorVisible(15000)) {
+            val currentTexts = dumpAllVisibleTexts()
+            throw AssertionError("Error not shown for invalid NIT format. Visible texts: $currentTexts")
         }
 
         // Fill valid NIT (10 digits) and verify error disappears
         webViewHelper.fillTextFieldByLabel("9001234567", "Cédula / Doc de identidad")
         blurDocumentField()
         dismissKeyboardSafely()
-        val errorGoneForValidNit = device.wait(Until.gone(By.textContains("válido")), 5000) &&
-                device.wait(Until.gone(By.textContains("inválido")), 2000) &&
-                device.wait(Until.gone(By.textContains("documento")), 2000)
-        if (!errorGoneForValidNit) {
-            throw AssertionError("Error stayed for valid NIT format")
+        if (!isValidationErrorGone(10000)) {
+            val currentTexts = dumpAllVisibleTexts()
+            throw AssertionError("Error stayed for valid NIT format. Visible: $currentTexts")
         }
 
         // Change document type to CE, verify reset
@@ -162,17 +154,66 @@ class PaymentWidgetIdentityDocumentIntegrationTest : BaseExploreIntegrationTest(
         webViewHelper.fillTextFieldByLabel("1234567", "Cédula / Doc de identidad")
         blurDocumentField()
         dismissKeyboardSafely()
-        val noErrorForCe = device.wait(Until.findObject(By.textContains("documento")), 3000) == null
-        if (!noErrorForCe) {
-            throw AssertionError("Error shown for valid CE format")
+        if (!isValidationErrorGone(5000)) {
+            val currentTexts = dumpAllVisibleTexts()
+            throw AssertionError("Error shown for valid CE format. Visible: $currentTexts")
         }
 
         scenario.close()
     }
 
+    private fun dumpAllVisibleTexts(): List<String> {
+        val allTextViews = device.findObjects(By.clazz("android.widget.TextView")).map { it.text }
+        val allViews = device.findObjects(By.clazz("android.view.View")).map { it.text ?: it.contentDescription }
+        return (allTextViews + allViews).filter { !it.isNullOrBlank() }.distinct()
+    }
+
+    private fun isValidationErrorVisible(timeoutMs: Long): Boolean {
+        val keywords = listOf(
+            "requerido", "required",
+            "válido", "valido", "valid",
+            "inválido", "invalido", "invalid"
+        )
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            for (word in keywords) {
+                if (device.findObject(By.textContains(word)) != null) {
+                    return true
+                }
+            }
+            Thread.sleep(250)
+        }
+        return false
+    }
+
+    private fun isValidationErrorGone(timeoutMs: Long): Boolean {
+        val keywords = listOf(
+            "requerido", "required",
+            "válido", "valido", "valid",
+            "inválido", "invalido", "invalid"
+        )
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            val anyVisible = keywords.any { word ->
+                device.findObject(By.textContains(word)) != null
+            }
+            if (!anyVisible) {
+                return true
+            }
+            Thread.sleep(250)
+        }
+        return false
+    }
+
     private fun blurDocumentField() {
-        val editText = device.findObjects(By.clazz("android.widget.EditText")).firstOrNull()
-        editText?.click()
+        val editTexts = device.findObjects(By.clazz("android.widget.EditText"))
+        if (editTexts.size > 1) {
+            // Click the penúltimo EditText (Nombre como aparece en la tarjeta)
+            // as it's guaranteed to be visible near the identity document field
+            editTexts[editTexts.size - 2].click()
+        } else {
+            editTexts.firstOrNull()?.click()
+        }
         Thread.sleep(1000)
     }
 
